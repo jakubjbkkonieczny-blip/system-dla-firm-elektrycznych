@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* MVP: jasny, czytelny UI */
+:root {
+  --background: #ffffff;
+  --foreground: #111111;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ===== THEME BACKGROUNDS (tylko tło aplikacji) ===== */
+:root {
+  --app-bg: #f5f6f8; /* default: jasny szaro-biały */
+}
+
+html[data-theme="default"] {
+  --app-bg: #f5f6f8;
+}
+
+html[data-theme="beige"] {
+  --app-bg: rgba(245, 238, 224, 0.65); /* biało-beżowy, delikatny */
+}
+
+html[data-theme="green"] {
+  --app-bg: rgba(210, 230, 218, 0.55); /* biało-zielony, delikatny */
+}
+
+html[data-theme="pink"] {
+  --app-bg: rgba(245, 214, 226, 0.45); /* biało-różowy, delikatny */
+}
+
+html[data-theme="blue"] {
+  --app-bg: rgba(207, 226, 255, 0.55); /* biało-niebieski, delikatny */
+}
+
+/* tło całej strony */
+body {
+  background: var(--app-bg);
+}
