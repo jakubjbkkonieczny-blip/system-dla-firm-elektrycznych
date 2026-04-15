@@ -132,8 +132,8 @@ export function AppShell({
   const topLabel = displayName.trim() || user.email || "Użytkownik";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <aside className="w-64 bg-white border-r px-4 py-4 flex flex-col gap-4">
+   <div className="h-screen bg-gray-50 flex overflow-hidden">
+    <aside className="w-64 bg-white border-r px-4 py-4 flex flex-col gap-4 overflow-y-auto shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gray-900 text-white flex items-center justify-center">
             ⚡
@@ -183,8 +183,8 @@ export function AppShell({
         </div>
       </aside>
 
-      <main className="flex-1">
-        <div className="h-14 bg-white border-b flex items-center justify-end px-4 gap-2">
+      <main className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden">
+        <div className="h-14 bg-white border-b flex items-center justify-end px-4 gap-2 shrink-0">
           <Link href="/notifications" className="w-9 h-9 rounded-xl border flex items-center justify-center">
             🔔
           </Link>
@@ -193,7 +193,9 @@ export function AppShell({
           </Link>
         </div>
 
-        <div className="p-6">{children}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto p-6">
+  {children}
+</div>
       </main>
     </div>
   );

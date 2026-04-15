@@ -32,6 +32,47 @@ function assignedCount(job: any) {
   return job?.assignedTo ? 1 : 0;
 }
 
+function formatTimeAgo(dateValue?: any) {
+  if (!dateValue) return null;
+
+  let date: Date | null = null;
+
+  // Handle Firestore Timestamp
+  if (typeof dateValue === "object" && dateValue?.seconds) {
+    date = new Date(dateValue.seconds * 1000);
+  }
+  // Handle ISO string / normal date
+  else if (typeof dateValue === "string" || typeof dateValue === "number") {
+    const parsed = new Date(dateValue);
+    if (!isNaN(parsed.getTime())) {
+      date = parsed;
+    }
+  }
+
+  if (!date) return null;
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+
+  if (diffMs < 0) return null;
+
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffH = Math.floor(diffMin / 60);
+  const diffD = Math.floor(diffH / 24);
+
+  const time = date.toLocaleTimeString("pl-PL", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  if (diffMin < 1) return "teraz";
+  if (diffMin < 60) return `${diffMin} min temu (${time})`;
+  if (diffH < 24) return `${diffH} godz. temu (${time})`;
+  if (diffD === 1) return `wczoraj (${time})`;
+
+  return date.toLocaleDateString("pl-PL") + ` (${time})`;
+}
+
 function StatusBadge({ status }: { status: string }) {
   const label = getStatusLabel(status);
 
@@ -81,6 +122,7 @@ export default function JobsPage() {
   const companyId = useActiveCompanyId();
 
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [status, setStatus] = useState<string>("");
 
   const [cursor, setCursor] = useState<string | null>(null);
@@ -97,6 +139,16 @@ export default function JobsPage() {
   const [subscriptionEndsAt, setSubscriptionEndsAt] = useState<string | null>(null);
 
   const isOwnerOrAdmin = useMemo(() => role === "owner" || role === "admin", [role]);
+
+  const stats = {
+    all: allJobs.length,
+    new: allJobs.filter((j) => j.status === "new").length,
+    scheduled: allJobs.filter((j) => j.status === "scheduled").length,
+    in_progress: allJobs.filter((j) => j.status === "in_progress").length,
+    done: allJobs.filter((j) => j.status === "done").length,
+    cancelled: allJobs.filter((j) => j.status === "cancelled").length,
+  };
+
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -166,6 +218,9 @@ export default function JobsPage() {
       const data = await apiFetch(`/api/companies/${companyId}/jobs?` + qs.toString());
       const nextJobs = Array.isArray(data?.jobs) ? data.jobs : [];
 
+      if (!status) {
+        setAllJobs(firstPage ? nextJobs : [...allJobs, ...nextJobs]);
+      }
       setJobs(firstPage ? nextJobs : [...jobs, ...nextJobs]);
       setNextCursor(data.nextCursor || null);
       setCursor(data.nextCursor || null);
@@ -195,11 +250,11 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-8 bg-gray-50">
       <div className="max-w-5xl mx-auto space-y-8">
 
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-6">
+          <div className="shrink-0">
             <h1 className="text-3xl font-semibold text-gray-900">
               Zlecenia
             </h1>
@@ -208,14 +263,44 @@ export default function JobsPage() {
             </p>
           </div>
 
-          {!roleLoading && isOwnerOrAdmin && (
-            <Link
-              href="/jobs/new"
-              className="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90 transition"
-            >
-              Dodaj zlecenie
-            </Link>
-          )}
+          <div className="flex-1 flex justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                { key: "all", label: "Wszystkie", count: stats.all, color: "text-gray-700 border-gray-300 bg-gray-50 hover:bg-gray-100" },
+                { key: "new", label: "Nowe", count: stats.new, color: "text-gray-700 border-gray-300 bg-gray-50 hover:bg-gray-100" },
+                { key: "scheduled", label: "Zaplanowane", count: stats.scheduled, color: "text-blue-700 border-blue-300 bg-blue-50 hover:bg-blue-100" },
+                { key: "in_progress", label: "W trakcie", count: stats.in_progress, color: "text-yellow-800 border-yellow-300 bg-yellow-50 hover:bg-yellow-100" },
+                { key: "done", label: "Zakończone", count: stats.done, color: "text-green-700 border-green-300 bg-green-50 hover:bg-green-100" },
+                { key: "cancelled", label: "Anulowane", count: stats.cancelled, color: "text-red-700 border-red-300 bg-red-50 hover:bg-red-100" },
+              ].map((item) => {
+                const isActive = (item.key === "all" && status === "") || status === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => setStatus(item.key === "all" ? "" : item.key)}
+                    className={[
+                      "px-4 py-2 rounded-xl border text-sm flex items-center gap-2 transition",
+                      isActive ? "bg-black text-white border-black" : item.color,
+                    ].join(" ")}
+                  >
+                    <span>{item.label}</span>
+                    <span className="font-semibold">{item.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="shrink-0 min-w-[144px] flex justify-end">
+            {!roleLoading && isOwnerOrAdmin && (
+              <Link
+                href="/jobs/new"
+                className="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90 transition"
+              >
+                Dodaj zlecenie
+              </Link>
+            )}
+          </div>
         </div>
 
         {err && (
@@ -289,6 +374,10 @@ export default function JobsPage() {
 
                     <div className="text-xs text-gray-500">
                       Przypisani: <b>{assignedCount(j)}</b>
+                    </div>
+
+                    <div className="text-[11px] text-gray-400">
+                      🕒 {formatTimeAgo(j.statusUpdatedAt || j.updatedAt) || "brak daty"}
                     </div>
                   </div>
 

@@ -92,6 +92,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 
     if (typeof body.status === "string") {
       patch.status = body.status;
+      patch.statusUpdatedAt = new Date();
     }
 
     if (body.assignedToUids !== undefined) {

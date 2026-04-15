@@ -100,7 +100,17 @@ export async function GET(
     const snap = await q.get();
 
     const jobs = snap.docs
-      .map((d) => ({ id: d.id, ...(d.data() as any) }))
+      .map((d) => {
+        const data = d.data() as any;
+
+        return {
+          id: d.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || data.createdAt || null,
+          updatedAt: data.updatedAt?.toDate?.() || data.updatedAt || null,
+          statusUpdatedAt: data.statusUpdatedAt?.toDate?.() || data.statusUpdatedAt || null,
+        };
+      })
       .filter((job) => canMemberSeeJob(member, uid, job))
       .map((job) => {
         const assignedToUids = readAssignedToUids(job);
@@ -190,7 +200,8 @@ export async function POST(
         assignedToUids,
         assignedTo: assignedToUids[0] || null,
 
-        createdAt: now,
+        createdAt: new Date(),
+        statusUpdatedAt: new Date(),
         createdBy: uid,
         updatedAt: now,
         updatedBy: uid,
