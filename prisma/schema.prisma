@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  firebaseUid String?  @unique
+  email       String   @unique
+  displayName String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships         CompanyMember[]
+  createdJobs         Job[]               @relation("JobCreatedBy")
+  jobAssignments      JobAssignment[]
+  completedStages     JobStage[]          @relation("StageCompletedBy")
+  statusChanges       JobStatusHistory[]  @relation("StatusChangedBy")
+  auditLogs           AuditLog[]
+  idempotencyKeys     IdempotencyKey[]
+
+  @@index([firebaseUid])
+}
+
+model Company {
+  id                   String   @id @default(cuid())
+  name                 String
+  slug                 String?  @unique
+  billingStatus        String?  // active, inactive, trialing, past_due, cancelled
+  subscriptionEndsAt   DateTime?
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  members              CompanyMember[]
+  jobs                 Job[]
+  jobAssignments       JobAssignment[]
+  jobStages            JobStage[]
+  jobStagePhotos       JobStagePhoto[]
+  jobStatusHistory     JobStatusHistory[]
+  auditLogs            AuditLog[]
+  idempotencyKeys      IdempotencyKey[]
+}
+
+model CompanyMember {
+  id          String   @id @default(cuid())
+  companyId   String
+  userId      String
+  role        String   // owner, admin, staff
+  scope       String?  // all, assigned_only, custom
+  isActive    Boolean  @default(true)
+  invitedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([companyId])
+  @@index([userId])
+  @@index([companyId, role])
+  @@index([companyId, isActive])
+}
+
+model Job {
+  id                String   @id @default(cuid())
+  companyId         String
+  customerName      String
+  customerPhone     String
+  addressCity       String
+  addressStreet     String
+  addressZip        String?
+  addressNotes      String?
+  description       String
+  preferredFrom     DateTime?
+  preferredTo       DateTime?
+  priority          String   // normal, urgent
+  status            String   // new, scheduled, in_progress, done, cancelled
+  statusUpdatedAt   DateTime @default(now())
+
+  createdByUserId   String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  version           Int      @default(1)
+  deletedAt         DateTime?
+
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy         User               @relation("JobCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  assignments       JobAssignment[]
+  stages            JobStage[]
+  statusHistory     JobStatusHistory[]
+
+  @@index([companyId])
+  @@index([companyId, status, createdAt(sort: Desc)])
+  @@index([companyId, statusUpdatedAt(sort: Desc)])
+  @@index([companyId, createdByUserId])
+  @@index([companyId, priority])
+  @@index([companyId, deletedAt])
+}
+
+model JobAssignment {
+  id                String   @id @default(cuid())
+  companyId         String
+  jobId             String
+  userId            String
+  assignedByUserId  String?
+  assignedAt        DateTime @default(now())
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job               Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId])
+  @@index([companyId])
+  @@index([jobId])
+  @@index([userId])
+  @@index([companyId, jobId])
+  @@index([companyId, userId])
+}
+
+model JobStage {
+  id                 String   @id @default(cuid())
+  companyId          String
+  jobId              String
+  name               String
+  description        String?
+  plannedDate        DateTime?
+  status             String   // todo, done
+  completedAt        DateTime?
+  completedByUserId  String?
+  workerNote         String?
+  sortOrder          Int      @default(0)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  version            Int      @default(1)
+
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job                Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  completedBy        User?    @relation("StageCompletedBy", fields: [completedByUserId], references: [id], onDelete: SetNull)
+  photos             JobStagePhoto[]
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([companyId, jobId])
+  @@index([companyId, plannedDate])
+  @@index([companyId, status])
+  @@index([jobId, sortOrder])
+}
+
+model JobStagePhoto {
+  id               String   @id @default(cuid())
+  companyId        String
+  jobStageId       String
+  bucket           String
+  objectKey        String
+  contentType      String?
+  sizeBytes        Int?
+  uploadedByUserId String?
+  createdAt        DateTime @default(now())
+
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stage            JobStage @relation(fields: [jobStageId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([jobStageId])
+  @@index([companyId, jobStageId])
+  @@unique([bucket, objectKey])
+}
+
+model JobStatusHistory {
+  id              String   @id @default(cuid())
+  companyId       String
+  jobId           String
+  fromStatus      String?
+  toStatus        String
+  changedByUserId String
+  reason          String?
+  changedAt       DateTime @default(now())
+
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job             Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  changedBy       User     @relation("StatusChangedBy", fields: [changedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([companyId, jobId])
+  @@index([companyId, changedAt(sort: Desc)])
+  @@index([jobId, changedAt(sort: Desc)])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  companyId     String
+  userId        String?
+  action        String
+  entityType    String
+  entityId      String
+  data          Json?
+  requestId     String?
+  createdAt     DateTime @default(now())
+
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([companyId, entityType, entityId])
+  @@index([companyId, action])
+  @@index([companyId, createdAt(sort: Desc)])
+  @@index([requestId])
+}
+
+model IdempotencyKey {
+  id              String   @id @default(cuid())
+  companyId       String?
+  userId          String
+  endpoint        String
+  idempotencyKey  String
+  requestHash     String?
+  responseCode    Int?
+  responseBody    Json?
+  status          String   // started, completed, failed
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
+
+  company         Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint, idempotencyKey])
+  @@index([companyId])
+  @@index([userId])
+  @@index([endpoint])
+  @@index([expiresAt])
+  @@index([companyId, endpoint])
+}
