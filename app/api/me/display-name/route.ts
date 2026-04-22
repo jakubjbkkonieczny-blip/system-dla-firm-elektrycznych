@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase/admin";
 import { requireAuthUid } from "@/app/api/_lib/auth";
-import { FieldValue } from "firebase-admin/firestore";
-import { auth } from "firebase-admin";
+import { auth, FieldValue } from "@/lib/firebase/admin";
 
 // ================= PATCH =================
 export async function PATCH(req: NextRequest) {

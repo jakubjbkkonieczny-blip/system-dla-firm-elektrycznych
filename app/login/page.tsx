@@ -3,13 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginTypeSelect from "@/components/LoginTypeSelect";
-import { auth } from "@/lib/firebase/client";
-import {
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
 import { apiFetch } from "@/lib/api";
 
 type AccountType = "worker" | "employer";
@@ -42,23 +35,6 @@ export default function LoginPage() {
 
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-
-  async function establishServerSession() {
-    const idToken = await auth.currentUser?.getIdToken(true);
-    if (!idToken) {
-      throw new Error("MISSING_ID_TOKEN");
-    }
-
-    const res = await fetch("/api/auth/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-    });
-
-    if (!res.ok) {
-      throw new Error("SESSION_EXCHANGE_FAILED");
-    }
-  }
 
   async function afterWorkerAuth() {
     try {
@@ -97,36 +73,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!hasType) return;
-
-    const unsub = auth.onAuthStateChanged(async (u) => {
-      if (!u) return;
-
-      try {
-        const role = await ensureRoleOrBlock(selected);
-
-        if (role !== selected) {
-          await signOut(auth);
-          router.replace("/login");
-          return;
-        }
-
-        if (role === "worker") {
-          await afterWorkerAuth();
-          return;
-        }
-
-        await afterEmployerAuth();
-      } catch (e: any) {
-        if (e?.message === "ROLE_MISMATCH") {
-          await signOut(auth);
-          router.replace("/login");
-          return;
-        }
-        router.replace("/login");
-      }
-    });
-
-    return () => unsub();
+    console.log("TODO AUTH");
+    return;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasType, selected]);
 
@@ -144,13 +92,12 @@ export default function LoginPage() {
         throw new Error("Uzupełnij email i hasło.");
       }
 
-      await signInWithEmailAndPassword(auth, email.trim(), pass);
-      await establishServerSession();
+      console.log("LOGIN TODO");
 
       const role = await ensureRoleOrBlock(selected);
 
       if (role !== selected) {
-        await signOut(auth);
+        console.log("LOGOUT TODO");
         throw new Error("To konto jest innego typu. Wybierz właściwy typ na ekranie startowym.");
       }
 
@@ -168,7 +115,7 @@ export default function LoginPage() {
           : m
       );
       try {
-        await signOut(auth);
+        console.log("LOGOUT TODO");
       } catch {}
     } finally {
       setBusy(false);
@@ -197,13 +144,12 @@ export default function LoginPage() {
         throw new Error("Hasła nie są takie same.");
       }
 
-      await createUserWithEmailAndPassword(auth, email.trim(), pass);
-      await establishServerSession();
+      console.log("REGISTER TODO");
 
       const role = await ensureRoleOrBlock(selected, displayName.trim());
 
       if (role !== selected) {
-        await signOut(auth);
+        console.log("LOGOUT TODO");
         throw new Error("To konto już istnieje jako inny typ. Wybierz prawidłowy typ.");
       }
 
@@ -221,7 +167,7 @@ export default function LoginPage() {
           : m
       );
       try {
-        await signOut(auth);
+        console.log("LOGOUT TODO");
       } catch {}
     } finally {
       setBusy(false);
@@ -234,7 +180,7 @@ export default function LoginPage() {
 
     try {
       if (!resetEmail.trim()) throw new Error("Podaj email.");
-      await sendPasswordResetEmail(auth, resetEmail.trim());
+      console.log("RESET TODO");
       setMsg("Wysłano email do resetu hasła.");
     } catch (e: any) {
       setMsg(e?.message ?? "Nie udało się wysłać resetu hasła.");

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { requireAuthUid } from "@/app/api/_lib/auth";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "@/lib/firebase/admin";
 
 function isYyyyMmDd(s: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(s);

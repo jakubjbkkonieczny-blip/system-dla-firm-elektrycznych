@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, db } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "@/lib/firebase/admin";
 
 type Role = "worker" | "employer";
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase/admin";
 import { requireAuthUid } from "@/app/api/_lib/auth";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "@/lib/firebase/admin";
 
 type Role = "worker" | "employer";
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     let finalRole: Role | null = null;
     let created = false;
 
-    await db.runTransaction(async (tx) => {
+    await db.runTransaction(async (tx: any) => {
       const snap = await tx.get(userRef);
       const existing = snap.exists ? (snap.data() as any) : null;
 

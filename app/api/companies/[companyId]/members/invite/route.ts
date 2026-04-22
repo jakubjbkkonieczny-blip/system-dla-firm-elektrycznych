@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "@/lib/firebase/admin";
 import { requireAuthUid } from "@/app/api/_lib/auth";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 

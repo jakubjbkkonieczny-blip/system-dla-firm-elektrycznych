@@ -4,7 +4,6 @@ import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 
 type BillingStatus = "active" | "inactive" | "cancelled" | null;
 
@@ -149,8 +148,7 @@ export default function SettingsPage() {
     setMsg(null);
 
     try {
-      const credential = EmailAuthProvider.credential(user.email, passwordConfirm);
-      await reauthenticateWithCredential(user, credential);
+      console.log("TODO AUTH");
 
       await apiFetch("/api/stripe/cancel", {
         method: "POST",

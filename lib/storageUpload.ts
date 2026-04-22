@@ -1,5 +1,4 @@
-import { storage } from "@/lib/firebase/client";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+// TODO: storage imports removed with Firebase cleanup
 
 function sanitizeFileName(name: string) {
   return name.replace(/[^\w.\-]+/g, "_");

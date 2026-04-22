@@ -1,8 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { onAuthStateChanged, User, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase/client";
+
+type User = {
+  uid: string;
+  email?: string | null;
+};
 
 type AuthCtx = {
   user: User | null;
@@ -17,16 +20,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return () => unsub();
+    console.log("TODO AUTH");
+    setUser(null);
+    setLoading(false);
   }, []);
 
   const logout = async () => {
+    console.log("LOGOUT TODO");
     await fetch("/api/auth/session", { method: "DELETE" }).catch(() => null);
-    await signOut(auth);
   };
 
   const value = useMemo<AuthCtx>(() => ({ user, loading, logout }), [user, loading]);

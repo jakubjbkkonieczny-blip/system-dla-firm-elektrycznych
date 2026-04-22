@@ -12,10 +12,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useRouter, useParams } from "next/navigation";
 
-import { storage } from "@/lib/firebase/client";
-
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-
 
 
 
@@ -687,42 +683,10 @@ const blob = await compressImage(file);
 const safeName = `${Date.now()}_${file.name}.replace(/[^\w.\-]+/g, "_")`;
 
 const path = `companies/${companyId}/jobs/${jobId}/etapy_realizacji/${stageId}/${safeName}`;
-
-const r = ref(storage, path);
-
-
-
-return await new Promise<string>((resolve, reject) => {
-
-const task = uploadBytesResumable(r, blob, { contentType: "image/jpeg" });
-
-
-
-task.on(
-
-"state_changed",
-
-(snap) => {
-
-const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-
-setUploadPct((prev) => Math.max(prev, pct));
-
-},
-
-(error) => reject(error),
-
-async () => {
-
-const url = await getDownloadURL(task.snapshot.ref);
-
-resolve(url);
-
-}
-
-);
-
-});
+console.log("TODO AUTH");
+console.log("UPLOAD TODO", { path, size: blob.size });
+setUploadPct(100);
+return `todo://upload/${stageId}/${safeName}`;
 
 }
 
