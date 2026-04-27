@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
 import crypto from "crypto";
+import { prisma } from "@/lib/db/prisma";
 
 function sha256(s: string) {
   return crypto.createHash("sha256").update(s).digest("hex");
@@ -15,25 +15,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "MISSING_API_KEY_OR_COMPANY" }, { status: 400 });
     }
 
-    // sprawdź hash
-    const ref = adminDb.collection("companies").doc(companyId).collection("private").doc("apikey");
-    const snap = await ref.get();
-    const storedHash = snap.exists ? (snap.data() as any)?.apiKeyHash : null;
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      select: { apiKeyHash: true },
+    });
 
+    const storedHash = company?.apiKeyHash ?? null;
     if (!storedHash || sha256(apiKey) !== storedHash) {
       return NextResponse.json({ error: "INVALID_API_KEY" }, { status: 401 });
     }
 
     const body = await req.json().catch(() => ({}));
 
-    // MVP: zapis do kolekcji intake_requests (żebyś mógł potem przerobić na tworzenie zleceń)
-    const doc = await adminDb.collection("companies").doc(companyId).collection("intake_requests").add({
-      ...body,
-      createdAt: Date.now(),
-      source: "public_intake",
+    const row = await prisma.auditLog.create({
+      data: {
+        companyId,
+        userId: null,
+        action: "public_intake",
+        entityType: "intake_request",
+        entityId: crypto.randomUUID(),
+        data: body as object,
+      },
     });
 
-    return NextResponse.json({ ok: true, id: doc.id }, { status: 200 });
+    return NextResponse.json({ ok: true, id: row.id }, { status: 200 });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? "UNKNOWN" }, { status: 500 });
   }

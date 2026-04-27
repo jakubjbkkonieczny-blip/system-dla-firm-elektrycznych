@@ -1,69 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 
 type Ctx = { params: Promise<{ companyId: string }> };
 
-function yyyymm(d = new Date()) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  return `${y}${m}`;
+function startOfUtcMonth(d = new Date()) {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
 }
 
-export async function GET(req: NextRequest, { params }: Ctx) {
+export async function GET(_req: NextRequest, { params }: Ctx) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId } = await params;
 
-    // membership check
-    await requireActiveMember(companyId, uid);
+    await requireActiveMember(companyId, userId);
 
-    const companyRef = adminDb.collection("companies").doc(companyId);
-    const companySnap = await companyRef.get();
-    if (!companySnap.exists) return NextResponse.json({ error: "COMPANY_NOT_FOUND" }, { status: 404 });
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!company) return NextResponse.json({ error: "COMPANY_NOT_FOUND" }, { status: 404 });
 
-    const company = companySnap.data() as any;
+    const baseWhere = { companyId, deletedAt: null as const };
 
-    // Jobs count by status (prosto i tanio na MVP: 5 zapytań count)
-    const jobsRef = companyRef.collection("jobs");
-    const [newC, schC, progC, doneC, cancC] = await Promise.all([
-      jobsRef.where("status", "==", "new").count().get(),
-      jobsRef.where("status", "==", "scheduled").count().get(),
-      jobsRef.where("status", "==", "in_progress").count().get(),
-      jobsRef.where("status", "==", "done").count().get(),
-      jobsRef.where("status", "==", "cancelled").count().get(),
-    ]);
+    const [newC, schC, progC, doneC, cancC, membersActive, membersTotal, jobsUsed] =
+      await Promise.all([
+        prisma.job.count({ where: { ...baseWhere, status: "new" } }),
+        prisma.job.count({ where: { ...baseWhere, status: "scheduled" } }),
+        prisma.job.count({ where: { ...baseWhere, status: "in_progress" } }),
+        prisma.job.count({ where: { ...baseWhere, status: "done" } }),
+        prisma.job.count({ where: { ...baseWhere, status: "cancelled" } }),
+        prisma.companyMember.count({ where: { companyId, isActive: true } }),
+        prisma.companyMember.count({ where: { companyId } }),
+        prisma.job.count({
+          where: {
+            companyId,
+            deletedAt: null,
+            createdAt: { gte: startOfUtcMonth() },
+          },
+        }),
+      ]);
 
-    // Usage this month
-    const usageRef = companyRef.collection("usage").doc(yyyymm());
-    const usageSnap = await usageRef.get();
-    const jobsUsed = usageSnap.exists ? Number((usageSnap.data() as any)?.jobsCount || 0) : 0;
-    const jobsLimit = Number(company?.limits?.jobsPerMonth || 0) || 0;
+    const jobsLimit = 200;
 
     return NextResponse.json(
       {
         ok: true,
         stats: {
           jobs: {
-            new: newC.data().count,
-            scheduled: schC.data().count,
-            in_progress: progC.data().count,
-            done: doneC.data().count,
-            cancelled: cancC.data().count,
+            new: newC,
+            scheduled: schC,
+            in_progress: progC,
+            done: doneC,
+            cancelled: cancC,
           },
           members: {
-            active: Number(company?.activeMembersCount || 0),
-            total: Number(company?.membersCount || 0),
+            active: membersActive,
+            total: membersTotal,
           },
           usage: { jobsUsed, jobsLimit },
         },
       },
       { status: 200 }
     );
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

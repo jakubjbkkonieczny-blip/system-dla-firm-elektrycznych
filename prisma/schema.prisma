@@ -13,6 +13,14 @@ model User {
   email       String   @unique
   passwordHash String
   displayName String?
+  accountRole String?  // worker | employer (app-level account type)
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?
+  subscriptionEndsAt   DateTime?
+  subscriptionCancelAtPeriodEnd Boolean @default(false)
+  googleAccessToken    String?  @db.Text
+  googleRefreshToken   String?  @db.Text
+  pushSubscription     Json?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -32,8 +40,10 @@ model Company {
   id                   String   @id @default(cuid())
   name                 String
   slug                 String?  @unique
+  apiKeyHash           String?
   billingStatus        String?  // active, inactive, trialing, past_due, cancelled
   subscriptionEndsAt   DateTime?
+  scheduledDeletionAt  DateTime?
   isActive             Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt

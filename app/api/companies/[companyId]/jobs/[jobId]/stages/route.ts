@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "@/lib/firebase/admin";
+import { jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
+import { getJobPrimaryAssigneeId } from "@/lib/server/jobs/job-assignments";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
 
@@ -10,77 +15,58 @@ function isYyyyMmDd(v: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(v);
 }
 
-async function getJob(companyId: string, jobId: string) {
-  const ref = adminDb.collection("companies").doc(companyId).collection("jobs").doc(jobId);
-  const snap = await ref.get();
-  if (!snap.exists) throw new Error("JOB_NOT_FOUND");
-  return snap.data() as any;
-}
-
-/**
- * GET: lista etapów
- * owner/admin: zawsze
- * staff: tylko jeśli przypisany do zlecenia
- */
-export async function GET(req: NextRequest, { params }: Ctx) {
+export async function GET(_req: NextRequest, { params }: Ctx) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId } = await params;
 
-    const me = await requireActiveMember(companyId, uid);
-    const job = await getJob(companyId, jobId);
+    const me = await requireActiveMember(companyId, userId);
+    const job = await prisma.job.findFirst({
+      where: { id: jobId, companyId, deletedAt: null },
+    });
+    if (!job) throw new Error("JOB_NOT_FOUND");
 
     const isAdmin = me.role === "owner" || me.role === "admin";
-    const isAssignedStaff = job?.assignedTo === uid;
+    const primary = await getJobPrimaryAssigneeId(jobId);
+    const isAssignedStaff = primary === userId;
 
     if (!isAdmin && !isAssignedStaff) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
-    const snap = await adminDb
-      .collection("companies")
-      .doc(companyId)
-      .collection("jobs")
-      .doc(jobId)
-      .collection("etapy_realizacji")
-      .orderBy("planowana_data", "asc")
-      .orderBy("createdAt", "asc")
-      .get();
+    const rows = await prisma.jobStage.findMany({
+      where: { companyId, jobId },
+      orderBy: [{ plannedDate: "asc" }, { createdAt: "asc" }],
+      include: { photos: true },
+    });
 
-    const stages = snap.docs.map((d: any) => ({ id: d.id, ...(d.data() as any) }));
+    const stages = rows.map((r) => jobStageToPl(r));
     return NextResponse.json({ stages }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "JOB_NOT_FOUND"
-        ? 404
-        : msg === "NOT_A_MEMBER" || msg === "MEMBER_INACTIVE"
-        ? 403
-        : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }
 
-/**
- * POST: dodaj etap (owner/admin)
- */
 export async function POST(req: NextRequest, { params }: Ctx) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId } = await params;
 
-    const me = await requireActiveMember(companyId, uid);
+    const me = await requireActiveMember(companyId, userId);
     const isAdmin = me.role === "owner" || me.role === "admin";
     if (!isAdmin) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
-    await getJob(companyId, jobId);
+    const job = await prisma.job.findFirst({
+      where: { id: jobId, companyId, deletedAt: null },
+    });
+    if (!job) throw new Error("JOB_NOT_FOUND");
 
     const body = (await req.json()) as {
       nazwa_etapu: string;
       opis_etapu?: string;
-      planowana_data?: string; // YYYY-MM-DD
+      planowana_data?: string;
     };
 
     const nazwa_etapu = (body?.nazwa_etapu || "").trim();
@@ -92,43 +78,28 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "INVALID_DATE" }, { status: 400 });
     }
 
-    const ref = adminDb
-      .collection("companies")
-      .doc(companyId)
-      .collection("jobs")
-      .doc(jobId)
-      .collection("etapy_realizacji")
-      .doc();
+    const maxOrder = await prisma.jobStage.aggregate({
+      where: { companyId, jobId },
+      _max: { sortOrder: true },
+    });
+    const sortOrder = (maxOrder._max.sortOrder ?? 0) + 1;
 
-    const now = FieldValue.serverTimestamp();
-
-    await ref.set({
-      nazwa_etapu,
-      opis_etapu: opis_etapu || "",
-      planowana_data: planowana_data || "",
-      status: "do_wykonania",
-      data_zakonczenia: null,
-      zakonczone_przez: null,
-      notatka_pracownika: "",
-      lista_zdjec: [],
-
-      createdAt: now,
-      createdBy: uid,
-      updatedAt: now,
-      updatedBy: uid,
+    const stage = await prisma.jobStage.create({
+      data: {
+        companyId,
+        jobId,
+        name: nazwa_etapu,
+        description: opis_etapu || null,
+        plannedDate: planowana_data
+          ? new Date(`${planowana_data}T00:00:00.000Z`)
+          : null,
+        status: "todo",
+        sortOrder,
+      },
     });
 
-    return NextResponse.json({ ok: true, stageId: ref.id }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "JOB_NOT_FOUND"
-        ? 404
-        : msg === "NOT_A_MEMBER" || msg === "MEMBER_INACTIVE"
-        ? 403
-        : 500;
-    return NextResponse.json({ error: msg }, { status });
+    return NextResponse.json({ ok: true, stageId: stage.id }, { status: 200 });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

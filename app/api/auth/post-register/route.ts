@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
-import { FieldValue } from "@/lib/firebase/admin";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import { prisma } from "@/lib/db/prisma";
+import { handleSessionRouteErrorOr } from "@/lib/server/auth/handle-session-route-error";
 
 type Role = "worker" | "employer";
 
 export async function POST(req: NextRequest) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
+
     const body = (await req.json()) as {
       role?: Role;
       displayName?: string;
@@ -20,58 +22,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "ROLE_REQUIRED" }, { status: 400 });
     }
 
-    const userRef = db.collection("users").doc(uid);
-
     let finalRole: Role | null = null;
     let created = false;
 
-    await db.runTransaction(async (tx: any) => {
-      const snap = await tx.get(userRef);
-      const existing = snap.exists ? (snap.data() as any) : null;
+    await prisma.$transaction(async (tx) => {
+      const existing = await tx.user.findUnique({ where: { id: userId } });
+      if (!existing) {
+        throw new Error("USER_NOT_FOUND");
+      }
 
-      if (existing?.role && existing.role !== role) {
+      if (existing.accountRole && existing.accountRole !== role) {
         throw new Error("ROLE_MISMATCH");
       }
 
-      if (!existing?.role) {
+      if (!existing.accountRole) {
         created = true;
-
-        const payload: Record<string, any> = {
-          role,
-          createdAt: FieldValue.serverTimestamp(),
-        };
-
-        if (displayName) payload.displayName = displayName;
-
-        if (role === "employer") {
-          payload.billing = {
-            status: "inactive",
-            activeCompaniesCount: 0,
-            unitAmountPln: 400,
-          };
-        }
-
-        tx.set(userRef, payload, { merge: true });
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            accountRole: role,
+            ...(displayName ? { displayName } : {}),
+          },
+        });
         finalRole = role;
       } else {
-        finalRole = existing.role as Role;
-
-        if (!existing?.displayName && displayName) {
-          tx.set(userRef, { displayName }, { merge: true });
+        finalRole = existing.accountRole as Role;
+        if (!existing.displayName && displayName) {
+          await tx.user.update({
+            where: { id: userId },
+            data: { displayName },
+          });
         }
       }
     });
 
     return NextResponse.json({ ok: true, role: finalRole, created }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "ROLE_MISMATCH"
-        ? 409
-        : 500;
-
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, (msg) => {
+      if (msg === "ROLE_MISMATCH") return 409;
+      if (msg === "USER_NOT_FOUND") return 404;
+      return null;
+    });
   }
 }

@@ -1,58 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 
 type Ctx = { params: Promise<{ companyId: string }> };
 
-export async function GET(req: NextRequest, { params }: Ctx) {
+export async function GET(_req: NextRequest, { params }: Ctx) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId } = await params;
 
-    const me = await requireActiveMember(companyId, uid);
+    const me = await requireActiveMember(companyId, userId);
     if (me.role !== "owner" && me.role !== "admin") {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
-    const snap = await adminDb
-      .collection("companies")
-      .doc(companyId)
-      .collection("members")
-      .orderBy("createdAt", "desc")
-      .limit(200)
-      .get();
-
-    const membersRaw = snap.docs.map((d: any) => {
-      const data = d.data() as any;
-      return {
-        uid: d.id,
-        email: data.email || "",
-        role: data.role || "staff",
-        scope: data.scope || "all",
-        active: data.active === true,
-        createdAt: data.createdAt || null,
-      };
+    const rows = await prisma.companyMember.findMany({
+      where: { companyId },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      include: {
+        user: { select: { email: true, displayName: true } },
+      },
     });
 
-    const userRefs = membersRaw.map((m: any) => adminDb.collection("users").doc(m.uid));
-    const userSnaps = userRefs.length > 0 ? await adminDb.getAll(...userRefs) : [];
-
-    const displayNameByUid = new Map<string, string>();
-    for (const snap of userSnaps) {
-      const data = snap.exists ? (snap.data() as any) : null;
-      displayNameByUid.set(snap.id, String(data?.displayName || ""));
-    }
-
-    const members = membersRaw.map((m: any) => ({
-      ...m,
-      displayName: displayNameByUid.get(m.uid) || "",
+    const members = rows.map((m) => ({
+      uid: m.userId,
+      email: m.user.email,
+      displayName: m.user.displayName || "",
+      role: m.role || "staff",
+      scope: m.scope || "all",
+      active: m.isActive === true,
+      createdAt: m.createdAt,
     }));
 
     return NextResponse.json({ members }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

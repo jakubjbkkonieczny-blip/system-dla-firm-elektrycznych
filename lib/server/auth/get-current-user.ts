@@ -1,17 +1,15 @@
 import "server-only";
-import { auth } from "@/lib/firebase/admin";
-import { getSessionCookie } from "@/lib/server/auth/session";
-import type { DecodedIdToken } from "@/lib/firebase/admin";
+import { getUserFromSession } from "@/lib/server/auth/getUserFromSession";
+import type { AuthContextUser } from "@/lib/server/auth/types";
 
-export async function getCurrentUser(): Promise<DecodedIdToken | null> {
-  const sessionCookie = await getSessionCookie();
-  if (!sessionCookie) {
-    return null;
-  }
+export async function getCurrentUser(): Promise<AuthContextUser | null> {
+  const user = await getUserFromSession();
+  if (!user) return null;
 
-  try {
-    return await auth.verifySessionCookie(sessionCookie, true);
-  } catch {
-    return null;
-  }
+  return {
+    id: user.id,
+    uid: user.id,
+    email: user.email,
+    displayName: user.displayName,
+  };
 }

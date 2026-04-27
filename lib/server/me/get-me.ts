@@ -1,5 +1,5 @@
 import "server-only";
-import { db } from "@/lib/firebase/admin";
+import { prisma } from "@/lib/db/prisma";
 import { getCurrentUser } from "@/lib/server/auth/get-current-user";
 
 type Role = "worker" | "employer";
@@ -21,32 +21,46 @@ export async function getMeData(): Promise<MeData> {
   }
 
   const uid = currentUser.uid;
-  const userIndexSnap = await db.collection("user_index").doc(uid).get();
-  const userSnap = await db.collection("users").doc(uid).get();
-  const user = userSnap.exists ? (userSnap.data() as Record<string, any>) : null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: uid },
+    select: {
+      displayName: true,
+      accountRole: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("MISSING_AUTH");
+  }
 
   const role: Role | null =
-    user?.role === "employer" || user?.role === "worker"
-      ? (user.role as Role)
+    user.accountRole === "employer" || user.accountRole === "worker"
+      ? (user.accountRole as Role)
       : null;
+
+  const ownedCompanies = await prisma.companyMember.findMany({
+    where: { userId: uid, role: "owner", isActive: true },
+    include: { company: { select: { billingStatus: true, isActive: true } } },
+  });
+
+  const activeOwned = ownedCompanies.filter((m) => m.company.isActive);
 
   const billingStatus: BillingStatus | null =
-    user?.billing?.status === "active"
-      ? "active"
-      : user?.billing?.status
-      ? "inactive"
-      : null;
+    activeOwned.length === 0
+      ? null
+      : activeOwned.some((m) => m.company.billingStatus === "active")
+        ? "active"
+        : "inactive";
 
-  const canCreateCompany = userIndexSnap.exists
-    ? Boolean((userIndexSnap.data() as Record<string, any>)?.canCreateCompany ?? (role === "employer"))
-    : role === "employer";
+  const canCreateCompany = role === "employer" || activeOwned.length > 0;
 
   return {
     uid,
     canCreateCompany,
     role,
     billingStatus,
-    billing: (user?.billing as Record<string, unknown> | undefined) ?? null,
-    displayName: (user?.displayName as string | undefined) ?? null,
+    billing: null,
+    displayName: user.displayName ?? null,
   };
 }

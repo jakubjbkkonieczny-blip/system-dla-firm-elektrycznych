@@ -1,47 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "@/lib/firebase/admin";
+import { getJobPrimaryAssigneeId } from "@/lib/server/jobs/job-assignments";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string; stageId: string }> };
 
 function todayYyyyMmDd() {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC) – prosto i stabilnie
+  return new Date().toISOString().slice(0, 10);
 }
 
-async function getJob(companyId: string, jobId: string) {
-  const ref = adminDb.collection("companies").doc(companyId).collection("jobs").doc(jobId);
-  const snap = await ref.get();
-  if (!snap.exists) throw new Error("JOB_NOT_FOUND");
-  return snap.data() as any;
-}
-
-function refStage(companyId: string, jobId: string, stageId: string) {
-  return adminDb
-    .collection("companies")
-    .doc(companyId)
-    .collection("jobs")
-    .doc(jobId)
-    .collection("etapy_realizacji")
-    .doc(stageId);
-}
-
-/**
- * POST: oznacz etap jako zakończony
- * owner/admin: zawsze
- * staff: tylko jeśli assignedTo == uid
- */
 export async function POST(req: NextRequest, { params }: Ctx) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId, stageId } = await params;
 
-    const me = await requireActiveMember(companyId, uid);
-    const job = await getJob(companyId, jobId);
+    const me = await requireActiveMember(companyId, userId);
+    const job = await prisma.job.findFirst({
+      where: { id: jobId, companyId, deletedAt: null },
+    });
+    if (!job) throw new Error("JOB_NOT_FOUND");
 
     const isAdmin = me.role === "owner" || me.role === "admin";
-    const isAssignedStaff = job?.assignedTo === uid;
+    const primary = await getJobPrimaryAssigneeId(jobId);
+    const isAssignedStaff = primary === userId;
 
     if (!isAdmin && !isAssignedStaff) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
@@ -49,43 +36,28 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
     const body = (await req.json()) as {
       notatka_pracownika?: string;
-      lista_zdjec?: string[]; // URL-e już po uploadzie
+      lista_zdjec?: string[];
     };
 
     const notatka_pracownika = (body?.notatka_pracownika || "").trim();
-    const lista_zdjec = Array.isArray(body?.lista_zdjec) ? body.lista_zdjec.filter(Boolean) : [];
 
-    const ref = refStage(companyId, jobId, stageId);
-    const snap = await ref.get();
-    if (!snap.exists) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
+    const stage = await prisma.jobStage.findFirst({
+      where: { id: stageId, companyId, jobId },
+    });
+    if (!stage) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    const now = FieldValue.serverTimestamp();
-    const data_zakonczenia = todayYyyyMmDd();
-
-    await ref.set(
-      {
-        status: "zakonczony",
-        data_zakonczenia,
-        zakonczone_przez: uid,
-        notatka_pracownika,
-        lista_zdjec,
-        updatedAt: now,
-        updatedBy: uid,
+    await prisma.jobStage.update({
+      where: { id: stageId },
+      data: {
+        status: "done",
+        completedAt: new Date(`${todayYyyyMmDd()}T12:00:00.000Z`),
+        completedByUserId: userId,
+        workerNote: notatka_pracownika,
       },
-      { merge: true }
-    );
+    });
 
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "JOB_NOT_FOUND"
-        ? 404
-        : msg === "NOT_A_MEMBER" || msg === "MEMBER_INACTIVE"
-        ? 403
-        : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

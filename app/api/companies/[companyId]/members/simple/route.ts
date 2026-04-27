@@ -1,61 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId } = await params;
 
-    await requireActiveMember(companyId, uid);
+    await requireActiveMember(companyId, userId);
 
-    const membersSnap = await adminDb
-      .collection("companies")
-      .doc(companyId)
-      .collection("members")
-      .where("active", "==", true)
-      .get();
+    const rows = await prisma.companyMember.findMany({
+      where: { companyId, isActive: true },
+      include: { user: { select: { email: true, displayName: true } } },
+    });
 
-    const rawMembers = membersSnap.docs.map((d: any) => {
-  const data = d.data() as any;
-
-  return {
-    uid: d.id,
-    email: data.email || "",
-    role: data.role || "staff",
-  };
-});
-
-    const userRefs = rawMembers.map((d: any) => adminDb.collection("users").doc(d.uid));
-    const userSnaps = userRefs.length ? await adminDb.getAll(...userRefs) : [];
-
-    const displayNameMap = new Map<string, string>();
-    for (const snap of userSnaps) {
-      const data = snap.exists ? (snap.data() as any) : null;
-      displayNameMap.set(snap.id, String(data?.displayName || ""));
-    }
-
-    const members = rawMembers
-      .map((d: any) => {
-        const displayName = displayNameMap.get(d.uid) || "";
+    const members = rows
+      .map((d) => {
+        const displayName = d.user.displayName || "";
+        const email = d.user.email;
         return {
-          uid: d.uid,
-          email: d.email,
-          role: d.role,
+          uid: d.userId,
+          email,
+          role: d.role || "staff",
           displayName,
-          label: displayName.trim() || d.email || d.uid,
+          label: displayName.trim() || email || d.userId,
         };
       })
-      .sort((a: any, b: any) => a.label.localeCompare(b.label, "pl"));
+      .sort((a, b) => a.label.localeCompare(b.label, "pl"));
 
     return NextResponse.json({ members }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

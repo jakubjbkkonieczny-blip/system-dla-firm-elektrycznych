@@ -1,15 +1,18 @@
 import { NextResponse, NextRequest } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const uid = await requireAuthUid(request);
+    const sessionUser = await requireSessionUser();
 
-    const snap = await adminDb.collection("users").doc(uid).get();
-    const google = snap.data()?.google;
+    const user = await prisma.user.findUnique({
+      where: { id: sessionUser.id },
+      select: { googleAccessToken: true },
+    });
 
-    if (!google?.accessToken) {
+    if (!user?.googleAccessToken) {
       return NextResponse.json({ error: "NO_GOOGLE" }, { status: 400 });
     }
 
@@ -17,7 +20,7 @@ export async function GET(request: NextRequest) {
       "https://www.googleapis.com/calendar/v3/calendars/primary/events",
       {
         headers: {
-          Authorization: `Bearer ${google.accessToken}`,
+          Authorization: `Bearer ${user.googleAccessToken}`,
         },
       }
     );
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
     const data = await res.json();
 
     return NextResponse.json({ events: data.items || [] });
-  } catch {
-    return NextResponse.json({ error: "ERROR" }, { status: 500 });
+  } catch (e: unknown) {
+    return handleSessionRouteError(e);
   }
 }

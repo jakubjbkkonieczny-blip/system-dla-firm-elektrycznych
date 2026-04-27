@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuthUid } from "@/app/api/_lib/auth";
-import { db } from "@/lib/firebase/admin";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { getMeData } from "@/lib/server/me/get-me";
+import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
 
 function getDeleteAtIso() {
   const d = new Date();
@@ -13,106 +14,52 @@ export async function GET(_req: NextRequest) {
   try {
     const data = await getMeData();
     return NextResponse.json(data, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteError(e);
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(_req: NextRequest) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
 
-    const userRef = db.collection("users").doc(uid);
-    const userSnap = await userRef.get();
-    const user = userSnap.exists ? (userSnap.data() as any) : null;
-
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       return NextResponse.json({ error: "USER_NOT_FOUND" }, { status: 404 });
     }
 
-    const nowIso = new Date().toISOString();
-    const deleteAtIso = getDeleteAtIso();
+    const deleteAt = new Date(getDeleteAtIso());
 
-    // PRACODAWCA: oznacz firmę do usunięcia i odetnij pracowników od firmy
-    if (user.role === "employer") {
-      const companiesSnap = await db
-        .collection("companies")
-        .where("ownerUid", "==", uid)
-        .get();
+    if (user.accountRole === "employer") {
+      const owned = await prisma.companyMember.findMany({
+        where: { userId, role: "owner", isActive: true },
+        select: { companyId: true },
+      });
 
-      for (const companyDoc of companiesSnap.docs) {
-        const companyId = companyDoc.id;
-        const companyRef = db.collection("companies").doc(companyId);
-
-        await companyRef.set(
-          {
-            deletion: {
-              scheduled: true,
-              scheduledAt: nowIso,
-              deleteAt: deleteAtIso,
-              scheduledBy: uid,
-            },
-            active: false,
-            status: "scheduled_for_deletion",
-            updatedAt: nowIso,
+      for (const { companyId } of owned) {
+        await prisma.company.update({
+          where: { id: companyId },
+          data: {
+            isActive: false,
+            scheduledDeletionAt: deleteAt,
           },
-          { merge: true }
-        );
+        });
 
-        const membersSnap = await companyRef.collection("members").get();
-
-        for (const memberDoc of membersSnap.docs) {
-          const memberUid = memberDoc.id;
-
-          await memberDoc.ref.set(
-            {
-              active: false,
-              removedAt: nowIso,
-              removedBy: uid,
-            },
-            { merge: true }
-          );
-
-          await db
-            .collection("user_index")
-            .doc(memberUid)
-            .set(
-              {
-                companyIds: [],
-                updatedAt: nowIso,
-              },
-              { merge: true }
-            );
-        }
+        await prisma.companyMember.updateMany({
+          where: { companyId },
+          data: { isActive: false },
+        });
       }
     }
 
-    // PRACOWNIK: tylko oznacz konto do usunięcia
-    // PRACODAWCA: też oznacz konto do usunięcia
-    // UWAGA: NIE ruszamy displayName / role / billing
-    await userRef.set(
-      {
-        deletion: {
-          scheduled: true,
-          scheduledAt: nowIso,
-          deleteAt: deleteAtIso,
-        },
-      },
-      { merge: true }
-    );
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false },
+    });
 
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "DELETE_ERROR";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "USER_NOT_FOUND"
-        ? 404
-        : 500;
-
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteError(e);
   }
 }

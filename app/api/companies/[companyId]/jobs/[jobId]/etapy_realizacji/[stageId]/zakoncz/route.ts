@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "@/lib/firebase/admin";
+import { getJobPrimaryAssigneeId } from "@/lib/server/jobs/job-assignments";
 
 type Body = {
   notatka_pracownika?: string;
-  lista_zdjec?: string[]; // linki (downloadURL)
+  lista_zdjec?: string[];
 };
 
 function todayYyyyMmDd() {
   const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return d.toISOString().slice(0, 10);
 }
 
 export async function POST(
@@ -22,54 +23,46 @@ export async function POST(
   { params }: { params: Promise<{ companyId: string; jobId: string; stageId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId, stageId } = await params;
 
-    const member = await requireActiveMember(companyId, uid);
-    const role = (member?.role || "staff") as "owner" | "admin" | "staff";
+    const member = await requireActiveMember(companyId, userId);
+    const role = (member.role || "staff") as "owner" | "admin" | "staff";
 
-    const jobRef = adminDb.collection("companies").doc(companyId).collection("jobs").doc(jobId);
-    const stageRef = jobRef.collection("etapy_realizacji").doc(stageId);
+    const job = await prisma.job.findFirst({
+      where: { id: jobId, companyId, deletedAt: null },
+    });
+    if (!job) return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
 
-    const [jobSnap, stageSnap] = await Promise.all([jobRef.get(), stageRef.get()]);
-    if (!jobSnap.exists) return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
-    if (!stageSnap.exists) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
+    const stage = await prisma.jobStage.findFirst({
+      where: { id: stageId, companyId, jobId },
+    });
+    if (!stage) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    const job = jobSnap.data() as any;
-    const assignedTo = job?.assignedTo || null;
-
+    const assignedTo = await getJobPrimaryAssigneeId(jobId);
     const can =
       role === "owner" ||
       role === "admin" ||
-      (role === "staff" && assignedTo && assignedTo === uid);
+      (role === "staff" && assignedTo && assignedTo === userId);
 
     if (!can) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
     const body = (await req.json()) as Body;
-
     const note = String(body.notatka_pracownika || "");
-    const photos = Array.isArray(body.lista_zdjec) ? body.lista_zdjec : [];
 
-    const prev = stageSnap.data() as any;
-    const prevPhotos = Array.isArray(prev?.lista_zdjec) ? prev.lista_zdjec : [];
-
-    const now = FieldValue.serverTimestamp();
-
-    await stageRef.update({
-      status: "zakonczony",
-      data_zakonczenia: todayYyyyMmDd(),
-      zakonczone_przez: uid,
-      notatka_pracownika: note,
-      lista_zdjec: [...prevPhotos, ...photos],
-
-      updatedAt: now,
-      updatedBy: uid,
+    await prisma.jobStage.update({
+      where: { id: stageId },
+      data: {
+        status: "done",
+        completedAt: new Date(`${todayYyyyMmDd()}T12:00:00.000Z`),
+        completedByUserId: userId,
+        workerNote: note,
+      },
     });
 
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

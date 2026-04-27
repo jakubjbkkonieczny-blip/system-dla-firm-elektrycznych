@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 
 export async function GET(req: NextRequest) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
     const code = req.nextUrl.searchParams.get("code");
 
     if (!code) {
-      return NextResponse.redirect("/settings");
+      return NextResponse.redirect(new URL("/settings", req.url));
     }
 
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
@@ -25,18 +25,20 @@ export async function GET(req: NextRequest) {
 
     const data = await tokenRes.json();
 
-    await adminDb.collection("users").doc(uid).set(
-      {
-        google: {
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
-        },
+    await prisma.user.update({
+      where: { id: sessionUser.id },
+      data: {
+        googleAccessToken: data.access_token ?? null,
+        googleRefreshToken: data.refresh_token ?? null,
       },
-      { merge: true }
-    );
+    });
 
-    return NextResponse.redirect("/calendar");
-  } catch {
-    return NextResponse.redirect("/settings");
+    return NextResponse.redirect(new URL("/calendar", req.url));
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "MISSING_AUTH") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    console.error(e);
+    return NextResponse.redirect(new URL("/settings", req.url));
   }
 }

@@ -1,26 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuthUid } from "@/app/api/_lib/auth";
-import { adminDb } from "@/lib/firebase/admin";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
-    const uid = await requireAuthUid(req);
-
-    const snap = await adminDb
-      .collection("users")
-      .doc(uid)
-      .collection("notifications")
-      .orderBy("createdAt", "desc")
-      .limit(50)
-      .get();
-
-    const notifications = snap.docs.map((d: any) => ({
-      id: d.id,
-      ...(d.data() as any),
-    }));
-
-    return NextResponse.json({ notifications });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message }, { status: 500 });
+    await requireSessionUser();
+    return NextResponse.json({ notifications: [] }, { status: 200 });
+  } catch (e: unknown) {
+    return handleSessionRouteError(e);
   }
 }

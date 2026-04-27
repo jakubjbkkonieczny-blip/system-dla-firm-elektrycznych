@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "@/lib/firebase/admin";
+import type { ActiveMember } from "@/app/api/_lib/membership";
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function yyyymm(d = new Date()) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  return `${y}${m}`;
+function startOfUtcMonth(d = new Date()) {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
 }
 
 function normalizeAssignedToUids(input: unknown): string[] {
@@ -19,26 +22,18 @@ function normalizeAssignedToUids(input: unknown): string[] {
   const out = input
     .map((v) => String(v || "").trim())
     .filter(Boolean);
-
   return Array.from(new Set(out));
 }
 
-function readAssignedToUids(job: any): string[] {
-  const fromArray = normalizeAssignedToUids(job?.assignedToUids);
-  if (fromArray.length > 0) return fromArray;
-
-  const legacy = String(job?.assignedTo || "").trim();
-  return legacy ? [legacy] : [];
+function readAssignedToUids(job: { assignments: { userId: string }[] }): string[] {
+  return job.assignments.map((a) => a.userId);
 }
 
-function canMemberSeeJob(member: any, uid: string, job: any) {
-  const role = String(member?.role || "staff");
-  const scope = String(member?.scope || "all");
-
+function canMemberSeeJob(member: ActiveMember, userId: string, assignedIds: string[]) {
+  const role = String(member.role || "staff");
+  const scope = String(member.scope || "all");
   if (role === "owner" || role === "admin") return true;
-
-  const assigned = readAssignedToUids(job);
-  return assigned.includes(uid) || scope === "all";
+  return assignedIds.includes(userId) || scope === "all";
 }
 
 type CreateJobBody = {
@@ -60,10 +55,11 @@ export async function GET(
   { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId } = await params;
 
-    const member = await requireActiveMember(companyId, uid);
+    const member = await requireActiveMember(companyId, userId);
 
     const url = new URL(req.url);
     const status = url.searchParams.get("status");
@@ -71,64 +67,42 @@ export async function GET(
     const limit = clamp(Number(url.searchParams.get("limit") || "50"), 1, 50);
     const cursor = url.searchParams.get("cursor");
 
-    let q: any = adminDb
-      .collection("companies")
-      .doc(companyId)
-      .collection("jobs")
-      .orderBy("createdAt", "desc")
-      .limit(limit);
+    const where: Prisma.JobWhereInput = {
+      companyId,
+      deletedAt: null,
+      ...(todo
+        ? { status: { in: ["new", "scheduled", "in_progress"] } }
+        : status
+          ? { status }
+          : {}),
+    };
 
-    if (todo) {
-      q = q.where("status", "in", ["new", "scheduled", "in_progress"]);
-    } else if (status) {
-      q = q.where("status", "==", status);
-    }
+    const jobsRaw = await prisma.job.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      include: { assignments: { select: { userId: true } } },
+    });
 
-    if (cursor) {
-      const cursorSnap = await adminDb
-        .collection("companies")
-        .doc(companyId)
-        .collection("jobs")
-        .doc(cursor)
-        .get();
-
-      if (cursorSnap.exists) {
-        q = q.startAfter(cursorSnap);
-      }
-    }
-
-    const snap = await q.get();
-
-    const jobs = snap.docs
-      .map((d: any) => {
-        const data = d.data() as any;
-
-        return {
-          id: d.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.() || data.createdAt || null,
-          updatedAt: data.updatedAt?.toDate?.() || data.updatedAt || null,
-          statusUpdatedAt: data.statusUpdatedAt?.toDate?.() || data.statusUpdatedAt || null,
-        };
-      })
-      .filter((job: any) => canMemberSeeJob(member, uid, job))
-      .map((job: any) => {
+    const jobs = jobsRaw
+      .filter((job) => canMemberSeeJob(member, userId, readAssignedToUids(job)))
+      .map((job) => {
         const assignedToUids = readAssignedToUids(job);
+        const { assignments, ...rest } = job;
         return {
-          ...job,
+          ...rest,
           assignedToUids,
           assignedTo: assignedToUids[0] || null,
         };
       });
 
     const nextCursor =
-      snap.docs.length === limit ? snap.docs[snap.docs.length - 1].id : null;
+      jobsRaw.length === limit && jobsRaw.length > 0 ? jobsRaw[jobsRaw.length - 1].id : null;
 
     return NextResponse.json({ jobs, nextCursor }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }
 
@@ -137,11 +111,12 @@ export async function POST(
   { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId } = await params;
 
-    const member = await requireActiveMember(companyId, uid);
-    const role = String(member?.role || "staff");
+    const member = await requireActiveMember(companyId, userId);
+    const role = String(member.role || "staff");
 
     if (!(role === "owner" || role === "admin")) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
@@ -165,71 +140,74 @@ export async function POST(
       return NextResponse.json({ error: "MISSING_FIELDS" }, { status: 400 });
     }
 
-    const companyRef = adminDb.collection("companies").doc(companyId);
-    const usageRef = companyRef.collection("usage").doc(yyyymm());
-    const jobRef = companyRef.collection("jobs").doc();
-    const now = FieldValue.serverTimestamp();
-
-    await adminDb.runTransaction(async (tx: any) => {
-      const companySnap = await tx.get(companyRef);
-      if (!companySnap.exists) throw new Error("COMPANY_NOT_FOUND");
-
-      const limits = (companySnap.data() as any)?.limits || {};
-      const monthLimit = Number(limits.jobsPerMonth || 0) || 0;
-
-      const usageSnap = await tx.get(usageRef);
-      const current = usageSnap.exists ? Number((usageSnap.data() as any)?.jobsCount || 0) : 0;
-
-      if (monthLimit > 0 && current >= monthLimit) {
+    const jobId = await prisma.$transaction(async (tx) => {
+      const monthStart = startOfUtcMonth();
+      const usageCount = await tx.job.count({
+        where: { companyId, deletedAt: null, createdAt: { gte: monthStart } },
+      });
+      const monthLimit = 200;
+      if (monthLimit > 0 && usageCount >= monthLimit) {
         throw new Error("LIMIT_JOBS_PER_MONTH");
       }
 
-      tx.set(jobRef, {
-        customerName,
-        customerPhone,
-        addressCity,
-        addressStreet,
-        addressZip,
-        addressNotes,
-        description,
-        preferredFrom,
-        preferredTo,
-        priority,
-        status: "new",
+      if (assignedToUids.length > 0) {
+        const valid = await tx.companyMember.count({
+          where: {
+            companyId,
+            userId: { in: assignedToUids },
+            isActive: true,
+          },
+        });
+        if (valid !== assignedToUids.length) {
+          throw new Error("INVALID_ASSIGNEES");
+        }
+      }
 
-        assignedToUids,
-        assignedTo: assignedToUids[0] || null,
-
-        createdAt: new Date(),
-        statusUpdatedAt: new Date(),
-        createdBy: uid,
-        updatedAt: now,
-        updatedBy: uid,
+      const j = await tx.job.create({
+        data: {
+          companyId,
+          customerName,
+          customerPhone,
+          addressCity,
+          addressStreet,
+          addressZip: addressZip || null,
+          addressNotes: addressNotes || null,
+          description,
+          preferredFrom: preferredFrom ? new Date(preferredFrom) : null,
+          preferredTo: preferredTo ? new Date(preferredTo) : null,
+          priority,
+          status: "new",
+          statusUpdatedAt: new Date(),
+          createdByUserId: userId,
+        },
       });
 
-      tx.set(
-        usageRef,
-        {
-          yyyymm: yyyymm(),
-          jobsCount: FieldValue.increment(1),
-          updatedAt: now,
-        },
-        { merge: true }
-      );
+      for (const assigneeId of assignedToUids) {
+        await tx.jobAssignment.create({
+          data: {
+            companyId,
+            jobId: j.id,
+            userId: assigneeId,
+            assignedByUserId: userId,
+          },
+        });
+      }
+
+      return j.id;
     });
 
-    return NextResponse.json({ jobId: jobRef.id }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "LIMIT_JOBS_PER_MONTH"
-        ? 403
-        : msg === "FORBIDDEN"
-        ? 403
-        : 500;
-
-    return NextResponse.json({ error: msg }, { status });
+    return NextResponse.json({ jobId }, { status: 200 });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, (msg) => {
+      if (
+        msg === "LIMIT_JOBS_PER_MONTH" ||
+        msg === "INVALID_ASSIGNEES" ||
+        msg === "FORBIDDEN" ||
+        msg === "NOT_MEMBER"
+      ) {
+        return 403;
+      }
+      return null;
+    });
   }
 }

@@ -1,35 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId } = await params;
 
-    const me = await requireActiveMember(companyId, uid);
+    const me = await requireActiveMember(companyId, userId);
 
-    const companySnap = await adminDb.collection("companies").doc(companyId).get();
-    if (!companySnap.exists) return NextResponse.json({ error: "COMPANY_NOT_FOUND" }, { status: 404 });
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      select: { id: true },
+    });
+    if (!company) return NextResponse.json({ error: "COMPANY_NOT_FOUND" }, { status: 404 });
 
-    const data = companySnap.data() as any;
+    const [activeMembersCount, membersCount] = await Promise.all([
+      prisma.companyMember.count({ where: { companyId, isActive: true } }),
+      prisma.companyMember.count({ where: { companyId } }),
+    ]);
 
     return NextResponse.json(
       {
         role: me.role,
         scope: me.scope,
-        activeMembersCount: Number(data?.activeMembersCount || 0),
-        membersCount: Number(data?.membersCount || 0),
+        activeMembersCount,
+        membersCount,
       },
       { status: 200 }
     );
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

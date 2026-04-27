@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth, db } from "@/lib/firebase/admin";
-import { FieldValue } from "@/lib/firebase/admin";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import { handleSessionRouteErrorOr } from "@/lib/server/auth/handle-session-route-error";
 
 type Role = "worker" | "employer";
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "MISSING_AUTH" }, { status: 401 });
-
-    const decoded = await auth.verifyIdToken(token);
-    const uid = decoded.uid;
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
 
     const body = (await req.json().catch(() => ({}))) as { desiredRole?: Role };
     const desiredRole = body.desiredRole;
@@ -19,43 +17,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "ROLE_REQUIRED" }, { status: 400 });
     }
 
-    const userRef = db.collection("users").doc(uid);
+    const result = await prisma.$transaction(async (tx) => {
+      const u = await tx.user.findUnique({ where: { id: userId } });
+      if (!u) throw new Error("USER_NOT_FOUND");
 
-    const result = await db.runTransaction(async (tx: any) => {
-      const snap = await tx.get(userRef);
-      const existingRole = snap.exists ? (snap.data() as any)?.role : null;
-
-      // jeśli rola już jest — nie zmieniamy jej NIGDY
-      if (existingRole) {
-        if (existingRole !== desiredRole) {
-          // twarda blokada: typ UI nie pasuje do roli konta
+      if (u.accountRole) {
+        if (u.accountRole !== desiredRole) {
           throw new Error("ROLE_MISMATCH");
         }
-        return { role: existingRole as Role };
+        return { role: u.accountRole as Role };
       }
 
-      // pierwszy raz: zapisujemy rolę
-      tx.set(
-        userRef,
-        {
-          role: desiredRole,
-          createdAt: FieldValue.serverTimestamp(),
-          billing: {
-            status: "inactive",
-            activeCompaniesCount: 0,
-            unitAmountPln: 400,
-          },
-        },
-        { merge: true }
-      );
+      await tx.user.update({
+        where: { id: userId },
+        data: { accountRole: desiredRole },
+      });
 
       return { role: desiredRole };
     });
 
     return NextResponse.json(result, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "ROLE_MISMATCH" ? 409 : msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, (msg) => {
+      if (msg === "ROLE_MISMATCH") return 409;
+      if (msg === "USER_NOT_FOUND") return 404;
+      return null;
+    });
   }
 }

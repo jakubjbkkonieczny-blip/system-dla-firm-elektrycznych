@@ -1,12 +1,24 @@
-import { db } from "@/lib/firebase/admin";
+import "server-only";
+import { prisma } from "@/lib/db/prisma";
 
-export async function requireActiveMember(companyId: string, uid: string) {
-  const ref = db.collection("companies").doc(companyId).collection("members").doc(uid);
-  const snap = await ref.get();
+export type ActiveMember = {
+  role: string;
+  scope: string | null;
+  userId: string;
+  isActive: boolean;
+};
 
-  if (!snap.exists) throw new Error("NOT_MEMBER");
-  const data = snap.data() as any;
-  if (!data?.active) throw new Error("NOT_ACTIVE_MEMBER");
+export async function requireActiveMember(companyId: string, userId: string): Promise<ActiveMember> {
+  const m = await prisma.companyMember.findUnique({
+    where: { companyId_userId: { companyId, userId } },
+  });
 
-  return data;
+  if (!m || !m.isActive) throw new Error("NOT_MEMBER");
+
+  return {
+    role: m.role,
+    scope: m.scope,
+    userId: m.userId,
+    isActive: m.isActive,
+  };
 }

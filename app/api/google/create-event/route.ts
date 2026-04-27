@@ -1,16 +1,19 @@
 import { NextResponse, NextRequest } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
 
 export async function POST(request: NextRequest) {
   try {
-    const uid = await requireAuthUid(request);
+    const sessionUser = await requireSessionUser();
     const body = await request.json();
 
-    const snap = await adminDb.collection("users").doc(uid).get();
-    const google = snap.data()?.google;
+    const user = await prisma.user.findUnique({
+      where: { id: sessionUser.id },
+      select: { googleAccessToken: true },
+    });
 
-    if (!google?.accessToken) {
+    if (!user?.googleAccessToken) {
       return NextResponse.json({ error: "NO_GOOGLE" }, { status: 400 });
     }
 
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${google.accessToken}`,
+          Authorization: `Bearer ${user.googleAccessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
 
     return NextResponse.json({ event: data });
-  } catch {
-    return NextResponse.json({ error: "ERROR" }, { status: 500 });
+  } catch (e: unknown) {
+    return handleSessionRouteError(e);
   }
 }

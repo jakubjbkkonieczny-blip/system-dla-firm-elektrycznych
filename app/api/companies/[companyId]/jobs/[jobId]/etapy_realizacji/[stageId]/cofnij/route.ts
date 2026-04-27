@@ -1,52 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "@/lib/firebase/admin";
+import { getJobPrimaryAssigneeId } from "@/lib/server/jobs/job-assignments";
 
 export async function POST(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ companyId: string; jobId: string; stageId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId, stageId } = await params;
 
-    const member = await requireActiveMember(companyId, uid);
-    const role = (member?.role || "staff") as "owner" | "admin" | "staff";
+    const member = await requireActiveMember(companyId, userId);
+    const role = (member.role || "staff") as "owner" | "admin" | "staff";
 
-    const jobRef = adminDb.collection("companies").doc(companyId).collection("jobs").doc(jobId);
-    const stageRef = jobRef.collection("etapy_realizacji").doc(stageId);
+    const job = await prisma.job.findFirst({
+      where: { id: jobId, companyId, deletedAt: null },
+    });
+    if (!job) return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
 
-    const [jobSnap, stageSnap] = await Promise.all([jobRef.get(), stageRef.get()]);
-    if (!jobSnap.exists) return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
-    if (!stageSnap.exists) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
+    const stage = await prisma.jobStage.findFirst({
+      where: { id: stageId, companyId, jobId },
+    });
+    if (!stage) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    const job = jobSnap.data() as any;
-    const assignedTo = job?.assignedTo || null;
-
+    const assignedTo = await getJobPrimaryAssigneeId(jobId);
     const can =
       role === "owner" ||
       role === "admin" ||
-      (role === "staff" && assignedTo && assignedTo === uid);
+      (role === "staff" && assignedTo && assignedTo === userId);
 
     if (!can) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
-    const now = FieldValue.serverTimestamp();
-
-    await stageRef.update({
-      status: "do_wykonania",
-      data_zakonczenia: null,
-      zakonczone_przez: null,
-
-      updatedAt: now,
-      updatedBy: uid,
+    await prisma.jobStage.update({
+      where: { id: stageId },
+      data: {
+        status: "todo",
+        completedAt: null,
+        completedByUserId: null,
+      },
     });
 
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

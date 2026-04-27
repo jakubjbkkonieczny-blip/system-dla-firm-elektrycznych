@@ -1,25 +1,20 @@
 import { NextResponse } from "next/server";
-import { auth, db } from "@/lib/firebase/admin";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
 
 export async function POST(req: Request) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const decoded = await auth.verifyIdToken(token);
-    const uid = decoded.uid;
-
+    const sessionUser = await requireSessionUser();
     const sub = await req.json();
 
-    await db.collection("push_subscriptions").doc(uid).set(
-      {
-        subscription: sub,
-      },
-      { merge: true }
-    );
+    await prisma.user.update({
+      where: { id: sessionUser.id },
+      data: { pushSubscription: sub as object },
+    });
 
     return NextResponse.json({ ok: true });
-  } catch (e) {
-    return NextResponse.json({ error: "ERROR" }, { status: 500 });
+  } catch (e: unknown) {
+    return handleSessionRouteError(e);
   }
 }

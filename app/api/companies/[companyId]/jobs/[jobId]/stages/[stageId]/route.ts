@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "@/lib/firebase/admin";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string; stageId: string }> };
 
@@ -10,25 +13,13 @@ function isYyyyMmDd(v: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(v);
 }
 
-function refStage(companyId: string, jobId: string, stageId: string) {
-  return adminDb
-    .collection("companies")
-    .doc(companyId)
-    .collection("jobs")
-    .doc(jobId)
-    .collection("etapy_realizacji")
-    .doc(stageId);
-}
-
-/**
- * PATCH: edycja etapu (owner/admin)
- */
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId, stageId } = await params;
 
-    const me = await requireActiveMember(companyId, uid);
+    const me = await requireActiveMember(companyId, userId);
     const isAdmin = me.role === "owner" || me.role === "admin";
     if (!isAdmin) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
@@ -38,67 +29,54 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       planowana_data?: string;
     };
 
-    const patch: any = {};
+    const data: Record<string, unknown> = {};
     if (typeof body.nazwa_etapu === "string") {
       const v = body.nazwa_etapu.trim();
       if (!v) return NextResponse.json({ error: "MISSING_STAGE_NAME" }, { status: 400 });
-      patch.nazwa_etapu = v;
+      data.name = v;
     }
-    if (typeof body.opis_etapu === "string") patch.opis_etapu = body.opis_etapu.trim();
-
+    if (typeof body.opis_etapu === "string") {
+      data.description = body.opis_etapu.trim() || null;
+    }
     if (typeof body.planowana_data === "string") {
       const d = body.planowana_data.trim();
       if (d && !isYyyyMmDd(d)) return NextResponse.json({ error: "INVALID_DATE" }, { status: 400 });
-      patch.planowana_data = d;
+      data.plannedDate = d ? new Date(`${d}T00:00:00.000Z`) : null;
     }
 
-    patch.updatedAt = FieldValue.serverTimestamp();
-    patch.updatedBy = uid;
+    const existing = await prisma.jobStage.findFirst({
+      where: { id: stageId, companyId, jobId },
+    });
+    if (!existing) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    const ref = refStage(companyId, jobId, stageId);
-    const snap = await ref.get();
-    if (!snap.exists) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
-
-    await ref.set(patch, { merge: true });
+    await prisma.jobStage.update({
+      where: { id: stageId },
+      data: data as object,
+    });
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "NOT_A_MEMBER" || msg === "MEMBER_INACTIVE"
-        ? 403
-        : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }
 
-/**
- * DELETE: usuń etap (owner/admin)
- */
-export async function DELETE(req: NextRequest, { params }: Ctx) {
+export async function DELETE(_req: NextRequest, { params }: Ctx) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId, stageId } = await params;
 
-    const me = await requireActiveMember(companyId, uid);
+    const me = await requireActiveMember(companyId, userId);
     const isAdmin = me.role === "owner" || me.role === "admin";
     if (!isAdmin) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
-    const ref = refStage(companyId, jobId, stageId);
-    const snap = await ref.get();
-    if (!snap.exists) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
+    const existing = await prisma.jobStage.findFirst({
+      where: { id: stageId, companyId, jobId },
+    });
+    if (!existing) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    await ref.delete();
+    await prisma.jobStage.delete({ where: { id: stageId } });
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status =
-      msg === "MISSING_AUTH"
-        ? 401
-        : msg === "NOT_A_MEMBER" || msg === "MEMBER_INACTIVE"
-        ? 403
-        : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }

@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { requireAuthUid } from "@/app/api/_lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { FieldValue } from "@/lib/firebase/admin";
+import { jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
+import {
+  companyRouteErrorStatus,
+  handleSessionRouteErrorOr,
+} from "@/lib/server/auth/handle-session-route-error";
 
 type CreateStageBody = {
   nazwa_etapu: string;
   opis_etapu?: string;
-  planowana_data?: string; // "YYYY-MM-DD" lub ""
+  planowana_data?: string;
 };
 
 function isYyyyMmDd(s: string) {
@@ -15,31 +19,26 @@ function isYyyyMmDd(s: string) {
 }
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ companyId: string; jobId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId } = await params;
 
-    await requireActiveMember(companyId, uid);
+    await requireActiveMember(companyId, userId);
 
-    const ref = adminDb
-      .collection("companies")
-      .doc(companyId)
-      .collection("jobs")
-      .doc(jobId)
-      .collection("etapy_realizacji");
+    const rows = await prisma.jobStage.findMany({
+      where: { companyId, jobId },
+      orderBy: [{ plannedDate: "asc" }, { createdAt: "asc" }],
+      include: { photos: true },
+    });
 
-    // sort: planowana_data asc, createdAt asc (to może wymagać indeksu — już Ci wyskoczył)
-    const snap = await ref.orderBy("planowana_data", "asc").orderBy("createdAt", "asc").get();
-
-    const stages =snap.docs.map((d: any) => ({ id: d.id, ...(d.data() as any) }));
+    const stages = rows.map((r) => jobStageToPl(r));
     return NextResponse.json({ stages }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }
 
@@ -48,11 +47,12 @@ export async function POST(
   { params }: { params: Promise<{ companyId: string; jobId: string }> }
 ) {
   try {
-    const uid = await requireAuthUid(req);
+    const sessionUser = await requireSessionUser();
+    const userId = sessionUser.id;
     const { companyId, jobId } = await params;
 
-    const member = await requireActiveMember(companyId, uid);
-    const role = (member?.role || "staff") as "owner" | "admin" | "staff";
+    const member = await requireActiveMember(companyId, userId);
+    const role = (member.role || "staff") as "owner" | "admin" | "staff";
     if (!(role === "owner" || role === "admin")) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
@@ -71,35 +71,28 @@ export async function POST(
       return NextResponse.json({ error: "BAD_DATE_FORMAT" }, { status: 400 });
     }
 
-    const now = FieldValue.serverTimestamp();
-    const stageRef = adminDb
-      .collection("companies")
-      .doc(companyId)
-      .collection("jobs")
-      .doc(jobId)
-      .collection("etapy_realizacji")
-      .doc();
+    const maxOrder = await prisma.jobStage.aggregate({
+      where: { companyId, jobId },
+      _max: { sortOrder: true },
+    });
+    const sortOrder = (maxOrder._max.sortOrder ?? 0) + 1;
 
-    await stageRef.set({
-      nazwa_etapu,
-      opis_etapu,
-      planowana_data, // string YYYY-MM-DD albo ""
-      status: "do_wykonania",
-      data_zakonczenia: null,
-      zakonczone_przez: null,
-      notatka_pracownika: "",
-      lista_zdjec: [],
-
-      createdAt: now,
-      createdBy: uid,
-      updatedAt: now,
-      updatedBy: uid,
+    const stage = await prisma.jobStage.create({
+      data: {
+        companyId,
+        jobId,
+        name: nazwa_etapu,
+        description: opis_etapu || null,
+        plannedDate: planowana_data
+          ? new Date(`${planowana_data}T00:00:00.000Z`)
+          : null,
+        status: "todo",
+        sortOrder,
+      },
     });
 
-    return NextResponse.json({ stageId: stageRef.id }, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || "UNKNOWN";
-    const status = msg === "MISSING_AUTH" ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status });
+    return NextResponse.json({ stageId: stage.id }, { status: 200 });
+  } catch (e: unknown) {
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }
