@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "MISSING_ID_TOKEN" }, { status: 400 });
     }
 
-    const decoded = await auth.verifyIdToken(idToken, true);
+    const decoded = await (auth as any).verifyIdToken(idToken, true);
     if (!decoded?.uid) {
       return NextResponse.json({ error: "INVALID_ID_TOKEN" }, { status: 401 });
     }

@@ -34,7 +34,7 @@ export async function GET(
     // sort: planowana_data asc, createdAt asc (to może wymagać indeksu — już Ci wyskoczył)
     const snap = await ref.orderBy("planowana_data", "asc").orderBy("createdAt", "asc").get();
 
-    const stages = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+    const stages =snap.docs.map((d: any) => ({ id: d.id, ...(d.data() as any) }));
     return NextResponse.json({ stages }, { status: 200 });
   } catch (e: any) {
     const msg = e?.message || "UNKNOWN";

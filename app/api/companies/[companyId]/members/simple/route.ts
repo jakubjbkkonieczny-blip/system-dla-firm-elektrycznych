@@ -20,16 +20,17 @@ export async function GET(
       .where("active", "==", true)
       .get();
 
-    const rawMembers = membersSnap.docs.map((d) => {
-      const data = d.data() as any;
-      return {
-        uid: d.id,
-        email: data.email || "",
-        role: data.role || "staff",
-      };
-    });
+    const rawMembers = membersSnap.docs.map((d: any) => {
+  const data = d.data() as any;
 
-    const userRefs = rawMembers.map((m) => adminDb.collection("users").doc(m.uid));
+  return {
+    uid: d.id,
+    email: data.email || "",
+    role: data.role || "staff",
+  };
+});
+
+    const userRefs = rawMembers.map((d: any) => adminDb.collection("users").doc(d.uid));
     const userSnaps = userRefs.length ? await adminDb.getAll(...userRefs) : [];
 
     const displayNameMap = new Map<string, string>();
@@ -39,17 +40,17 @@ export async function GET(
     }
 
     const members = rawMembers
-      .map((m) => {
-        const displayName = displayNameMap.get(m.uid) || "";
+      .map((d: any) => {
+        const displayName = displayNameMap.get(d.uid) || "";
         return {
-          uid: m.uid,
-          email: m.email,
-          role: m.role,
+          uid: d.uid,
+          email: d.email,
+          role: d.role,
           displayName,
-          label: displayName.trim() || m.email || m.uid,
+          label: displayName.trim() || d.email || d.uid,
         };
       })
-      .sort((a, b) => a.label.localeCompare(b.label, "pl"));
+      .sort((a: any, b: any) => a.label.localeCompare(b.label, "pl"));
 
     return NextResponse.json({ members }, { status: 200 });
   } catch (e: any) {

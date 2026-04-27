@@ -38,7 +38,7 @@ async function deleteCollection(path: string) {
 
   const batch = db.batch();
 
-  snapshot.docs.forEach((doc) => {
+  snapshot.docs.forEach((doc: any) => {
     batch.delete(doc.ref);
   });
 

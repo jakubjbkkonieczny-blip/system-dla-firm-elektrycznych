@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const userRef = db.collection("users").doc(uid);
 
-    const result = await db.runTransaction(async (tx) => {
+    const result = await db.runTransaction(async (tx: any) => {
       const snap = await tx.get(userRef);
       const existingRole = snap.exists ? (snap.data() as any)?.role : null;
 

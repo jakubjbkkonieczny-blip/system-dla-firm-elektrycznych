@@ -26,8 +26,8 @@ export async function getMyCompanies(): Promise<MyCompany[]> {
   const snaps = await adminDb.getAll(...refs);
 
   return snaps
-    .filter((s) => s.exists)
-    .map((s) => ({ id: s.id, ...(s.data() as Record<string, unknown>) }))
-    .filter((c) => !c.deletedAt)
-    .map((c) => ({ id: String(c.id), name: String(c.name ?? "(no name)") }));
+    .filter((s: any) => s.exists)
+.map((s: any) => ({ id: s.id, ...(s.data() as Record<string, unknown>) }))
+    .filter((c: any) => !c.deletedAt)
+    .map((c: any) => ({ id: String(c.id), name: String(c.name ?? "(no name)") }));
 }

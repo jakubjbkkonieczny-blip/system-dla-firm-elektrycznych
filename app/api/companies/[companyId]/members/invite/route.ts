@@ -36,7 +36,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const memberRef = companyRef.collection("members").doc(user.uid);
     const userIndexRef = adminDb.collection("user_index").doc(user.uid);
 
-    await adminDb.runTransaction(async (tx) => {
+    await adminDb.runTransaction(async (tx: any) => {
       const mSnap = await tx.get(memberRef);
       const now = FieldValue.serverTimestamp();
 

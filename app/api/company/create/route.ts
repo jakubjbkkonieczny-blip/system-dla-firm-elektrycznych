@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     const now = FieldValue.serverTimestamp();
 
-    await db.runTransaction(async (tx) => {
+    await db.runTransaction(async (tx: any) => {
       const userSnap = await tx.get(userRef);
       const user = userSnap.exists ? (userSnap.data() as any) : null;
 

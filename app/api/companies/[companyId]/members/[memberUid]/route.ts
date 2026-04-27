@@ -28,7 +28,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const companyRef = adminDb.collection("companies").doc(companyId);
     const memberRef = companyRef.collection("members").doc(memberUid);
 
-    await adminDb.runTransaction(async (tx) => {
+    await adminDb.runTransaction(async (tx: any) => {
       const snap = await tx.get(memberRef);
       if (!snap.exists) throw new Error("MEMBER_NOT_FOUND");
 
@@ -88,7 +88,7 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
     const memberRef = companyRef.collection("members").doc(memberUid);
     const userIndexRef = adminDb.collection("user_index").doc(memberUid);
 
-    await adminDb.runTransaction(async (tx) => {
+    await adminDb.runTransaction(async (tx: any) => {
       const snap = await tx.get(memberRef);
       if (!snap.exists) return;
 

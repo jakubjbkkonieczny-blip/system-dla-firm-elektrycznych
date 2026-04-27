@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       .limit(200)
       .get();
 
-    const membersRaw = snap.docs.map((d) => {
+    const membersRaw = snap.docs.map((d: any) => {
       const data = d.data() as any;
       return {
         uid: d.id,
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       };
     });
 
-    const userRefs = membersRaw.map((m) => adminDb.collection("users").doc(m.uid));
+    const userRefs = membersRaw.map((m: any) => adminDb.collection("users").doc(m.uid));
     const userSnaps = userRefs.length > 0 ? await adminDb.getAll(...userRefs) : [];
 
     const displayNameByUid = new Map<string, string>();
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       displayNameByUid.set(snap.id, String(data?.displayName || ""));
     }
 
-    const members = membersRaw.map((m) => ({
+    const members = membersRaw.map((m: any) => ({
       ...m,
       displayName: displayNameByUid.get(m.uid) || "",
     }));

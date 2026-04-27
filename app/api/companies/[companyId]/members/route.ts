@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       .limit(200)
       .get();
 
-    const members = snap.docs.map((d) => {
+    const members = snap.docs.map((d: any) => {
       const data = d.data() as any;
       return {
         uid: d.id,

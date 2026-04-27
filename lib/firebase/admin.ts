@@ -13,10 +13,18 @@ const makeStub = (name: string): any =>
     }
   );
 
-export const auth = {
-  verifyIdToken: async () => {
-    console.log("TODO: verifyIdToken");
-    return null;
+export const auth: any = {
+  verifyIdToken: async (...args: any[]) => {
+    console.log("TODO: verifyIdToken", args);
+    return { uid: "stub-user" };
+  },
+
+  getUserByEmail: async (email: string) => {
+    console.log("TODO: getUserByEmail", email);
+    return {
+      uid: "stub-user",
+      email,
+    };
   },
 };
 

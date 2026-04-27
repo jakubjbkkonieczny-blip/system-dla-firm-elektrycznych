@@ -71,7 +71,7 @@ export async function GET(
     const limit = clamp(Number(url.searchParams.get("limit") || "50"), 1, 50);
     const cursor = url.searchParams.get("cursor");
 
-    let q: FirebaseFirestore.Query = adminDb
+    let q: any = adminDb
       .collection("companies")
       .doc(companyId)
       .collection("jobs")
@@ -100,7 +100,7 @@ export async function GET(
     const snap = await q.get();
 
     const jobs = snap.docs
-      .map((d) => {
+      .map((d: any) => {
         const data = d.data() as any;
 
         return {
@@ -111,8 +111,8 @@ export async function GET(
           statusUpdatedAt: data.statusUpdatedAt?.toDate?.() || data.statusUpdatedAt || null,
         };
       })
-      .filter((job) => canMemberSeeJob(member, uid, job))
-      .map((job) => {
+      .filter((job: any) => canMemberSeeJob(member, uid, job))
+      .map((job: any) => {
         const assignedToUids = readAssignedToUids(job);
         return {
           ...job,
@@ -170,7 +170,7 @@ export async function POST(
     const jobRef = companyRef.collection("jobs").doc();
     const now = FieldValue.serverTimestamp();
 
-    await adminDb.runTransaction(async (tx) => {
+    await adminDb.runTransaction(async (tx: any) => {
       const companySnap = await tx.get(companyRef);
       if (!companySnap.exists) throw new Error("COMPANY_NOT_FOUND");
 

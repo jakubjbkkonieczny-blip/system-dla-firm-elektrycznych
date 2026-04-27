@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       .limit(50)
       .get();
 
-    const notifications = snap.docs.map((d) => ({
+    const notifications = snap.docs.map((d: any) => ({
       id: d.id,
       ...(d.data() as any),
     }));

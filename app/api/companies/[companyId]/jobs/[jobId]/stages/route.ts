@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       .orderBy("createdAt", "asc")
       .get();
 
-    const stages = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+    const stages = snap.docs.map((d: any) => ({ id: d.id, ...(d.data() as any) }));
     return NextResponse.json({ stages }, { status: 200 });
   } catch (e: any) {
     const msg = e?.message || "UNKNOWN";
