@@ -3,30 +3,30 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-const SESSION_COOKIE_NAME = "__session";
+const SESSION_COOKIE_NAME = "session";
 export const SESSION_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 function getSessionSecret(): string {
   const s = process.env.SESSION_SECRET;
-  if (s && s.length >= 32) return s;
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("SESSION_SECRET must be set to at least 32 characters in production.");
+  if (!s || s.length < 32) {
+    throw new Error("SESSION_SECRET must be set to at least 32 characters.");
   }
-  return "dev-only-insecure-session-secret-min-32-chars";
+  return s;
 }
 
 /**
  * payload JSON → HMAC-SHA256 → opaque base64url token (not a raw user id).
  */
 export function createSignedSessionToken(userId: string): string {
-  const payload = JSON.stringify({ userId });
+  const exp = Math.floor(Date.now() / 1000) + SESSION_COOKIE_MAX_AGE_SECONDS;
+  const payload = JSON.stringify({ userId, exp });
   const payloadB64 = Buffer.from(payload, "utf8").toString("base64url");
   const sig = createHmac("sha256", getSessionSecret()).update(payload, "utf8").digest("base64url");
   const inner = `${payloadB64}.${sig}`;
   return Buffer.from(inner, "utf8").toString("base64url");
 }
 
-export function verifySignedSessionToken(token: string): { userId: string } | null {
+export function verifySignedSessionToken(token: string): { userId: string; exp: number } | null {
   try {
     const inner = Buffer.from(token, "base64url").toString("utf8");
     const dot = inner.indexOf(".");
@@ -38,9 +38,11 @@ export function verifySignedSessionToken(token: string): { userId: string } | nu
     const a = Buffer.from(sig, "utf8");
     const b = Buffer.from(expectedSig, "utf8");
     if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-    const data = JSON.parse(payload) as { userId?: unknown };
+    const data = JSON.parse(payload) as { userId?: unknown; exp?: unknown };
     if (typeof data.userId !== "string" || data.userId.length === 0) return null;
-    return { userId: data.userId };
+    if (typeof data.exp !== "number" || !Number.isFinite(data.exp)) return null;
+    if (Math.floor(Date.now() / 1000) >= data.exp) return null;
+    return { userId: data.userId, exp: data.exp };
   } catch {
     return null;
   }

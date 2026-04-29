@@ -24,7 +24,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     const company = await prisma.company.findUnique({ where: { id: companyId } });
     if (!company) return NextResponse.json({ error: "COMPANY_NOT_FOUND" }, { status: 404 });
 
-    const baseWhere = { companyId, deletedAt: null as const };
+    const baseWhere = { companyId, deletedAt: null };
 
     const [newC, schC, progC, doneC, cancC, membersActive, membersTotal, jobsUsed] =
       await Promise.all([

@@ -6,7 +6,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function syncSubscriptionForUser(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      accountRole: true,
+      stripeCustomerId: true,
+      stripeSubscriptionId: true,
+    },
+  });
   if (!user) throw new Error("USER_NOT_FOUND");
   if (user.accountRole !== "employer") throw new Error("FORBIDDEN_ROLE");
 
