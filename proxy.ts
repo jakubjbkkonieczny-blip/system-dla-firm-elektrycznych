@@ -6,6 +6,7 @@ import { logRequestSummary } from "@/lib/server/request-log";
 
 
 
+
 function getClientIp(req: NextRequest): string {
 
   const forwarded = req.headers.get("x-forwarded-for");
@@ -18,7 +19,7 @@ function getClientIp(req: NextRequest): string {
 
   }
 
-  return req.headers.get("x-real-ip") ?? req.ip ?? "0.0.0.0";
+  return req.headers.get("x-real-ip") ?? "0.0.0.0";
 
 }
 
