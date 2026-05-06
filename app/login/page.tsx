@@ -1,6 +1,6 @@
 "use client";
 import { Suspense } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginTypeSelect from "@/components/LoginTypeSelect";
 import { apiFetch } from "@/lib/api";
@@ -13,6 +13,49 @@ function normalizeType(v: string | null): AccountType | null {
   if (v === "worker") return "worker";
   if (v === "employer") return "employer";
   return null;
+}
+
+async function postAuthJson(path: string, body: Record<string, unknown>) {
+  const res = await fetch(path, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) {
+    const raw =
+      typeof json.message === "string"
+        ? json.message
+        : typeof json.error === "string"
+          ? json.error
+          : `HTTP_${res.status}`;
+    throw new Error(raw);
+  }
+  return json;
+}
+
+async function clearServerSession() {
+  await fetch("/api/auth/session", { method: "DELETE", credentials: "same-origin" });
+}
+
+function mapAuthErrorMessage(raw: string): string {
+  switch (raw) {
+    case "INVALID_CREDENTIALS":
+      return "Niewłaściwy email lub hasło.";
+    case "ACCOUNT_DISABLED":
+      return "To konto jest wyłączone.";
+    case "MISSING_CREDENTIALS":
+      return "Uzupełnij email i hasło.";
+    case "USER_EXISTS":
+      return "Ten adres email jest już zarejestrowany. Zaloguj się.";
+    case "INVALID_REQUEST":
+      return "Nieprawidłowe żądanie. Spróbuj ponownie.";
+    case "INTERNAL_ERROR":
+      return "Błąd serwera. Spróbuj ponownie później.";
+    default:
+      return raw;
+  }
 }
 
 function LoginPageInner() {
@@ -71,13 +114,6 @@ function LoginPageInner() {
     router.push("/login");
   }
 
-  useEffect(() => {
-    if (!hasType) return;
-    console.log("TODO AUTH");
-    return;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasType, selected]);
-
   async function onLogin() {
     setBusy(true);
     setMsg(null);
@@ -92,12 +128,13 @@ function LoginPageInner() {
         throw new Error("Uzupełnij email i hasło.");
       }
 
-      console.log("LOGIN TODO");
+      const normalizedEmail = email.trim().toLowerCase();
+      await postAuthJson("/api/auth/session", { email: normalizedEmail, password: pass });
 
-      const role = await ensureRoleOrBlock(selected);
+      const role = await ensureRoleOrBlock(selected, "");
 
       if (role !== selected) {
-        console.log("LOGOUT TODO");
+        await clearServerSession();
         throw new Error("To konto jest innego typu. Wybierz właściwy typ na ekranie startowym.");
       }
 
@@ -107,16 +144,13 @@ function LoginPageInner() {
       }
 
       await afterEmployerAuth();
-    } catch (e: any) {
-      const m = e?.message ?? "Błąd logowania.";
+    } catch (e: unknown) {
+      const raw = e instanceof Error ? e.message : "Błąd logowania.";
       setMsg(
-        m === "ROLE_MISMATCH"
+        raw === "ROLE_MISMATCH"
           ? "To konto już istnieje jako inny typ. Wybierz prawidłowy typ na ekranie startowym."
-          : m
+          : mapAuthErrorMessage(raw)
       );
-      try {
-        console.log("LOGOUT TODO");
-      } catch {}
     } finally {
       setBusy(false);
     }
@@ -144,12 +178,19 @@ function LoginPageInner() {
         throw new Error("Hasła nie są takie same.");
       }
 
-      console.log("REGISTER TODO");
+      const normalizedEmail = email.trim().toLowerCase();
+      const nameTrimmed = displayName.trim();
+      await postAuthJson("/api/auth/register", {
+        email: normalizedEmail,
+        password: pass,
+        displayName: nameTrimmed,
+      });
+      await postAuthJson("/api/auth/session", { email: normalizedEmail, password: pass });
 
-      const role = await ensureRoleOrBlock(selected, displayName.trim());
+      const role = await ensureRoleOrBlock(selected, nameTrimmed);
 
       if (role !== selected) {
-        console.log("LOGOUT TODO");
+        await clearServerSession();
         throw new Error("To konto już istnieje jako inny typ. Wybierz prawidłowy typ.");
       }
 
@@ -159,16 +200,13 @@ function LoginPageInner() {
       }
 
       router.replace("/oczekiwanie");
-    } catch (e: any) {
-      const m = e?.message ?? "Błąd rejestracji.";
+    } catch (e: unknown) {
+      const raw = e instanceof Error ? e.message : "Błąd rejestracji.";
       setMsg(
-        m === "ROLE_MISMATCH"
+        raw === "ROLE_MISMATCH"
           ? "To konto już istnieje jako inny typ. Zaloguj się w prawidłowym trybie."
-          : m
+          : mapAuthErrorMessage(raw)
       );
-      try {
-        console.log("LOGOUT TODO");
-      } catch {}
     } finally {
       setBusy(false);
     }
