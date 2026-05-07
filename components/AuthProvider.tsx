@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type User = {
   uid: string;
@@ -10,27 +18,82 @@ type User = {
 type AuthCtx = {
   user: User | null;
   loading: boolean;
+  refresh: () => Promise<User | null>;
   logout: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
 
+type AuthMeResponse = {
+  id?: unknown;
+  email?: unknown;
+};
+
+async function fetchSessionUser(): Promise<User | null> {
+  try {
+    const res = await fetch("/api/auth/me", {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+
+    if (!res.ok) return null;
+
+    const data = (await res.json().catch(() => null)) as AuthMeResponse | null;
+    if (!data || typeof data.id !== "string" || data.id.length === 0) {
+      return null;
+    }
+
+    return {
+      uid: data.id,
+      email: typeof data.email === "string" ? data.email : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMountedRef = useRef(false);
 
-  useEffect(() => {
-    console.log("TODO AUTH");
-    setUser(null);
-    setLoading(false);
+  const refresh = useCallback(async (): Promise<User | null> => {
+    const next = await fetchSessionUser();
+    if (isMountedRef.current) {
+      setUser(next);
+      setLoading(false);
+    }
+    return next;
   }, []);
 
-  const logout = async () => {
-    console.log("LOGOUT TODO");
-    await fetch("/api/auth/session", { method: "DELETE" }).catch(() => null);
-  };
+  useEffect(() => {
+    isMountedRef.current = true;
+    void refresh();
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [refresh]);
 
-  const value = useMemo<AuthCtx>(() => ({ user, loading, logout }), [user, loading]);
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/session", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+    } catch {
+      // ignore network errors; we still clear client state below
+    }
+    if (isMountedRef.current) {
+      setUser(null);
+      setLoading(false);
+    }
+  }, []);
+
+  const value = useMemo<AuthCtx>(
+    () => ({ user, loading, refresh, logout }),
+    [user, loading, refresh, logout]
+  );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

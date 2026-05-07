@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginTypeSelect from "@/components/LoginTypeSelect";
+import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
 
 type AccountType = "worker" | "employer";
@@ -61,6 +62,7 @@ function mapAuthErrorMessage(raw: string): string {
 function LoginPageInner() {
   const router = useRouter();
   const sp = useSearchParams();
+  const { refresh: refreshAuth } = useAuth();
 
   const accountType = useMemo(() => normalizeType(sp.get("type")), [sp]);
   const hasType = accountType !== null;
@@ -135,8 +137,11 @@ function LoginPageInner() {
 
       if (role !== selected) {
         await clearServerSession();
+        await refreshAuth();
         throw new Error("To konto jest innego typu. Wybierz właściwy typ na ekranie startowym.");
       }
+
+      await refreshAuth();
 
       if (role === "worker") {
         await afterWorkerAuth();
@@ -191,8 +196,11 @@ function LoginPageInner() {
 
       if (role !== selected) {
         await clearServerSession();
+        await refreshAuth();
         throw new Error("To konto już istnieje jako inny typ. Wybierz prawidłowy typ.");
       }
+
+      await refreshAuth();
 
       if (role === "employer") {
         router.replace("/subskrypcja");
