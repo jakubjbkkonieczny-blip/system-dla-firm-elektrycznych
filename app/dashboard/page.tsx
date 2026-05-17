@@ -2,6 +2,10 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
+import {
+  setActiveCompanyIdInStorage,
+  useActiveCompanyId,
+} from "@/lib/useActiveCompany";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -19,9 +23,8 @@ export default function DashboardPage() {
   const [err, setErr] = useState<string | null>(null);
 
   const [newCompanyName, setNewCompanyName] = useState("");
-  const [activeCompanyId, setActiveCompanyId] = useState<string>("");
+  const activeCompanyId = useActiveCompanyId();
 
-  
 
   const [canCreateCompany, setCanCreateCompany] = useState<boolean>(true);
 
@@ -36,12 +39,6 @@ export default function DashboardPage() {
       router.replace("/login");
     }
   }, [loading, user, router]);
-
-  useEffect(() => {
-    if (!user) return;
-    const saved = localStorage.getItem("activeCompanyId") || "";
-    setActiveCompanyId(saved);
-  }, [user]);
 
   async function loadMe() {
     const data = await apiFetch("/api/me");
@@ -123,8 +120,7 @@ export default function DashboardPage() {
 
       const companyId = data.companyId as string;
 
-      localStorage.setItem("activeCompanyId", companyId);
-      setActiveCompanyId(companyId);
+      setActiveCompanyIdInStorage(companyId);
       setNewCompanyName("");
 
       await loadCompanies();
@@ -138,8 +134,7 @@ export default function DashboardPage() {
   }
 
   function onSelectCompany(id: string) {
-    setActiveCompanyId(id);
-    localStorage.setItem("activeCompanyId", id);
+    setActiveCompanyIdInStorage(id);
     router.refresh();
   }
 

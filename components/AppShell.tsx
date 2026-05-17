@@ -77,9 +77,13 @@ export function AppShell({
       if (!isAuthed || hideShell) return;
 
       if (!companyId) {
+        setRole("staff");
         setRoleLoaded(false);
         return;
       }
+
+      setRole("staff");
+      setRoleLoaded(false);
 
       try {
         const data: CompanyMeResponse = await apiFetch(
@@ -91,6 +95,7 @@ export function AppShell({
         setRole((data?.role as Role) || "staff");
         setRoleLoaded(true);
       } catch {
+        if (cancelled) return;
         setRole("staff");
         setRoleLoaded(true);
       }
