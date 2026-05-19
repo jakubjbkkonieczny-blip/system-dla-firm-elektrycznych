@@ -7,7 +7,7 @@ import {
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
-import { getJobPrimaryAssigneeId } from "@/lib/server/jobs/job-assignments";
+import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
 
@@ -28,8 +28,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     if (!job) throw new Error("JOB_NOT_FOUND");
 
     const isAdmin = me.role === "owner" || me.role === "admin";
-    const primary = await getJobPrimaryAssigneeId(jobId);
-    const isAssignedStaff = primary === userId;
+    const isAssignedStaff = await isUserAssignedToJob(jobId, userId, companyId);
 
     if (!isAdmin && !isAssignedStaff) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });

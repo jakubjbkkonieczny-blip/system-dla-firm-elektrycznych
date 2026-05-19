@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { getJobPrimaryAssigneeId } from "@/lib/server/jobs/job-assignments";
+import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
 import {
   companyRouteErrorStatus,
   handleSessionRouteErrorOr,
@@ -36,8 +36,6 @@ export async function PATCH(
     });
     if (!stage) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    const assignedTo = await getJobPrimaryAssigneeId(jobId);
-
     if (role === "owner" || role === "admin") {
       const data: Record<string, unknown> = {};
       if (body.nazwa_etapu !== undefined) {
@@ -64,7 +62,8 @@ export async function PATCH(
     }
 
     if (role === "staff") {
-      if (!assignedTo || assignedTo !== userId) {
+      const isAssigned = await isUserAssignedToJob(jobId, userId, companyId);
+      if (!isAssigned) {
         return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
       }
       const keys = Object.keys(body || {});

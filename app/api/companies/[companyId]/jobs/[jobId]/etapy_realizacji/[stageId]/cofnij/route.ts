@@ -6,7 +6,7 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { getJobPrimaryAssigneeId } from "@/lib/server/jobs/job-assignments";
+import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
 
 export async function POST(
   _req: NextRequest,
@@ -30,11 +30,9 @@ export async function POST(
     });
     if (!stage) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    const assignedTo = await getJobPrimaryAssigneeId(jobId);
-    const can =
-      role === "owner" ||
-      role === "admin" ||
-      (role === "staff" && assignedTo && assignedTo === userId);
+    const isAssigned =
+      role === "staff" ? await isUserAssignedToJob(jobId, userId, companyId) : false;
+    const can = role === "owner" || role === "admin" || isAssigned;
 
     if (!can) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 

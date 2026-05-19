@@ -7,7 +7,14 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import type { ActiveMember } from "@/app/api/_lib/membership";
+import {
+  canMemberSeeJob,
+  jobWithAssignmentFields,
+  normalizeAssignedToUids,
+  readAssignedToUids,
+  syncJobAssignments,
+  validateAssignedMembers,
+} from "@/lib/server/jobs/job-assignment-helpers";
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -15,25 +22,6 @@ function clamp(n: number, min: number, max: number) {
 
 function startOfUtcMonth(d = new Date()) {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
-}
-
-function normalizeAssignedToUids(input: unknown): string[] {
-  if (!Array.isArray(input)) return [];
-  const out = input
-    .map((v) => String(v || "").trim())
-    .filter(Boolean);
-  return Array.from(new Set(out));
-}
-
-function readAssignedToUids(job: { assignments: { userId: string }[] }): string[] {
-  return job.assignments.map((a) => a.userId);
-}
-
-function canMemberSeeJob(member: ActiveMember, userId: string, assignedIds: string[]) {
-  const role = String(member.role || "staff");
-  const scope = String(member.scope || "all");
-  if (role === "owner" || role === "admin") return true;
-  return assignedIds.includes(userId) || scope === "all";
 }
 
 type CreateJobBody = {
@@ -87,15 +75,7 @@ export async function GET(
 
     const jobs = jobsRaw
       .filter((job) => canMemberSeeJob(member, userId, readAssignedToUids(job)))
-      .map((job) => {
-        const assignedToUids = readAssignedToUids(job);
-        const { assignments, ...rest } = job;
-        return {
-          ...rest,
-          assignedToUids,
-          assignedTo: assignedToUids[0] || null,
-        };
-      });
+      .map((job) => jobWithAssignmentFields(job));
 
     const nextCursor =
       jobsRaw.length === limit && jobsRaw.length > 0 ? jobsRaw[jobsRaw.length - 1].id : null;
@@ -150,18 +130,7 @@ export async function POST(
         throw new Error("LIMIT_JOBS_PER_MONTH");
       }
 
-      if (assignedToUids.length > 0) {
-        const valid = await tx.companyMember.count({
-          where: {
-            companyId,
-            userId: { in: assignedToUids },
-            isActive: true,
-          },
-        });
-        if (valid !== assignedToUids.length) {
-          throw new Error("INVALID_ASSIGNEES");
-        }
-      }
+      await validateAssignedMembers(tx, companyId, assignedToUids);
 
       const j = await tx.job.create({
         data: {
@@ -182,16 +151,12 @@ export async function POST(
         },
       });
 
-      for (const assigneeId of assignedToUids) {
-        await tx.jobAssignment.create({
-          data: {
-            companyId,
-            jobId: j.id,
-            userId: assigneeId,
-            assignedByUserId: userId,
-          },
-        });
-      }
+      await syncJobAssignments(tx, {
+        companyId,
+        jobId: j.id,
+        assignedToUids,
+        assignedByUserId: userId,
+      });
 
       return j.id;
     });

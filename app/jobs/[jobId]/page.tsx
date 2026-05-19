@@ -18,6 +18,14 @@ import { useRouter, useParams } from "next/navigation";
 
 type Role = "owner" | "admin" | "staff";
 
+type MemberOption = {
+  uid: string;
+  email: string;
+  role: "owner" | "admin" | "staff";
+  displayName?: string;
+  label: string;
+};
+
 
 
 type Stage = {
@@ -226,15 +234,63 @@ const [noteValue, setNoteValue] = useState("");
 
 
 
+const [members, setMembers] = useState<MemberOption[]>([]);
+
+const [draftAssignedToUids, setDraftAssignedToUids] = useState<string[]>([]);
+
+const [assignBusy, setAssignBusy] = useState(false);
+
+const [assignErr, setAssignErr] = useState<string | null>(null);
+
+
+
 const isOwnerOrAdmin = role === "owner" || role === "admin";
 
-const isAssignedToMe = useMemo(
+const isAssignedToMe = useMemo(() => {
 
-() => Boolean(job?.assignedTo && user?.uid && job.assignedTo === user.uid),
+if (!user?.uid) return false;
 
-[job?.assignedTo, user?.uid]
+const uids = Array.isArray(job?.assignedToUids) ? job.assignedToUids : [];
 
-);
+return uids.includes(user.uid);
+
+}, [job?.assignedToUids, user?.uid]);
+
+
+
+const assignedLabels = useMemo(() => {
+
+const map = new Map(members.map((m) => [m.uid, m.label]));
+
+const uids = Array.isArray(job?.assignedToUids) ? job.assignedToUids : [];
+
+return uids.map((uid: string) => map.get(uid) || uid);
+
+}, [members, job?.assignedToUids]);
+
+
+
+const draftAssignedPreview = useMemo(() => {
+
+const map = new Map(members.map((m) => [m.uid, m.label]));
+
+return draftAssignedToUids.map((uid) => map.get(uid) || uid);
+
+}, [members, draftAssignedToUids]);
+
+
+
+const assignDirty = useMemo(() => {
+
+const saved = Array.isArray(job?.assignedToUids) ? [...job.assignedToUids].sort() : [];
+
+const draft = [...draftAssignedToUids].sort();
+
+if (saved.length !== draft.length) return true;
+
+return saved.some((id, i) => id !== draft[i]);
+
+}, [job?.assignedToUids, draftAssignedToUids]);
 
 
 
@@ -246,13 +302,17 @@ const canMarkDone = isOwnerOrAdmin || (role === "staff" && isAssignedToMe);
 
 
 
-async function loadJob() {
+async function loadJob(opts?: { silent?: boolean }) {
 
 if (!companyId) return;
+
+if (!opts?.silent) {
 
 setBusy(true);
 
 setErr(null);
+
+}
 
 try {
 
@@ -262,11 +322,59 @@ setJob(data.job);
 
 } catch (e: any) {
 
-setErr(e?.message ?? "LOAD_ERROR");
+if (opts?.silent) setAssignErr(e?.message ?? "LOAD_ERROR");
+
+else setErr(e?.message ?? "LOAD_ERROR");
 
 } finally {
 
-setBusy(false);
+if (!opts?.silent) setBusy(false);
+
+}
+
+}
+
+
+
+function toggleDraftAssigned(uid: string) {
+
+setDraftAssignedToUids((prev) =>
+
+prev.includes(uid) ? prev.filter((x) => x !== uid) : [...prev, uid]
+
+);
+
+}
+
+
+
+async function saveAssignments() {
+
+if (!companyId || !isOwnerOrAdmin) return;
+
+setAssignBusy(true);
+
+setAssignErr(null);
+
+try {
+
+await apiFetch(`/api/companies/${companyId}/jobs/${jobId}`, {
+
+method: "PATCH",
+
+body: JSON.stringify({ assignedToUids: draftAssignedToUids }),
+
+});
+
+await loadJob({ silent: true });
+
+} catch (e: any) {
+
+setAssignErr(e?.message ?? "UPDATE_ERROR");
+
+} finally {
+
+setAssignBusy(false);
 
 }
 
@@ -341,6 +449,44 @@ loadStages();
 // eslint-disable-next-line react-hooks/exhaustive-deps
 
 }, [user, companyId, jobId]);
+
+
+
+useEffect(() => {
+
+if (!companyId || !user) return;
+
+(async () => {
+
+try {
+
+const data = await apiFetch(`/api/companies/${companyId}/members/simple`);
+
+setMembers(Array.isArray(data?.members) ? data.members : []);
+
+} catch {
+
+setMembers([]);
+
+}
+
+})();
+
+}, [companyId, user]);
+
+
+
+useEffect(() => {
+
+if (!job) return;
+
+setDraftAssignedToUids(
+
+Array.isArray(job.assignedToUids) ? [...job.assignedToUids] : []
+
+);
+
+}, [job]);
 
 
 
@@ -938,47 +1084,149 @@ onChange={(e) => updateJob({ status: e.target.value })}
 
 
 
-<div className="flex gap-2 flex-wrap">
+<div className="space-y-3 border-t pt-3">
 
-<button
+<div>
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+<div className="text-sm font-medium">Przypisani pracownicy</div>
 
-disabled={busy}
+{isOwnerOrAdmin ? (
 
-onClick={() => updateJob({ assignedTo: user.uid })}
+<div className="text-xs text-gray-600 mt-1">
 
->
-
-Przypisz do mnie
-
-</button>
-
-<button
-
-className="px-3 py-2 rounded-lg border disabled:opacity-60"
-
-disabled={busy}
-
-onClick={() => updateJob({ assignedTo: null })}
-
->
-
-Odłącz przypisanie
-
-</button>
+Zaznacz osoby odpowiedzialne za zlecenie i zapisz zmiany.
 
 </div>
 
+) : null}
 
+</div>
+
+{assignErr ? (
+
+<div className="text-sm text-red-600 border border-red-200 bg-red-50 p-2 rounded">
+
+{assignErr}
+
+</div>
+
+) : null}
+
+{isOwnerOrAdmin ? (
+
+<>
+
+{members.length === 0 ? (
+
+<div className="text-sm text-gray-500">Brak aktywnych członków do wyboru.</div>
+
+) : (
+
+<div className="space-y-2">
+
+{members.map((m) => {
+
+const checked = draftAssignedToUids.includes(m.uid);
+
+return (
+
+<label
+
+key={m.uid}
+
+className="flex items-center gap-3 border rounded-lg px-3 py-2 bg-white cursor-pointer"
+
+>
+
+<input
+
+type="checkbox"
+
+checked={checked}
+
+disabled={assignBusy}
+
+onChange={() => toggleDraftAssigned(m.uid)}
+
+/>
+
+<div className="min-w-0">
+
+<div className="text-sm font-medium truncate">{m.label}</div>
+
+<div className="text-xs text-gray-500 truncate">{m.email}</div>
+
+</div>
+
+</label>
+
+);
+
+})}
+
+</div>
+
+)}
+
+<div className="text-xs text-gray-700">
+
+Wybrano: <b>{draftAssignedPreview.length}</b>
+
+{draftAssignedPreview.length > 0 ? ` — ${draftAssignedPreview.join(", ")}` : ""}
+
+</div>
+
+<button
+
+type="button"
+
+className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+
+disabled={assignBusy || !assignDirty}
+
+onClick={saveAssignments}
+
+>
+
+{assignBusy ? "Zapisywanie..." : "Zapisz przypisanie"}
+
+</button>
+
+</>
+
+) : (
 
 <div className="text-sm text-gray-700">
 
-Przypisane do: <b>{job.assignedTo || "(brak)"}</b>
+{assignedLabels.length > 0 ? (
+
+<ul className="list-disc list-inside space-y-1">
+
+{(Array.isArray(job?.assignedToUids) ? job.assignedToUids : []).map((uid: string) => {
+
+const label = members.find((m) => m.uid === uid)?.label || uid;
+
+return <li key={uid}>{label}</li>;
+
+})}
+
+</ul>
+
+) : (
+
+<span className="text-gray-500">(brak przypisanych)</span>
+
+)}
+
+</div>
+
+)}
+
+
 
 {role === "staff" && !isAssignedToMe ? (
 
-<div className="mt-1 text-xs text-gray-500">
+<div className="text-xs text-gray-500">
 
 Jako pracownik możesz edytować notatki / kończyć etapy tylko, gdy zlecenie jest przypisane do Ciebie.
 

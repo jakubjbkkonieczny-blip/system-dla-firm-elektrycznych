@@ -6,31 +6,16 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
+import {
+  canMemberSeeJob,
+  jobWithAssignmentFields,
+  normalizeAssignedToUids,
+  readAssignedToUids,
+  syncJobAssignments,
+  validateAssignedMembers,
+} from "@/lib/server/jobs/job-assignment-helpers";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
-
-function normalizeAssignedToUids(input: unknown): string[] {
-  if (!Array.isArray(input)) return [];
-  const out = input
-    .map((v) => String(v || "").trim())
-    .filter(Boolean);
-  return Array.from(new Set(out));
-}
-
-function readAssignedToUids(job: { assignments: { userId: string }[] }): string[] {
-  return job.assignments.map((a) => a.userId);
-}
-
-function canMemberSeeJob(
-  member: { role: string; scope: string | null },
-  userId: string,
-  assignedIds: string[]
-) {
-  const role = String(member.role || "staff");
-  const scope = String(member.scope || "all");
-  if (role === "owner" || role === "admin") return true;
-  return assignedIds.includes(userId) || scope === "all";
-}
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
   try {
@@ -54,15 +39,9 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
     }
 
-    const { assignments, ...rest } = job;
-
     return NextResponse.json(
       {
-        job: {
-          ...rest,
-          assignedToUids,
-          assignedTo: assignedToUids[0] || null,
-        },
+        job: jobWithAssignmentFields(job),
       },
       { status: 200 }
     );
@@ -94,18 +73,16 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       }
 
       const assignedToUids = normalizeAssignedToUids(body.assignedToUids);
+
+      await validateAssignedMembers(prisma, companyId, assignedToUids);
+
       await prisma.$transaction(async (tx) => {
-        await tx.jobAssignment.deleteMany({ where: { jobId } });
-        for (const assigneeId of assignedToUids) {
-          await tx.jobAssignment.create({
-            data: {
-              companyId,
-              jobId,
-              userId: assigneeId,
-              assignedByUserId: userId,
-            },
-          });
-        }
+        await syncJobAssignments(tx, {
+          companyId,
+          jobId,
+          assignedToUids,
+          assignedByUserId: userId,
+        });
       });
     }
 
@@ -125,6 +102,9 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {
-    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
+    return handleSessionRouteErrorOr(e, (msg) => {
+      if (msg === "INVALID_ASSIGNEES") return 403;
+      return companyRouteErrorStatus(msg);
+    });
   }
 }
