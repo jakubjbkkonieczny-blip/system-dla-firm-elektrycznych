@@ -81,6 +81,7 @@ model CompanyMember {
 model Job {
   id                String   @id @default(cuid())
   companyId         String
+  jobNumber         Int
   customerName      String
   customerPhone     String
   addressCity       String
@@ -106,6 +107,7 @@ model Job {
   stages            JobStage[]
   statusHistory     JobStatusHistory[]
 
+  @@unique([companyId, jobNumber])
   @@index([companyId])
   @@index([companyId, status, createdAt(sort: Desc)])
   @@index([companyId, statusUpdatedAt(sort: Desc)])

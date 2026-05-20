@@ -12,19 +12,22 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useRouter, useParams } from "next/navigation";
 
+import {
+  type CompanyMemberOption,
+  filterAssignableMembers,
+} from "@/lib/company/member-options";
+import {
+  formatPreferredDisplay,
+  jobToDetailsDraft,
+  type JobDetailsDraft,
+} from "@/lib/jobs/job-detail-form";
+import { getJobPriorityLabel, JobPriorityBadge } from "@/lib/jobs/job-priority";
+
 
 
 
 
 type Role = "owner" | "admin" | "staff";
-
-type MemberOption = {
-  uid: string;
-  email: string;
-  role: "owner" | "admin" | "staff";
-  displayName?: string;
-  label: string;
-};
 
 
 
@@ -234,13 +237,23 @@ const [noteValue, setNoteValue] = useState("");
 
 
 
-const [members, setMembers] = useState<MemberOption[]>([]);
+const [members, setMembers] = useState<CompanyMemberOption[]>([]);
 
 const [draftAssignedToUids, setDraftAssignedToUids] = useState<string[]>([]);
 
 const [assignBusy, setAssignBusy] = useState(false);
 
 const [assignErr, setAssignErr] = useState<string | null>(null);
+
+
+
+const [detailsEditOpen, setDetailsEditOpen] = useState(false);
+
+const [detailsDraft, setDetailsDraft] = useState<JobDetailsDraft | null>(null);
+
+const [detailsBusy, setDetailsBusy] = useState(false);
+
+const [detailsErr, setDetailsErr] = useState<string | null>(null);
 
 
 
@@ -277,6 +290,16 @@ const map = new Map(members.map((m) => [m.uid, m.label]));
 return draftAssignedToUids.map((uid) => map.get(uid) || uid);
 
 }, [members, draftAssignedToUids]);
+
+
+
+const assignableMembers = useMemo(
+
+() => filterAssignableMembers(members),
+
+[members]
+
+);
 
 
 
@@ -375,6 +398,126 @@ setAssignErr(e?.message ?? "UPDATE_ERROR");
 } finally {
 
 setAssignBusy(false);
+
+}
+
+}
+
+
+
+function openDetailsEdit() {
+
+if (!job) return;
+
+setDetailsDraft(jobToDetailsDraft(job));
+
+setDetailsErr(null);
+
+setDetailsEditOpen(true);
+
+}
+
+
+
+function cancelDetailsEdit() {
+
+setDetailsEditOpen(false);
+
+setDetailsDraft(null);
+
+setDetailsErr(null);
+
+}
+
+
+
+function setDetailsField<K extends keyof JobDetailsDraft>(
+
+key: K,
+
+value: JobDetailsDraft[K]
+
+) {
+
+setDetailsDraft((prev) => (prev ? { ...prev, [key]: value } : prev));
+
+}
+
+
+
+const detailsCanSave = useMemo(() => {
+
+if (!detailsDraft) return false;
+
+return Boolean(
+
+detailsDraft.customerName.trim() &&
+
+detailsDraft.customerPhone.trim() &&
+
+detailsDraft.addressCity.trim() &&
+
+detailsDraft.addressStreet.trim() &&
+
+detailsDraft.description.trim()
+
+);
+
+}, [detailsDraft]);
+
+
+
+async function saveJobDetails() {
+
+if (!companyId || !isOwnerOrAdmin || !detailsDraft) return;
+
+setDetailsBusy(true);
+
+setDetailsErr(null);
+
+try {
+
+await apiFetch(`/api/companies/${companyId}/jobs/${jobId}`, {
+
+method: "PATCH",
+
+body: JSON.stringify({
+
+customerName: detailsDraft.customerName,
+
+customerPhone: detailsDraft.customerPhone,
+
+addressCity: detailsDraft.addressCity,
+
+addressStreet: detailsDraft.addressStreet,
+
+addressZip: detailsDraft.addressZip,
+
+addressNotes: detailsDraft.addressNotes,
+
+description: detailsDraft.description,
+
+preferredFrom: detailsDraft.preferredFrom,
+
+preferredTo: detailsDraft.preferredTo,
+
+priority: detailsDraft.priority,
+
+}),
+
+});
+
+await loadJob({ silent: true });
+
+cancelDetailsEdit();
+
+} catch (e: any) {
+
+setDetailsErr(e?.message ?? "UPDATE_ERROR");
+
+} finally {
+
+setDetailsBusy(false);
 
 }
 
@@ -992,13 +1135,301 @@ return (
 
 <div className="space-y-6 max-w-3xl">
 
-<h1 className="text-2xl font-semibold">Zlecenie #{job.id}</h1>
+<h1 className="text-2xl font-semibold">
+
+Zlecenie nr {typeof job.jobNumber === "number" ? job.jobNumber : "—"}
+
+</h1>
 
 
 
 {/* DANE KLIENTA */}
 
-<div className="border rounded-xl p-4 bg-white space-y-2">
+<div className="border rounded-xl p-4 bg-white space-y-3">
+
+<div className="flex items-start justify-between gap-3">
+
+<div className="text-sm font-medium">Dane zlecenia</div>
+
+{isOwnerOrAdmin && !detailsEditOpen ? (
+
+<button
+
+type="button"
+
+className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50 shrink-0"
+
+onClick={openDetailsEdit}
+
+>
+
+Edytuj dane
+
+</button>
+
+) : null}
+
+</div>
+
+{detailsErr ? (
+
+<div className="text-sm text-red-600 border border-red-200 bg-red-50 p-2 rounded">
+
+{detailsErr}
+
+</div>
+
+) : null}
+
+{detailsEditOpen && detailsDraft ? (
+
+<div className="space-y-3">
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Klient</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+value={detailsDraft.customerName}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("customerName", e.target.value)}
+
+/>
+
+</label>
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Telefon</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+value={detailsDraft.customerPhone}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("customerPhone", e.target.value)}
+
+/>
+
+</label>
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Miasto</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+value={detailsDraft.addressCity}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("addressCity", e.target.value)}
+
+/>
+
+</label>
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Ulica i nr</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+value={detailsDraft.addressStreet}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("addressStreet", e.target.value)}
+
+/>
+
+</label>
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Kod pocztowy</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+value={detailsDraft.addressZip}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("addressZip", e.target.value)}
+
+/>
+
+</label>
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Uwagi do adresu</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+value={detailsDraft.addressNotes}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("addressNotes", e.target.value)}
+
+/>
+
+</label>
+
+</div>
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Opis problemu</span>
+
+<textarea
+
+className="border rounded-lg px-3 py-2 w-full"
+
+rows={4}
+
+value={detailsDraft.description}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("description", e.target.value)}
+
+/>
+
+</label>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Preferowany termin od</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+placeholder="np. 2026-02-25 10:00"
+
+value={detailsDraft.preferredFrom}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("preferredFrom", e.target.value)}
+
+/>
+
+</label>
+
+<label className="block space-y-1">
+
+<span className="text-xs text-gray-600">Preferowany termin do</span>
+
+<input
+
+className="border rounded-lg px-3 py-2 w-full"
+
+placeholder="opcjonalnie"
+
+value={detailsDraft.preferredTo}
+
+disabled={detailsBusy}
+
+onChange={(e) => setDetailsField("preferredTo", e.target.value)}
+
+/>
+
+</label>
+
+</div>
+
+<div className="flex gap-2 items-center">
+
+<label className="text-sm">Priorytet:</label>
+
+<select
+
+className="border rounded-lg px-3 py-2"
+
+value={detailsDraft.priority}
+
+disabled={detailsBusy}
+
+onChange={(e) =>
+
+setDetailsField("priority", e.target.value as "normal" | "urgent")
+
+}
+
+>
+
+<option value="normal">{getJobPriorityLabel("normal")}</option>
+
+<option value="urgent">{getJobPriorityLabel("urgent")}</option>
+
+</select>
+
+</div>
+
+<div className="flex flex-wrap gap-2 pt-1">
+
+<button
+
+type="button"
+
+className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+
+disabled={detailsBusy || !detailsCanSave}
+
+onClick={saveJobDetails}
+
+>
+
+{detailsBusy ? "Zapisywanie..." : "Zapisz zmiany"}
+
+</button>
+
+<button
+
+type="button"
+
+className="px-3 py-2 rounded-lg border hover:bg-gray-50 disabled:opacity-60"
+
+disabled={detailsBusy}
+
+onClick={cancelDetailsEdit}
+
+>
+
+Anuluj
+
+</button>
+
+</div>
+
+</div>
+
+) : (
+
+<div className="space-y-2">
 
 <div>
 
@@ -1032,17 +1463,35 @@ return (
 
 <div>
 
-<b>Preferowany termin:</b> {job.preferredFrom} {job.preferredTo ? `→ ${job.preferredTo}` : ""}
+<b>Preferowany termin:</b>{" "}
+
+{formatPreferredDisplay(job.preferredFrom)}
+
+{job.preferredTo
+
+? ` → ${formatPreferredDisplay(job.preferredTo)}`
+
+: ""}
 
 </div>
 
 ) : null}
 
-<div>
+<div className="flex items-center gap-2 flex-wrap">
 
-<b>Priorytet:</b> {job.priority === "urgent" ? "pilny" : "normalny"}
+<span className="text-sm">
+
+<b>Priorytet:</b>
+
+</span>
+
+<JobPriorityBadge priority={job.priority} />
 
 </div>
+
+</div>
+
+)}
 
 </div>
 
@@ -1116,15 +1565,15 @@ Zaznacz osoby odpowiedzialne za zlecenie i zapisz zmiany.
 
 <>
 
-{members.length === 0 ? (
+{assignableMembers.length === 0 ? (
 
-<div className="text-sm text-gray-500">Brak aktywnych członków do wyboru.</div>
+<div className="text-sm text-gray-500">Brak aktywnych pracowników do wyboru.</div>
 
 ) : (
 
-<div className="space-y-2">
+<div className="max-h-[280px] overflow-y-auto overscroll-contain space-y-2 pr-0.5">
 
-{members.map((m) => {
+{assignableMembers.map((m) => {
 
 const checked = draftAssignedToUids.includes(m.uid);
 

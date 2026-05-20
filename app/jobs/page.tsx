@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
+import { JobPriorityBadge } from "@/lib/jobs/job-priority";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -368,9 +369,7 @@ export default function JobsPage() {
                   <div className="text-right space-y-2 shrink-0">
                     <StatusBadge status={j.status} />
 
-                    <div className="text-xs text-gray-500">
-                      Priorytet: <b>{j.priority}</b>
-                    </div>
+                    <JobPriorityBadge priority={j.priority} />
 
                     <div className="text-xs text-gray-500">
                       Przypisani: <b>{assignedCount(j)}</b>

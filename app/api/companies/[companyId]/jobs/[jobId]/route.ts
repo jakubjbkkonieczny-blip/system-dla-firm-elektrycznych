@@ -14,6 +14,11 @@ import {
   syncJobAssignments,
   validateAssignedMembers,
 } from "@/lib/server/jobs/job-assignment-helpers";
+import {
+  hasJobDetailPatchKeys,
+  parseJobDetailPatchBody,
+  validateJobDetailPatch,
+} from "@/lib/server/jobs/job-detail-fields";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
 
@@ -91,6 +96,19 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     });
     if (!existing) {
       return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
+    }
+
+    if (hasJobDetailPatchKeys(body)) {
+      if (!(role === "owner" || role === "admin")) {
+        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      }
+
+      const detail = parseJobDetailPatchBody(body);
+      if (!validateJobDetailPatch(detail)) {
+        return NextResponse.json({ error: "MISSING_FIELDS" }, { status: 400 });
+      }
+
+      Object.assign(data, detail);
     }
 
     if (Object.keys(data).length > 0) {

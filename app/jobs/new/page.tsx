@@ -6,14 +6,11 @@ import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-
-type MemberOption = {
-  uid: string;
-  email: string;
-  role: "owner" | "admin" | "staff";
-  displayName?: string;
-  label: string;
-};
+import {
+  type CompanyMemberOption,
+  filterAssignableMembers,
+} from "@/lib/company/member-options";
+import { getJobPriorityLabel } from "@/lib/jobs/job-priority";
 
 export default function NewJobPage() {
   const { user, loading } = useAuth();
@@ -34,7 +31,7 @@ export default function NewJobPage() {
   const [preferredTo, setPreferredTo] = useState("");
   const [priority, setPriority] = useState<"normal" | "urgent">("normal");
 
-  const [members, setMembers] = useState<MemberOption[]>([]);
+  const [members, setMembers] = useState<CompanyMemberOption[]>([]);
   const [assignedToUids, setAssignedToUids] = useState<string[]>([]);
 
   useEffect(() => {
@@ -59,6 +56,11 @@ export default function NewJobPage() {
       prev.includes(uid) ? prev.filter((x) => x !== uid) : [...prev, uid]
     );
   }
+
+  const assignableMembers = useMemo(
+    () => filterAssignableMembers(members),
+    [members]
+  );
 
   const assignedPreview = useMemo(() => {
     const map = new Map(members.map((m) => [m.uid, m.label]));
@@ -115,7 +117,7 @@ export default function NewJobPage() {
 
   return (
     <div className="p-6 space-y-4 max-w-2xl">
-      <h1 className="text-xl font-semibold">Dodaj job ręcznie</h1>
+      <h1 className="text-xl font-semibold">Utwórz zlecenie</h1>
 
       {err && (
         <div className="text-sm text-red-600 border border-red-200 bg-red-50 p-2 rounded">
@@ -192,8 +194,8 @@ export default function NewJobPage() {
           value={priority}
           onChange={(e) => setPriority(e.target.value as "normal" | "urgent")}
         >
-          <option value="normal">normal</option>
-          <option value="urgent">urgent</option>
+          <option value="normal">{getJobPriorityLabel("normal")}</option>
+          <option value="urgent">{getJobPriorityLabel("urgent")}</option>
         </select>
       </div>
 
@@ -205,11 +207,11 @@ export default function NewJobPage() {
           </div>
         </div>
 
-        {members.length === 0 ? (
+        {assignableMembers.length === 0 ? (
           <div className="text-sm text-gray-500">Brak aktywnych pracowników do wyboru.</div>
         ) : (
           <div className="space-y-2">
-            {members.map((m) => {
+            {assignableMembers.map((m) => {
               const checked = assignedToUids.includes(m.uid);
               return (
                 <label
@@ -249,7 +251,7 @@ export default function NewJobPage() {
         }
         onClick={create}
       >
-        {busy ? "Tworzenie..." : "Utwórz job"}
+        {busy ? "Tworzenie..." : "Utwórz zlecenie"}
       </button>
     </div>
   );

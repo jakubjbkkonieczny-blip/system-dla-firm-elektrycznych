@@ -15,6 +15,7 @@ import {
   syncJobAssignments,
   validateAssignedMembers,
 } from "@/lib/server/jobs/job-assignment-helpers";
+import { allocateNextJobNumber } from "@/lib/server/jobs/job-number";
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -132,9 +133,12 @@ export async function POST(
 
       await validateAssignedMembers(tx, companyId, assignedToUids);
 
+      const jobNumber = await allocateNextJobNumber(tx, companyId);
+
       const j = await tx.job.create({
         data: {
           companyId,
+          jobNumber,
           customerName,
           customerPhone,
           addressCity,
