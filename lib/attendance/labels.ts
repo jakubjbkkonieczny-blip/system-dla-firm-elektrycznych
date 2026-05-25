@@ -1,6 +1,6 @@
-import type { AttendanceStatus } from "@/lib/attendance/types";
+import type { AttendanceDashboardStatus } from "@/lib/attendance/types";
 
-export const ATTENDANCE_STATUS_LABELS: Record<AttendanceStatus, string> = {
+export const ATTENDANCE_STATUS_LABELS: Record<AttendanceDashboardStatus, string> = {
   working: "W pracy",
   break: "Na przerwie",
   finished: "Zakończył",
@@ -8,7 +8,7 @@ export const ATTENDANCE_STATUS_LABELS: Record<AttendanceStatus, string> = {
 };
 
 export const ATTENDANCE_STATUS_COLORS: Record<
-  AttendanceStatus,
+  AttendanceDashboardStatus,
   { bg: string; text: string; border: string; card: string }
 > = {
   working: {
@@ -37,10 +37,10 @@ export const ATTENDANCE_STATUS_COLORS: Record<
   },
 };
 
-export function getAttendanceStatusLabel(status: AttendanceStatus): string {
+export function getAttendanceStatusLabel(status: AttendanceDashboardStatus): string {
   return ATTENDANCE_STATUS_LABELS[status] ?? status;
 }
 
-export function getAttendanceStatusColors(status: AttendanceStatus) {
+export function getAttendanceStatusColors(status: AttendanceDashboardStatus) {
   return ATTENDANCE_STATUS_COLORS[status] ?? ATTENDANCE_STATUS_COLORS.absent;
 }

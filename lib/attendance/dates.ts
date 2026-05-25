@@ -19,6 +19,18 @@ export function formatAttendanceDateInput(date: Date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+/** Display sessionDate (YYYY-MM-DD) as DD.MM.YYYY */
+export function formatSessionDateDisplay(dateStr: string): string {
+  const parsed = parseAttendanceDateParam(dateStr);
+  if (!parsed) return dateStr;
+  return parsed.toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function formatTimeHm(iso: string | null | undefined): string {
   if (!iso) return "—";
   const dt = new Date(iso);
@@ -28,6 +40,9 @@ export function formatTimeHm(iso: string | null | undefined): string {
 
 export function formatDateShort(iso: string | null | undefined): string {
   if (!iso) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso.trim())) {
+    return formatSessionDateDisplay(iso.trim());
+  }
   const dt = new Date(iso);
   if (Number.isNaN(dt.getTime())) return "";
   return dt.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit", year: "numeric" });

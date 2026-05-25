@@ -5,49 +5,35 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { getAttendanceDashboard } from "@/lib/server/attendance/get-attendance-dashboard";
 import { requireOwnerOrAdmin } from "@/lib/server/attendance/require-owner-admin";
-import type { AttendanceDashboardStatus } from "@/lib/attendance/types";
+import { getAttendanceHoursSummary } from "@/lib/server/attendance/get-attendance-hours";
 
-type Ctx = { params: Promise<{ companyId: string }> };
-
-const VALID_STATUSES: AttendanceDashboardStatus[] = [
-  "working",
-  "break",
-  "finished",
-  "absent",
-];
+type Ctx = { params: Promise<{ companyId: string; userId: string }> };
 
 export async function GET(req: NextRequest, { params }: Ctx) {
   try {
     const sessionUser = await requireSessionUser();
-    const userId = sessionUser.id;
-    const { companyId } = await params;
+    const actorId = sessionUser.id;
+    const { companyId, userId } = await params;
 
-    const me = await requireActiveMember(companyId, userId);
+    const me = await requireActiveMember(companyId, actorId);
     requireOwnerOrAdmin(me);
 
     const url = new URL(req.url);
     const date = url.searchParams.get("date") ?? undefined;
-    const userIdFilter = url.searchParams.get("userId") ?? undefined;
-    const statusParam = url.searchParams.get("status") ?? undefined;
 
-    const status =
-      statusParam && VALID_STATUSES.includes(statusParam as AttendanceDashboardStatus)
-        ? statusParam
-        : undefined;
-
-    const payload = await getAttendanceDashboard({
+    const payload = await getAttendanceHoursSummary({
       companyId,
+      userId,
+      actorId,
+      member: me,
       date,
-      userId: userIdFilter || undefined,
-      status,
     });
-
     return NextResponse.json(payload, { status: 200 });
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, (msg) => {
       if (msg === "FORBIDDEN") return 403;
+      if (msg === "MEMBER_NOT_FOUND") return 404;
       return companyRouteErrorStatus(msg);
     });
   }

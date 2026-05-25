@@ -2,9 +2,9 @@ import {
   getAttendanceStatusColors,
   getAttendanceStatusLabel,
 } from "@/lib/attendance/labels";
-import type { AttendanceStatus } from "@/lib/attendance/types";
+import type { AttendanceDashboardStatus } from "@/lib/attendance/types";
 
-export function AttendanceStatusBadge({ status }: { status: AttendanceStatus }) {
+export function AttendanceStatusBadge({ status }: { status: AttendanceDashboardStatus }) {
   const colors = getAttendanceStatusColors(status);
   return (
     <span

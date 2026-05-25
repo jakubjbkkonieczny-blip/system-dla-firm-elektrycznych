@@ -162,7 +162,7 @@ export function AppShell({
             <SidebarItem href="/members" label="Pracownicy" icon="👥" />
           )}
 
-          {isOwnerOrAdmin && (
+          {companyId && (
             <SidebarItem href="/attendance" label="Obecność" icon="🕐" />
           )}
 

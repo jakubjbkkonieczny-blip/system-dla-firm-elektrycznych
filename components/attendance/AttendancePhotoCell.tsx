@@ -3,9 +3,11 @@ import type { AttendancePhotoView } from "@/lib/attendance/types";
 export function AttendancePhotoCell({
   photo,
   label,
+  allowDownload = false,
 }: {
   photo: AttendancePhotoView;
   label: string;
+  allowDownload?: boolean;
 }) {
   if (photo.url) {
     return (
@@ -17,6 +19,17 @@ export function AttendancePhotoCell({
           alt={label}
           className="w-14 h-14 rounded-md border object-cover bg-gray-100"
         />
+        {allowDownload && (
+          <a
+            href={photo.url}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-blue-700 underline"
+          >
+            Pobierz
+          </a>
+        )}
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import type { AttendancePhotoView } from "@/lib/attendance/types";
 
-/** Temporary attendance photos expire 7 hours after upload. */
-export const ATTENDANCE_PHOTO_TTL_MS = 7 * 60 * 60 * 1000;
+/** Default client hint; server uses ATTENDANCE_PHOTO_RETENTION_HOURS env. */
+export const ATTENDANCE_PHOTO_TTL_MS = 48 * 60 * 60 * 1000;
 
 export function attendancePhotoExpiresAt(from: Date = new Date()): Date {
   return new Date(from.getTime() + ATTENDANCE_PHOTO_TTL_MS);
@@ -39,4 +39,4 @@ export function toAttendancePhotoView(
 }
 
 export const ATTENDANCE_PHOTO_HELPER_TEXT =
-  "Zdjęcia są tymczasowe i wygasają po 7 godzinach.";
+  "Zdjęcia potwierdzające są opcjonalne, tymczasowe i automatycznie wygasają po okresie retencji (domyślnie 48 h). Nie trafiają do galerii.";

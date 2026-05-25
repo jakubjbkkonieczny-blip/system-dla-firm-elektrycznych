@@ -254,20 +254,24 @@ model IdempotencyKey {
   @@index([companyId, endpoint])
 }
 
-/// Daily attendance session per employee (owner/admin dashboard).
+/// Daily attendance session per employee (one row per user per day).
 model AttendanceSession {
   id                     String    @id @default(cuid())
   companyId              String
   userId                 String
-  status                 String    // working, break, finished, absent
+  status                 String    // not_started, working, on_break, finished (legacy: break)
   sessionDate            DateTime  @db.Date
   startedAt              DateTime?
   breakStartedAt         DateTime?
+  totalBreakMinutes      Int       @default(0)
   endedAt                DateTime?
+  totalWorkedMinutes     Int?
   checkInPhotoUrl        String?
   checkInPhotoExpiresAt  DateTime?
   checkOutPhotoUrl       String?
   checkOutPhotoExpiresAt DateTime?
+  managerProofPhotoUrl   String?
+  managerProofPhotoExpiresAt DateTime?
   locationText           String?
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
@@ -277,6 +281,7 @@ model AttendanceSession {
 
   @@unique([companyId, userId, sessionDate])
   @@index([companyId, sessionDate])
+  @@index([companyId, userId, sessionDate])
   @@index([companyId, status])
   @@index([userId])
 }

@@ -1,19 +1,23 @@
 import "server-only";
-import { prisma } from "@/lib/db/prisma";
-import { buildDemoAttendanceRows } from "@/lib/attendance/demo-data";
 import { parseAttendanceDateParam, formatAttendanceDateInput } from "@/lib/attendance/dates";
-import { computeWorkDurationMs } from "@/lib/attendance/duration";
+import {
+  computeBreakDurationMs,
+  computeWorkDurationMs,
+} from "@/lib/attendance/duration";
 import { toAttendancePhotoView } from "@/lib/attendance/photos";
+import { toDashboardStatus } from "@/lib/attendance/status";
 import type {
   AttendanceDashboardResponse,
   AttendanceDashboardRow,
+  AttendanceDashboardStatus,
   AttendanceEmployeeRef,
-  AttendanceStatus,
   AttendanceSummary,
 } from "@/lib/attendance/types";
 import { getMemberDisplayName } from "@/lib/company/member-labels";
-
-const TRACKED_ROLES = ["staff", "admin"] as const;
+import {
+  findAttendanceSessionsForDate,
+  findTrackedCompanyMembers,
+} from "@/lib/server/attendance/queries";
 
 function employeeRef(user: {
   id: string;
@@ -38,8 +42,8 @@ function serializeSessionRow(
     startedAt: Date | null;
     breakStartedAt: Date | null;
     endedAt: Date | null;
-    checkInPhotoUrl: string | null;
-    checkInPhotoExpiresAt: Date | null;
+    totalBreakMinutes: number;
+    totalWorkedMinutes: number | null;
     checkOutPhotoUrl: string | null;
     checkOutPhotoExpiresAt: Date | null;
     locationText: string | null;
@@ -47,8 +51,17 @@ function serializeSessionRow(
   },
   now: Date
 ): AttendanceDashboardRow {
-  const status = session.status as AttendanceStatus;
+  const status = toDashboardStatus(session.status, true);
   const ref = employeeRef(session.user);
+  const durationInput = {
+    status: session.status,
+    startedAt: session.startedAt,
+    breakStartedAt: session.breakStartedAt,
+    endedAt: session.endedAt,
+    totalBreakMinutes: session.totalBreakMinutes,
+    totalWorkedMinutes: session.totalWorkedMinutes,
+    now,
+  };
 
   return {
     userId: ref.userId,
@@ -57,20 +70,10 @@ function serializeSessionRow(
     status,
     startedAt: session.startedAt?.toISOString() ?? null,
     endedAt: session.endedAt?.toISOString() ?? null,
-    workDurationMs: computeWorkDurationMs({
-      status,
-      startedAt: session.startedAt,
-      breakStartedAt: session.breakStartedAt,
-      endedAt: session.endedAt,
-      now,
-    }),
+    workDurationMs: computeWorkDurationMs(durationInput),
+    breakDurationMs: computeBreakDurationMs(durationInput),
     locationText: session.locationText,
-    checkInPhoto: toAttendancePhotoView(
-      session.checkInPhotoUrl,
-      session.checkInPhotoExpiresAt,
-      now
-    ),
-    checkOutPhoto: toAttendancePhotoView(
+    proofPhoto: toAttendancePhotoView(
       session.checkOutPhotoUrl,
       session.checkOutPhotoExpiresAt,
       now
@@ -93,9 +96,9 @@ function absentRow(user: {
     startedAt: null,
     endedAt: null,
     workDurationMs: null,
+    breakDurationMs: null,
     locationText: null,
-    checkInPhoto: { url: null, expired: false },
-    checkOutPhoto: { url: null, expired: false },
+    proofPhoto: { url: null, expired: false },
     sessionId: null,
   };
 }
@@ -117,59 +120,33 @@ function buildSummary(rows: AttendanceDashboardRow[]): AttendanceSummary {
   return summary;
 }
 
+function statusMatchesFilter(
+  dashboardStatus: AttendanceDashboardStatus,
+  filter: string
+): boolean {
+  if (filter === "break") return dashboardStatus === "break";
+  return dashboardStatus === filter;
+}
+
 export async function getAttendanceDashboard(params: {
   companyId: string;
   date?: string;
   userId?: string;
   status?: string;
-  demo?: boolean;
 }): Promise<AttendanceDashboardResponse> {
-  const sessionDate =
-    (params.date && parseAttendanceDateParam(params.date)) ||
-    parseAttendanceDateParam(formatAttendanceDateInput(new Date()))!;
-
+  // Day-based: one sessionDate per calendar day; default = today (no midnight job).
   const dateStr = params.date?.trim() || formatAttendanceDateInput(new Date());
+  const sessionDate =
+    parseAttendanceDateParam(dateStr) ??
+    parseAttendanceDateParam(formatAttendanceDateInput(new Date()))!;
   const now = new Date();
 
-  const members = await prisma.companyMember.findMany({
-    where: {
-      companyId: params.companyId,
-      isActive: true,
-      role: { in: [...TRACKED_ROLES] },
-      ...(params.userId ? { userId: params.userId } : {}),
-    },
-    include: {
-      user: { select: { id: true, email: true, displayName: true } },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  const [members, sessions] = await Promise.all([
+    findTrackedCompanyMembers(params.companyId, params.userId),
+    findAttendanceSessionsForDate(params.companyId, sessionDate, params.userId),
+  ]);
 
   const employees: AttendanceEmployeeRef[] = members.map((m) => employeeRef(m.user));
-
-  if (params.demo) {
-    let rows = buildDemoAttendanceRows(employees, sessionDate);
-    if (params.status) {
-      rows = rows.filter((r) => r.status === params.status);
-    }
-    return {
-      date: dateStr,
-      summary: buildSummary(rows),
-      rows,
-      employees,
-    };
-  }
-
-  const sessions = await prisma.attendanceSession.findMany({
-    where: {
-      companyId: params.companyId,
-      sessionDate,
-      ...(params.userId ? { userId: params.userId } : {}),
-    },
-    include: {
-      user: { select: { id: true, email: true, displayName: true } },
-    },
-  });
-
   const sessionByUser = new Map(sessions.map((s) => [s.userId, s]));
 
   let rows: AttendanceDashboardRow[] = members.map((m) => {
@@ -179,7 +156,8 @@ export async function getAttendanceDashboard(params: {
   });
 
   if (params.status) {
-    rows = rows.filter((r) => r.status === params.status);
+    const statusFilter = params.status;
+    rows = rows.filter((r) => statusMatchesFilter(r.status, statusFilter));
   }
 
   return {
