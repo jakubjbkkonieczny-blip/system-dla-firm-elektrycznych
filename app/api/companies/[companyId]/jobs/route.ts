@@ -52,18 +52,13 @@ export async function GET(
 
     const url = new URL(req.url);
     const status = url.searchParams.get("status");
-    const todo = url.searchParams.get("todo") === "1";
     const limit = clamp(Number(url.searchParams.get("limit") || "50"), 1, 50);
     const cursor = url.searchParams.get("cursor");
 
     const where: Prisma.JobWhereInput = {
       companyId,
       deletedAt: null,
-      ...(todo
-        ? { status: { in: ["new", "scheduled", "in_progress"] } }
-        : status
-          ? { status }
-          : {}),
+      ...(status ? { status } : {}),
     };
 
     const jobsRaw = await prisma.job.findMany({

@@ -28,7 +28,12 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
     const body = (await req.json()) as Body;
     const email = (body.email || "").trim().toLowerCase();
-    const role = body.role === "owner" || body.role === "admin" ? body.role : "staff";
+
+    if (body.role === "owner") {
+      return NextResponse.json({ error: "OWNER_ROLE_NOT_ASSIGNABLE" }, { status: 400 });
+    }
+
+    const role = body.role === "admin" ? "admin" : "staff";
     const scope = body.scope === "assigned" ? "assigned_only" : "all";
 
     if (!email) return NextResponse.json({ error: "MISSING_EMAIL" }, { status: 400 });

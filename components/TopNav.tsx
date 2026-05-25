@@ -126,7 +126,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="flex flex-col gap-1">
           <SidebarItem href="/dashboard" label="Panel główny" icon="🏠" />
           <SidebarItem href="/jobs" label="Zlecenia" icon="🧾" />
-          <SidebarItem href="/todo" label="Do zrobienia" icon="✅" />
           {isOwnerOrAdmin && (
             <SidebarItem href="/members" label="Pracownicy" icon="👥" />
           )}

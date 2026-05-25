@@ -2,6 +2,13 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
+import {
+  getMemberDisplayName,
+  getMemberEmailLine,
+  getMemberRoleLabel,
+  getMemberScopeLabel,
+  getMemberStatusLabel,
+} from "@/lib/company/member-labels";
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -12,7 +19,7 @@ type Member = {
   email: string;
   displayName?: string;
   role: "owner" | "admin" | "staff";
-  scope: "all" | "assigned";
+  scope: "all" | "assigned" | "assigned_only";
   active: boolean;
 };
 
@@ -26,7 +33,7 @@ export default function MembersPage() {
   const [err, setErr] = useState<string | null>(null);
 
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<Member["role"]>("staff");
+  const [role, setRole] = useState<"admin" | "staff">("staff");
   const [scope, setScope] = useState<Member["scope"]>("all");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -38,7 +45,7 @@ export default function MembersPage() {
     setBusy(true);
     setErr(null);
     try {
-      const data = await apiFetch(`/api/companies/${companyId}/members`);
+      const data = await apiFetch(`/api/companies/${companyId}`);
       setMembers(data.members || []);
     } catch (e: any) {
       setErr(e?.message ?? "LOAD_ERROR");
@@ -94,7 +101,7 @@ export default function MembersPage() {
 
   function openDelete(m: Member) {
     setDeleteUid(m.uid);
-    setDeleteLabel(m.displayName?.trim() || m.email || m.uid);
+    setDeleteLabel(getMemberDisplayName(m));
     setDeleteOpen(true);
   }
 
@@ -185,9 +192,8 @@ export default function MembersPage() {
             value={role}
             onChange={(e) => setRole(e.target.value as any)}
           >
-            <option value="owner">owner (właściciel)</option>
-            <option value="admin">admin (administrator)</option>
-            <option value="staff">staff (pracownik)</option>
+            <option value="admin">Kierownik</option>
+            <option value="staff">Pracownik</option>
           </select>
 
           <select
@@ -195,8 +201,8 @@ export default function MembersPage() {
             value={scope}
             onChange={(e) => setScope(e.target.value as any)}
           >
-            <option value="all">all (widzi wszystko)</option>
-            <option value="assigned">assigned (tylko przypisane)</option>
+            <option value="all">Wszystkie zlecenia</option>
+            <option value="assigned">Tylko przypisane zlecenia</option>
           </select>
         </div>
 
@@ -251,21 +257,36 @@ export default function MembersPage() {
             {members.map((m) => {
               const isMe = m.uid === user.uid;
               const isOwner = m.role === "owner";
+              const emailLine = getMemberEmailLine(m);
 
               return (
                 <div key={m.uid} className="p-4 flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="font-semibold truncate">
-                      {m.displayName?.trim() || m.email || m.uid}
+                  <div className="min-w-0 space-y-1">
+                    <div className="font-semibold text-gray-900 truncate">
+                      {getMemberDisplayName(m)}
                     </div>
-                    <div className="text-sm text-gray-600 truncate">
-                      {m.email || m.uid}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Rola: <b>{m.role}</b> • Zakres: <b>{m.scope}</b> • Status:{" "}
-                      <b className={m.active ? "text-green-700" : "text-red-700"}>
-                        {m.active ? "aktywny" : "nieaktywny"}
-                      </b>
+                    {emailLine && (
+                      <div className="text-sm text-gray-600 truncate">{emailLine}</div>
+                    )}
+                    <div className="text-sm text-gray-600 pt-1 space-y-0.5">
+                      <div>
+                        Rola:{" "}
+                        <span className="font-medium text-gray-800">{getMemberRoleLabel(m.role)}</span>
+                      </div>
+                      <div>
+                        Zakres:{" "}
+                        <span className="font-medium text-gray-800">
+                          {getMemberScopeLabel(m.scope)}
+                        </span>
+                      </div>
+                      <div>
+                        Status:{" "}
+                        <span
+                          className={`font-medium ${m.active ? "text-green-700" : "text-red-700"}`}
+                        >
+                          {getMemberStatusLabel(m.active)}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

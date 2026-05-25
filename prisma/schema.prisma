@@ -32,6 +32,7 @@ model User {
   statusChanges       JobStatusHistory[]  @relation("StatusChangedBy")
   auditLogs           AuditLog[]
   idempotencyKeys     IdempotencyKey[]
+  attendanceSessions  AttendanceSession[]
 
 }
 
@@ -55,6 +56,7 @@ model Company {
   jobStatusHistory     JobStatusHistory[]
   auditLogs            AuditLog[]
   idempotencyKeys      IdempotencyKey[]
+  attendanceSessions   AttendanceSession[]
 }
 
 model CompanyMember {
@@ -250,4 +252,31 @@ model IdempotencyKey {
   @@index([endpoint])
   @@index([expiresAt])
   @@index([companyId, endpoint])
+}
+
+/// Daily attendance session per employee (owner/admin dashboard).
+model AttendanceSession {
+  id                     String    @id @default(cuid())
+  companyId              String
+  userId                 String
+  status                 String    // working, break, finished, absent
+  sessionDate            DateTime  @db.Date
+  startedAt              DateTime?
+  breakStartedAt         DateTime?
+  endedAt                DateTime?
+  checkInPhotoUrl        String?
+  checkInPhotoExpiresAt  DateTime?
+  checkOutPhotoUrl       String?
+  checkOutPhotoExpiresAt DateTime?
+  locationText           String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId, sessionDate])
+  @@index([companyId, sessionDate])
+  @@index([companyId, status])
+  @@index([userId])
 }

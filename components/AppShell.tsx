@@ -157,13 +157,15 @@ export function AppShell({
         <nav className="flex flex-col gap-2">
           <SidebarItem href="/dashboard" label="Panel główny" icon="🏠" />
           <SidebarItem href="/jobs" label="Zlecenia" icon="🧾" />
-          <SidebarItem href="/todo" label="Do zrobienia" icon="✅" />
 
           {isOwnerOrAdmin && (
             <SidebarItem href="/members" label="Pracownicy" icon="👥" />
           )}
 
-          {/* 🔥 TUTAJ ZMIANA */}
+          {isOwnerOrAdmin && (
+            <SidebarItem href="/attendance" label="Obecność" icon="🕐" />
+          )}
+
           {isOwnerOrAdmin && (
             <SidebarItem href="/calendar" label="Kalendarz" icon="📅" />
           )}
