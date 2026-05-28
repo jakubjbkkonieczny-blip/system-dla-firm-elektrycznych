@@ -48,54 +48,83 @@ export function AttendanceHoursModal({
   }, [companyId, userId, date]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white border rounded-xl shadow-lg max-h-[90vh] overflow-y-auto">
-        <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
-          <div>
-            <h3 className="font-semibold text-lg">Godziny pracy</h3>
-            <p className="text-sm text-gray-600">
+    <div
+      className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4 sm:p-6"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-labelledby="attendance-hours-modal-title"
+        className="flex flex-col w-full max-w-5xl bg-white border rounded-xl shadow-lg max-h-[min(92vh,56rem)] min-h-[min(72vh,40rem)] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="shrink-0 flex items-center justify-between gap-4 px-5 py-4 border-b bg-white">
+          <div className="min-w-0">
+            <h3 id="attendance-hours-modal-title" className="font-semibold text-lg text-gray-900">
+              Godziny pracy
+            </h3>
+            <p className="text-sm text-gray-600 truncate">
               {displayName} · {email}
             </p>
           </div>
-          <button type="button" className="px-2 py-1 text-sm border rounded" onClick={onClose}>
+          <button
+            type="button"
+            className="shrink-0 px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50"
+            onClick={onClose}
+          >
             Zamknij
           </button>
-        </div>
+        </header>
 
-        <div className="p-4 space-y-4">
-          {busy && <div className="text-sm text-gray-500">Ładowanie podsumowania...</div>}
-          {err && (
-            <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-2 rounded">
-              {err}
-            </div>
-          )}
-          {summary && !busy && (
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="border rounded-lg p-3 bg-gray-50">
-                <div className="text-xs text-gray-600">Dziś</div>
-                <div className="font-semibold">{formatMinutes(summary.todayWorkedMinutes)}</div>
-                <div className="text-[10px] text-gray-500">
-                  przerwy {formatMinutes(summary.todayBreakMinutes)}
+        <div className="flex flex-col flex-1 min-h-0">
+          {(busy || err || summary) && (
+            <div className="shrink-0 px-5 py-4 border-b bg-gray-50/80 space-y-3">
+              {busy && <div className="text-sm text-gray-500">Ładowanie podsumowania...</div>}
+              {err && (
+                <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg">
+                  {err}
                 </div>
-              </div>
-              <div className="border rounded-lg p-3 bg-gray-50">
-                <div className="text-xs text-gray-600">Tydzień</div>
-                <div className="font-semibold">{formatMinutes(summary.weekWorkedMinutes)}</div>
-              </div>
-              <div className="border rounded-lg p-3 bg-gray-50">
-                <div className="text-xs text-gray-600">Miesiąc</div>
-                <div className="font-semibold">{formatMinutes(summary.monthWorkedMinutes)}</div>
-              </div>
+              )}
+              {summary && !busy && (
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="border rounded-lg p-4 bg-white">
+                    <div className="text-xs text-gray-600 uppercase tracking-wide">Dziś</div>
+                    <div className="font-semibold text-lg mt-1">
+                      {formatMinutes(summary.todayWorkedMinutes)}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      przerwy {formatMinutes(summary.todayBreakMinutes)}
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4 bg-white">
+                    <div className="text-xs text-gray-600 uppercase tracking-wide">Tydzień</div>
+                    <div className="font-semibold text-lg mt-1">
+                      {formatMinutes(summary.weekWorkedMinutes)}
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4 bg-white">
+                    <div className="text-xs text-gray-600 uppercase tracking-wide">Miesiąc</div>
+                    <div className="font-semibold text-lg mt-1">
+                      {formatMinutes(summary.monthWorkedMinutes)}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          <div>
-            <div className="text-sm font-medium text-gray-800 mb-2">Historia godzin pracy</div>
-            <AttendanceHistoryList
-              companyId={companyId}
-              userId={userId}
-              emptyMessage="Brak zapisanej historii pracy."
-            />
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="shrink-0 px-5 pt-4 pb-2 bg-white border-b">
+              <h4 className="text-sm font-semibold text-gray-800">Historia godzin pracy</h4>
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-4">
+              <AttendanceHistoryList
+                companyId={companyId}
+                userId={userId}
+                layout="comfortable"
+              />
+            </div>
           </div>
         </div>
       </div>

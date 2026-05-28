@@ -73,6 +73,7 @@ export type AttendanceActionResponse = {
 };
 
 export type AttendanceHistoryDay = {
+  id: string;
   date: string;
   status: AttendanceDashboardStatus;
   startedAt: string | null;
@@ -81,10 +82,24 @@ export type AttendanceHistoryDay = {
   totalBreakMinutes: number;
 };
 
+export type AttendanceHistoryPeriodTotals = {
+  totalWorkedMinutes: number;
+  totalBreakMinutes: number;
+  workedDays: number;
+};
+
+/** Per calendar month aggregates for the filtered employee (full history). */
+export type AttendanceHistoryMonthSummary = {
+  year: number;
+  month: number;
+} & AttendanceHistoryPeriodTotals;
+
 export type AttendanceHistoryResponse = {
   items: AttendanceHistoryDay[];
   nextCursor: string | null;
   limit: number;
+  /** Included on the first page (no cursor) for period header totals. */
+  monthSummaries?: AttendanceHistoryMonthSummary[];
 };
 
 export type AttendanceHoursSummary = {

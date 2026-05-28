@@ -1,10 +1,12 @@
 "use client";
 
-import { AttendanceStatusBadge } from "@/components/attendance/AttendanceStatusBadge";
+import { AttendanceHistoryTree } from "@/components/attendance/AttendanceHistoryTree";
 import { apiFetch } from "@/lib/api";
-import { formatDateShort, formatTimeHm } from "@/lib/attendance/dates";
-import { formatMinutes } from "@/lib/attendance/duration";
-import type { AttendanceHistoryDay, AttendanceHistoryResponse } from "@/lib/attendance/types";
+import type {
+  AttendanceHistoryDay,
+  AttendanceHistoryMonthSummary,
+  AttendanceHistoryResponse,
+} from "@/lib/attendance/types";
 import { useCallback, useEffect, useState } from "react";
 
 const PAGE_LIMIT = 20;
@@ -12,13 +14,18 @@ const PAGE_LIMIT = 20;
 export function AttendanceHistoryList({
   companyId,
   userId,
-  emptyMessage = "Brak zapisanej historii.",
+  emptyMessage = "Brak historii czasu pracy.",
+  layout = "default",
 }: {
   companyId: string;
   userId?: string;
   emptyMessage?: string;
+  layout?: "default" | "comfortable";
 }) {
   const [items, setItems] = useState<AttendanceHistoryDay[]>([]);
+  const [monthSummaries, setMonthSummaries] = useState<
+    AttendanceHistoryMonthSummary[] | undefined
+  >();
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -36,6 +43,9 @@ export function AttendanceHistoryList({
       )) as AttendanceHistoryResponse;
 
       setItems((prev) => (append ? [...prev, ...res.items] : res.items));
+      if (!append && res.monthSummaries) {
+        setMonthSummaries(res.monthSummaries);
+      }
       setNextCursor(res.nextCursor);
     },
     [companyId, userId]
@@ -46,6 +56,7 @@ export function AttendanceHistoryList({
     (async () => {
       setBusy(true);
       setErr(null);
+      setMonthSummaries(undefined);
       try {
         await fetchPage();
       } catch (e: unknown) {
@@ -89,26 +100,12 @@ export function AttendanceHistoryList({
   }
 
   return (
-    <div className="space-y-2">
-      {items.map((h) => (
-        <div
-          key={`${h.date}-${h.startedAt ?? ""}-${h.endedAt ?? ""}`}
-          className="flex items-center justify-between gap-2 border rounded-lg px-3 py-2 text-sm"
-        >
-          <div>
-            <div className="font-medium">{formatDateShort(h.date)}</div>
-            <div className="text-xs text-gray-500">
-              {formatTimeHm(h.startedAt)} – {formatTimeHm(h.endedAt)}
-            </div>
-          </div>
-          <div className="text-right space-y-1 shrink-0">
-            <AttendanceStatusBadge status={h.status} />
-            <div className="text-xs text-gray-600">
-              {formatMinutes(h.totalWorkedMinutes)} · przerwa {formatMinutes(h.totalBreakMinutes)}
-            </div>
-          </div>
-        </div>
-      ))}
+    <div className="space-y-3">
+      <AttendanceHistoryTree
+        items={items}
+        monthSummaries={monthSummaries}
+        layout={layout}
+      />
       {nextCursor && (
         <button
           type="button"

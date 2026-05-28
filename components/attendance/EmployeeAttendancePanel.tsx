@@ -1,6 +1,7 @@
 "use client";
 
 import { AttendanceHistoryList } from "@/components/attendance/AttendanceHistoryList";
+import { LocationAutocomplete } from "@/components/attendance/LocationAutocomplete";
 import { apiFetch } from "@/lib/api";
 import {
   formatAttendanceDateInput,
@@ -160,15 +161,11 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
       </div>
 
       {state === "not_started" && !sessionLoading && (
-        <label className="block text-sm">
-          <span className="text-gray-600">Lokalizacja (opcjonalnie)</span>
-          <input
-            className="mt-1 w-full border rounded-lg px-3 py-2"
-            placeholder="np. Warszawa, ul. Kopernika 6"
-            value={locationText}
-            onChange={(e) => setLocationText(e.target.value)}
-          />
-        </label>
+        <LocationAutocomplete
+          value={locationText}
+          onChange={setLocationText}
+          disabled={busy}
+        />
       )}
 
       {state === "working" && !sessionLoading && (
@@ -216,10 +213,7 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
         </button>
         {historyOpen && (
           <div className="px-4 pb-4 border-t">
-            <AttendanceHistoryList
-              companyId={companyId}
-              emptyMessage="Nie masz jeszcze zapisanej historii pracy."
-            />
+            <AttendanceHistoryList companyId={companyId} />
           </div>
         )}
       </div>

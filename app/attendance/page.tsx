@@ -16,8 +16,13 @@ export default function AttendancePage() {
   const router = useRouter();
   const companyId = useActiveCompanyId();
 
-  const [role, setRole] = useState<Role>("staff");
+  const [role, setRole] = useState<Role | null>(null);
   const [roleLoaded, setRoleLoaded] = useState(false);
+  const [companyStorageReady, setCompanyStorageReady] = useState(false);
+
+  useEffect(() => {
+    setCompanyStorageReady(true);
+  }, []);
 
   const isOwnerOrAdmin = role === "owner" || role === "admin";
 
@@ -27,9 +32,13 @@ export default function AttendancePage() {
 
   useEffect(() => {
     if (!user || !companyId) {
-      setRoleLoaded(true);
+      setRole(null);
+      setRoleLoaded(false);
       return;
     }
+
+    setRole(null);
+    setRoleLoaded(false);
     let cancelled = false;
     (async () => {
       try {
@@ -46,7 +55,12 @@ export default function AttendancePage() {
     };
   }, [user, companyId]);
 
-  if (loading || !roleLoaded) return <div className="p-6">Ładowanie...</div>;
+  const waitingForRole =
+    !!user && !!companyId && (!roleLoaded || role === null);
+
+  if (loading || !companyStorageReady || waitingForRole) {
+    return <div className="p-6">Ładowanie...</div>;
+  }
   if (!user) return null;
 
   if (!companyId) {
