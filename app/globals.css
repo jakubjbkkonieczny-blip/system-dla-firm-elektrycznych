@@ -56,3 +56,70 @@ html[data-theme="blue"] {
 body {
   background: var(--app-bg);
 }
+
+/* Landing page — lightweight motion only */
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.landing-fade-up {
+  animation: landing-fade-up 0.65s ease-out both;
+}
+
+.landing-float-slow {
+  animation: landing-float 5s ease-in-out infinite;
+}
+
+.landing-float-delay {
+  animation: landing-float 5s ease-in-out 0.8s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-fade-up,
+  .landing-float-slow,
+  .landing-float-delay {
+    animation: none;
+  }
+}
+
+/* Landing hero atmosphere — CSS only */
+.landing-hero-glow {
+  background:
+    radial-gradient(ellipse 120% 80% at 75% 20%, rgba(56, 189, 248, 0.12), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 20% 80%, rgba(30, 58, 138, 0.35), transparent 55%);
+}
+
+.landing-lightning-accent {
+  background:
+    linear-gradient(
+      118deg,
+      transparent 38%,
+      rgba(191, 219, 254, 0.04) 44%,
+      rgba(251, 191, 36, 0.07) 49%,
+      rgba(147, 197, 253, 0.05) 54%,
+      transparent 60%
+    ),
+    linear-gradient(
+      72deg,
+      transparent 55%,
+      rgba(59, 130, 246, 0.06) 58%,
+      transparent 62%
+    );
+}
