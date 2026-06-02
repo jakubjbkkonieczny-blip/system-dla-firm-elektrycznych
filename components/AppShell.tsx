@@ -167,6 +167,10 @@ export function AppShell({
           )}
 
           {isOwnerOrAdmin && (
+            <SidebarItem href="/vacations" label="Urlopy" icon="🏖️" />
+          )}
+
+          {isOwnerOrAdmin && (
             <SidebarItem href="/calendar" label="Kalendarz" icon="📅" />
           )}
 
