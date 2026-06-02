@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const BENEFITS = [
-  { icon: "✓", text: "Bez instalacji" },
+  { icon: "✓", text: "Działa w przeglądarce" },
   { icon: "⚡", text: "Bez chaosu" },
   { icon: "☁", text: "Bez kombinowania" },
   { icon: "📱", text: "Zawsze pod ręką" },

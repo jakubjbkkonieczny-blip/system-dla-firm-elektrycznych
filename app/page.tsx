@@ -8,96 +8,217 @@ export default function HomePage() {
       <LandingHeader />
       <LandingHero />
 
-      <section id="funkcje" className="relative bg-slate-50 text-gray-900 border-t border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900">
-              Wszystko, czego potrzebuje firma techniczna
+      <section id="funkcje" className="relative scroll-mt-32 border-t border-white/10 bg-[#070d18]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.16),transparent_55%)]" aria-hidden />
+        <div className="relative max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+              Wszystko czego potrzebuje firma techniczna
             </h2>
-            <p className="mt-3 text-gray-600">
-              Porządek w zleceniach, jasny podział ról i dokumentacja pracy w jednym systemie.
+            <p className="mt-4 text-slate-300 text-base sm:text-lg leading-relaxed">
+              Porządek w zleceniach, pracownikach i dokumentacji pracy w jednym miejscu.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border rounded-2xl p-6 bg-white shadow-sm">
-              <div className="text-2xl mb-3" aria-hidden>
-                🧾
-              </div>
-              <h3 className="font-semibold text-xl mb-2">Zlecenia w jednym miejscu</h3>
-              <p className="text-gray-600 text-sm leading-6">
-                Dodawaj zlecenia, przypisuj ludzi, kontroluj status i miej porządek w pracy.
-              </p>
-            </div>
-
-            <div className="border rounded-2xl p-6 bg-white shadow-sm">
-              <div className="text-2xl mb-3" aria-hidden>
-                👷
-              </div>
-              <h3 className="font-semibold text-xl mb-2">Proste dla pracownika</h3>
-              <p className="text-gray-600 text-sm leading-6">
-                Pracownik widzi tylko to, czego potrzebuje. Bez zbędnych opcji i chaosu.
-              </p>
-            </div>
-
-            <div className="border rounded-2xl p-6 bg-white shadow-sm">
-              <div className="text-2xl mb-3" aria-hidden>
-                📷
-              </div>
-              <h3 className="font-semibold text-xl mb-2">Zdjęcia, notatki, postęp</h3>
-              <p className="text-gray-600 text-sm leading-6">
-                Dokumentuj robotę na bieżąco i miej wszystko pod ręką w jednym panelu.
-              </p>
-            </div>
+          <div className="mt-10 sm:mt-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+            {[
+              {
+                icon: "🧾",
+                title: "Zarządzanie zleceniami",
+                description: "Twórz i porządkuj zlecenia, przypisuj odpowiedzialnych i trzymaj terminy pod kontrolą.",
+              },
+              {
+                icon: "👥",
+                title: "Zarządzanie pracownikami",
+                description: "Widzisz kto pracuje, kto jest dostępny i jak rozdzielać zadania bez zbędnych telefonów.",
+              },
+              {
+                icon: "📷",
+                title: "Zdjęcia z realizacji",
+                description: "Dokumentuj postępy prac zdjęciami i przechowuj je zawsze przy konkretnym zleceniu.",
+              },
+              {
+                icon: "📝",
+                title: "Notatki terenowe",
+                description: "Zapisuj ustalenia, pomiary i uwagi bezpośrednio z telefonu, od razu dla całego zespołu.",
+              },
+              {
+                icon: "📊",
+                title: "Statusy prac",
+                description: "Śledź etapy realizacji w czasie rzeczywistym i szybko reaguj na opóźnienia.",
+              },
+              {
+                icon: "📱",
+                title: "Dostęp z każdego urządzenia",
+                description: "Biuro i teren mają ten sam widok danych na komputerze, tablecie i smartfonie.",
+              },
+            ].map((feature) => (
+              <article
+                key={feature.title}
+                className="rounded-2xl border border-white/15 bg-white/[0.04] p-6 sm:p-7 backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/12 text-xl" aria-hidden>
+                  {feature.icon}
+                </div>
+                <h3 className="mt-5 text-xl font-semibold text-white">{feature.title}</h3>
+                <p className="mt-2 text-sm sm:text-base leading-relaxed text-slate-300">{feature.description}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <section
-        id="dla-kogo"
-        className="border-t border-gray-200 bg-white text-gray-900"
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-16">
-          <h2 className="text-2xl font-semibold text-center mb-8">Dla kogo?</h2>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-700">
-            <li className="rounded-xl border p-4 bg-gray-50">Firmy elektryczne</li>
-            <li className="rounded-xl border p-4 bg-gray-50">Serwisy techniczne</li>
-            <li className="rounded-xl border p-4 bg-gray-50">Ekipy montażowe</li>
-            <li className="rounded-xl border p-4 bg-gray-50">Właściciele i koordynatorzy</li>
-          </ul>
+      <section id="korzysci" className="relative scroll-mt-32 border-t border-white/10 bg-[#070d18]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_80%_10%,rgba(245,158,11,0.14),transparent_55%)]" aria-hidden />
+        <div className="relative max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+              Dlaczego firmy wybierają Elektrę?
+            </h2>
+            <p className="mt-4 text-slate-300 text-base sm:text-lg leading-relaxed">
+              Oszczędzaj czas, eliminuj chaos i trzymaj wszystkie informacje w jednym miejscu.
+            </p>
+          </div>
+
+          <div className="mt-10 sm:mt-12 grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+            {[
+              {
+                icon: "📞",
+                title: "Mniej telefonów",
+                description: "Zespół widzi aktualny status pracy w systemie, więc nie trzeba dopytywać o każdy etap.",
+              },
+              {
+                icon: "🗂️",
+                title: "Wszystko w jednym miejscu",
+                description: "Zlecenia, zdjęcia, notatki i postępy realizacji są zebrane w jednym spójnym panelu.",
+              },
+              {
+                icon: "⚡",
+                title: "Szybsza organizacja pracy",
+                description: "Planowanie i delegowanie zadań zajmuje mniej czasu, a każdy wie co ma zrobić.",
+              },
+              {
+                icon: "🎯",
+                title: "Lepsza kontrola firmy",
+                description: "Masz pełny obraz działań terenowych i łatwiej podejmujesz decyzje operacyjne.",
+              },
+            ].map((item) => (
+              <article
+                key={item.title}
+                className="rounded-2xl border border-white/15 bg-white/[0.04] p-6 sm:p-8 backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-400/35 bg-blue-500/12 text-xl" aria-hidden>
+                  {item.icon}
+                </div>
+                <h3 className="mt-5 text-2xl font-semibold text-white">{item.title}</h3>
+                <p className="mt-3 text-sm sm:text-base leading-relaxed text-slate-300">{item.description}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section
-        id="jak-to-dziala"
-        className="border-t border-gray-200 bg-slate-50 text-gray-900"
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-16">
-          <h2 className="text-2xl font-semibold text-center mb-8">Jak to działa</h2>
-          <ol className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-600">
-            <li className="rounded-2xl border bg-white p-5">
-              <span className="text-amber-600 font-bold">1.</span> Załóż konto i dodaj firmę
-            </li>
-            <li className="rounded-2xl border bg-white p-5">
-              <span className="text-amber-600 font-bold">2.</span> Twórz zlecenia i przypisuj pracowników
-            </li>
-            <li className="rounded-2xl border bg-white p-5">
-              <span className="text-amber-600 font-bold">3.</span> Śledź postęp i dokumentację w terenie
-            </li>
+      <section id="dla-kogo" className="relative scroll-mt-32 border-t border-white/10 bg-[#070d18]">
+        <div className="relative max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+              Dla kogo jest Elektra?
+            </h2>
+          </div>
+
+          <div className="mt-10 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+            {[
+              {
+                icon: "⚡",
+                title: "Firmy elektryczne",
+                description: "Dla zespołów realizujących instalacje, naprawy i przeglądy w różnych lokalizacjach.",
+              },
+              {
+                icon: "🛠️",
+                title: "Firmy serwisowe",
+                description: "Dla ekip serwisowych, które potrzebują szybkiej dokumentacji i jasnego podziału zadań.",
+              },
+              {
+                icon: "🏗️",
+                title: "Ekipy montażowe",
+                description: "Dla brygad montażowych pracujących równolegle na wielu obiektach i etapach.",
+              },
+              {
+                icon: "📋",
+                title: "Właściciele i koordynatorzy",
+                description: "Dla osób zarządzających firmą i harmonogramem, które potrzebują pełnej kontroli.",
+              },
+            ].map((audience) => (
+              <article
+                key={audience.title}
+                className="rounded-2xl border border-white/15 bg-white/[0.04] p-6 backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 text-xl" aria-hidden>
+                  {audience.icon}
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-white">{audience.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-300">{audience.description}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="jak-to-dziala" className="relative scroll-mt-32 border-t border-white/10 bg-[#070d18]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,rgba(59,130,246,0.12),transparent_55%)]" aria-hidden />
+        <div className="relative max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">Jak zacząć?</h2>
+          </div>
+
+          <ol className="mt-10 sm:mt-12 grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5">
+            {[
+              "Załóż konto pracodawcy",
+              "Dodaj pracowników",
+              "Twórz zlecenia",
+              "Monitoruj postęp",
+            ].map((step, index) => (
+              <li
+                key={step}
+                className="relative rounded-2xl border border-white/15 bg-white/[0.04] p-5 sm:p-6 backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+              >
+                {index < 3 && (
+                  <span
+                    className="hidden lg:block pointer-events-none absolute top-1/2 left-[calc(100%-0.2rem)] h-[2px] w-6 bg-gradient-to-r from-amber-400/70 to-blue-400/70"
+                    aria-hidden
+                  />
+                )}
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-amber-500/35 bg-amber-500/15 text-sm font-bold text-amber-300">
+                  {index + 1}
+                </span>
+                <p className="mt-4 text-base sm:text-lg font-medium leading-snug text-white">{step}</p>
+              </li>
+            ))}
           </ol>
         </div>
       </section>
 
-      <footer
-        id="kontakt"
-        className="border-t border-gray-200 bg-white text-gray-900"
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+      <section id="kontakt" className="relative scroll-mt-32 border-t border-white/10 bg-[#070d18]">
+        <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+          <div className="mx-auto max-w-3xl text-center rounded-2xl border border-white/15 bg-white/[0.04] p-8 sm:p-10 backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.35)]">
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">Kontakt</h2>
+            <p className="mt-3 text-slate-300 text-base sm:text-lg">
+              Masz pytania lub chcesz wdrożyć Elektrę w swojej firmie?
+            </p>
+            <a
+              href="mailto:jkvector.stystem@gmail.com"
+              className="mt-6 inline-flex items-center justify-center min-h-[44px] rounded-xl border border-amber-500/35 bg-amber-500/10 px-5 py-3 text-base font-medium text-amber-200 hover:bg-amber-500/15 transition-colors"
+            >
+              📧 jkvector.stystem@gmail.com
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/10 bg-[#050a14]">
+        <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <p>© {new Date().getFullYear()} Elektra — system dla firm technicznych</p>
-          <Link
-            href="/login"
-            className="font-medium text-amber-700 hover:text-amber-600"
-          >
+          <Link href="/login" className="font-medium text-amber-300 hover:text-amber-200 transition-colors">
             Zaloguj się do panelu
           </Link>
         </div>

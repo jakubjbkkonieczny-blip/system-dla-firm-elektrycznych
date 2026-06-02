@@ -1,5 +1,5 @@
 const BENEFITS = [
-  { text: "Bez instalacji" },
+  { text: "Działa w przeglądarce" },
   { text: "Bez chaosu" },
   { text: "Bez kombinowania" },
   { text: "Zawsze pod ręką" },

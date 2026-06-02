@@ -61,7 +61,7 @@ export function LandingHero() {
         {/* Main hero content */}
         <div className="relative z-10 flex-1 flex flex-col justify-center pt-20 sm:pt-24 lg:pt-[4.25rem]">
           <div className="max-w-[88rem] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-            <div className="max-w-[600px] mx-auto lg:mx-0 text-center lg:text-left landing-fade-up">
+            <div className="w-full max-w-[620px] mx-auto lg:mx-0 text-center lg:text-left landing-fade-up">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.06] px-4 py-1.5 text-sm text-slate-100 backdrop-blur-sm">
                 <span
                   className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
@@ -104,9 +104,6 @@ export function LandingHero() {
                 </a>
               </div>
 
-              <div className="mt-6 lg:hidden [&_.border]:border-white/15 [&_.bg-gray-100]:bg-white/10 [&_.text-gray-900]:text-white [&_.text-gray-600]:text-slate-400 [&_button]:bg-amber-500 [&_button]:text-slate-950">
-                <InstallApp />
-              </div>
             </div>
 
             {/* Mobile / tablet: photo below copy */}
@@ -130,6 +127,7 @@ export function LandingHero() {
               <HeroStatsCard value="24" label="Aktywne zlecenia" icon="jobs" />
               <HeroStatsCard value="8" label="Pracowników online" icon="users" showOnlineDot />
               <HeroStatsCard value="98%" label="Zadowolonych klientów" icon="satisfaction" />
+              <InstallApp />
             </div>
           </div>
         </div>
@@ -155,12 +153,15 @@ export function LandingHero() {
             icon="satisfaction"
             className="pointer-events-auto absolute right-16 xl:right-24 top-[61%] landing-float-slow"
           />
+          <div className="pointer-events-auto absolute right-16 xl:right-24 top-[78.5%] w-full max-w-[22.5rem]">
+            <InstallApp />
+          </div>
         </div>
       </section>
 
       {/* Dark benefits strip — connected to hero */}
       <div
-        id="korzysci"
+        id="hero-korzysci-strip"
         className="relative z-10 border-t border-white/10 bg-[#0a101c] py-8 sm:py-10"
       >
         <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
