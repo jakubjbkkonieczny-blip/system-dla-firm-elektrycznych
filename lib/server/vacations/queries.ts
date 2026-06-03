@@ -45,6 +45,7 @@ export async function findVacationsOverlappingMonth(params: {
   return prisma.vacationRequest.findMany({
     where: {
       companyId,
+      status: "APPROVED",
       ...(userId ? { userId } : {}),
       startDate: { lte: monthEnd },
       endDate: { gte: monthStart },

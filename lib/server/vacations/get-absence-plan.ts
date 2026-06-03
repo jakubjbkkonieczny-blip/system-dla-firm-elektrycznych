@@ -17,6 +17,7 @@ import {
   findActiveCompanyMembers,
   findVacationsOverlappingMonth,
 } from "@/lib/server/vacations/queries";
+import { getVacationUtilization } from "@/lib/server/vacations/get-vacation-utilization";
 
 function toBar(
   request: {
@@ -86,6 +87,7 @@ export async function getAbsencePlan(params: {
 
   const byUser = new Map<string, AbsencePlanBar[]>();
   for (const v of vacations) {
+    if (v.status !== "APPROVED") continue;
     if (!pageUserIds.includes(v.userId)) continue;
     const bar = toBar(v, year, monthNum, daysInMonth);
     if (!bar) continue;
@@ -100,6 +102,14 @@ export async function getAbsencePlan(params: {
     bars: byUser.get(member.userId) ?? [],
   }));
 
+  const utilization = userId
+    ? await getVacationUtilization({
+        companyId,
+        userId,
+        month: formatMonthParamFromParts(year, monthNum),
+      })
+    : null;
+
   return {
     month: formatMonthParamFromParts(year, monthNum),
     monthLabel: getMonthLabel(year, monthNum),
@@ -109,5 +119,6 @@ export async function getAbsencePlan(params: {
     pageSize,
     totalEmployees,
     hasMore: offset + pageSize < totalEmployees,
+    utilization,
   };
 }

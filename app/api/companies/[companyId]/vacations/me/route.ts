@@ -5,8 +5,7 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { requireOwnerOrAdmin } from "@/lib/server/attendance/require-owner-admin";
-import { getVacationsDashboard } from "@/lib/server/vacations/get-vacations-dashboard";
+import { getEmployeeVacationDashboard } from "@/lib/server/vacations/get-employee-vacation-dashboard";
 import { createVacationRequest } from "@/lib/server/vacations/vacation-actions";
 import type { VacationStatus } from "@/lib/vacations/types";
 
@@ -19,34 +18,27 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     const sessionUser = await requireSessionUser();
     const { companyId } = await params;
 
-    const me = await requireActiveMember(companyId, sessionUser.id);
-    requireOwnerOrAdmin(me);
+    await requireActiveMember(companyId, sessionUser.id);
 
     const url = new URL(req.url);
-    const statusParam = url.searchParams.get("status") ?? undefined;
-    const userId = url.searchParams.get("userId") ?? undefined;
-    const utilizationUserId = url.searchParams.get("utilizationUserId") ?? undefined;
     const month = url.searchParams.get("month") ?? undefined;
+    const statusParam = url.searchParams.get("status") ?? undefined;
 
     const status =
       statusParam && VALID_STATUSES.includes(statusParam as VacationStatus)
         ? statusParam
         : undefined;
 
-    const payload = await getVacationsDashboard({
+    const payload = await getEmployeeVacationDashboard({
       companyId,
-      status,
-      userId: userId || undefined,
-      utilizationUserId: utilizationUserId || undefined,
+      userId: sessionUser.id,
       month,
+      status,
     });
 
     return NextResponse.json(payload, { status: 200 });
   } catch (e: unknown) {
-    return handleSessionRouteErrorOr(e, (msg) => {
-      if (msg === "FORBIDDEN") return 403;
-      return companyRouteErrorStatus(msg);
-    });
+    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
   }
 }
 
@@ -55,23 +47,21 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const sessionUser = await requireSessionUser();
     const { companyId } = await params;
 
-    const me = await requireActiveMember(companyId, sessionUser.id);
-    requireOwnerOrAdmin(me);
+    await requireActiveMember(companyId, sessionUser.id);
 
     const body = await req.json();
-    const userId = String(body?.userId ?? "").trim();
     const type = String(body?.type ?? "").trim();
     const startDate = String(body?.startDate ?? "").trim();
     const endDate = String(body?.endDate ?? "").trim();
     const reason = body?.reason != null ? String(body.reason) : null;
 
-    if (!userId || !type || !startDate || !endDate) {
+    if (!type || !startDate || !endDate) {
       return NextResponse.json({ error: "MISSING_FIELDS" }, { status: 400 });
     }
 
     const created = await createVacationRequest({
       companyId,
-      userId,
+      userId: sessionUser.id,
       type,
       startDate,
       endDate,
@@ -81,7 +71,6 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ id: created.id }, { status: 201 });
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, (msg) => {
-      if (msg === "FORBIDDEN") return 403;
       if (
         msg === "INVALID_TYPE" ||
         msg === "INVALID_DATES" ||

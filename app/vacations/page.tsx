@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import { AdminVacationDashboard } from "@/components/vacations/AdminVacationDashboard";
+import { EmployeeVacationDashboard } from "@/components/vacations/EmployeeVacationDashboard";
 import { apiFetch } from "@/lib/api";
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import Link from "next/link";
@@ -73,16 +74,9 @@ export default function VacationsPage() {
     );
   }
 
-  if (!isOwnerOrAdmin) {
-    return (
-      <div className="p-6 max-w-lg">
-        <h1 className="text-xl font-semibold text-gray-900">Urlopy</h1>
-        <p className="text-sm text-gray-600 mt-2">
-          Moduł urlopów jest dostępny dla właściciela i administratora firmy.
-        </p>
-      </div>
-    );
+  if (isOwnerOrAdmin) {
+    return <AdminVacationDashboard companyId={companyId} />;
   }
 
-  return <AdminVacationDashboard companyId={companyId} />;
+  return <EmployeeVacationDashboard companyId={companyId} />;
 }

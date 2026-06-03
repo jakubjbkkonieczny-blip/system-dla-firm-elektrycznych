@@ -11,7 +11,16 @@ const MONTH_NAMES = [
   "Październik",
   "Listopad",
   "Grudzień",
-];
+] as const;
+
+export const VACATION_MONTH_NAMES: readonly string[] = MONTH_NAMES;
+
+export function getVacationYearOptions(viewedYear: number): number[] {
+  const anchor = new Date().getFullYear();
+  const min = Math.min(anchor - 4, viewedYear);
+  const max = Math.max(anchor + 3, viewedYear);
+  return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+}
 
 export function formatVacationDateInput(date = new Date()): string {
   const y = date.getFullYear();

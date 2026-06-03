@@ -13,6 +13,7 @@ import {
   findCompanyVacationRequests,
   findTodayApprovedAbsences,
 } from "@/lib/server/vacations/queries";
+import { getVacationUtilization } from "@/lib/server/vacations/get-vacation-utilization";
 
 function serializeRequest(row: {
   id: string;
@@ -47,16 +48,21 @@ export async function getVacationsDashboard(params: {
   companyId: string;
   status?: string;
   userId?: string;
+  utilizationUserId?: string;
+  month?: string;
 }): Promise<VacationDashboardResponse> {
-  const { companyId, status, userId } = params;
+  const { companyId, status, userId, utilizationUserId, month } = params;
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
-  const [counts, requests, todayAbsences, members] = await Promise.all([
+  const [counts, requests, todayAbsences, members, utilization] = await Promise.all([
     countVacationsByStatus(companyId),
     findCompanyVacationRequests({ companyId, status, userId, limit: 100 }),
     findTodayApprovedAbsences(companyId, today),
     findActiveCompanyMembers(companyId),
+    utilizationUserId
+      ? getVacationUtilization({ companyId, userId: utilizationUserId, month })
+      : Promise.resolve(null),
   ]);
 
   return {
@@ -80,5 +86,6 @@ export async function getVacationsDashboard(params: {
       displayName: getMemberDisplayName(m.user),
       email: m.user.email,
     })),
+    utilization,
   };
 }

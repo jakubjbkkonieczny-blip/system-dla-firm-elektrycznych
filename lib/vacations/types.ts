@@ -32,6 +32,26 @@ export type VacationTodayAbsence = {
   endDate: string;
 };
 
+export type VacationTypeUsage = {
+  days: number;
+  hours: number;
+};
+
+export type VacationUtilization = {
+  userId: string;
+  displayName: string;
+  month: {
+    days: number;
+    hours: number;
+    byType: Record<VacationType, VacationTypeUsage>;
+  };
+  year: {
+    days: number;
+    hours: number;
+    byType: Record<VacationType, VacationTypeUsage>;
+  };
+};
+
 export type VacationDashboardResponse = {
   summary: {
     pending: number;
@@ -42,6 +62,16 @@ export type VacationDashboardResponse = {
   requests: VacationRequestRow[];
   todayAbsences: VacationTodayAbsence[];
   employees: VacationEmployeeRef[];
+  utilization: VacationUtilization | null;
+};
+
+export type EmployeeVacationDashboardResponse = {
+  month: string;
+  monthLabel: string;
+  usedMonth: { days: number; hours: number };
+  usedYear: { days: number; hours: number };
+  yearBreakdown: Record<VacationType, number>;
+  requests: VacationRequestRow[];
 };
 
 export type AbsencePlanBar = {
@@ -69,4 +99,5 @@ export type AbsencePlanResponse = {
   pageSize: number;
   totalEmployees: number;
   hasMore: boolean;
+  utilization: VacationUtilization | null;
 };

@@ -166,7 +166,7 @@ export function AppShell({
             <SidebarItem href="/attendance" label="Obecność" icon="🕐" />
           )}
 
-          {isOwnerOrAdmin && (
+          {companyId && (
             <SidebarItem href="/vacations" label="Urlopy" icon="🏖️" />
           )}
 
