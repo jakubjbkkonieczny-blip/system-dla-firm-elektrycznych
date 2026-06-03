@@ -25,22 +25,6 @@ const ACTION_LABELS: Record<AttendanceAction, string> = {
   finish_work: "Zakończ pracę",
 };
 
-async function compressImageFile(file: File): Promise<string | undefined> {
-  if (!file.type.startsWith("image/")) return undefined;
-  const bitmap = await createImageBitmap(file);
-  const max = 640;
-  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-  const w = Math.round(bitmap.width * scale);
-  const h = Math.round(bitmap.height * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return undefined;
-  ctx.drawImage(bitmap, 0, 0, w, h);
-  return canvas.toDataURL("image/webp", 0.65);
-}
-
 export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
   const [session, setSession] = useState<AttendanceMeResponse | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -48,7 +32,6 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
   const [err, setErr] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [locationText, setLocationText] = useState("");
-  const [proofFile, setProofFile] = useState<File | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const todayIso = formatAttendanceDateInput();
@@ -78,21 +61,15 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
     setSession(applyOptimisticAttendanceAction(session, action));
 
     try {
-      let proofPhotoBase64: string | undefined;
-      if (action === "finish_work" && proofFile) {
-        proofPhotoBase64 = await compressImageFile(proofFile);
-      }
       const res = (await apiFetch(`/api/companies/${companyId}/attendance/me`, {
         method: "POST",
         body: JSON.stringify({
           action,
           locationText: action === "start_work" ? locationText : undefined,
-          proofPhotoBase64,
         }),
       })) as AttendanceActionResponse;
       setSession(res.session);
       setSuccess(res.message);
-      if (action === "finish_work") setProofFile(null);
     } catch (e: unknown) {
       setSession(previous);
       setErr(e instanceof Error ? e.message : "ACTION_ERROR");
@@ -166,19 +143,6 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
           onChange={setLocationText}
           disabled={busy}
         />
-      )}
-
-      {state === "working" && !sessionLoading && (
-        <label className="block text-sm">
-          <span className="text-gray-600">Zdjęcie potwierdzające (opcjonalne, przy zakończeniu)</span>
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="mt-1 w-full text-sm"
-            onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
-          />
-        </label>
       )}
 
       {!sessionLoading && actions.length > 0 && (

@@ -9,7 +9,6 @@ import type {
   AttendanceMeResponse,
 } from "@/lib/attendance/types";
 import { todaySessionDate } from "@/lib/server/attendance/session-date";
-import { saveOptionalProofPhoto } from "@/lib/server/attendance/save-proof-photo";
 
 type SessionRow = {
   id: string;
@@ -76,7 +75,6 @@ export async function performAttendanceAction(params: {
   userId: string;
   action: AttendanceAction;
   locationText?: string;
-  proofPhotoBase64?: string;
 }): Promise<AttendanceActionResponse> {
   const sessionDate = todaySessionDate();
   const now = new Date();
@@ -156,10 +154,6 @@ export async function performAttendanceAction(params: {
       },
       now
     );
-    const proof = params.proofPhotoBase64
-      ? await saveOptionalProofPhoto(session.id, params.proofPhotoBase64)
-      : null;
-
     session = await prisma.attendanceSession.update({
       where: { id: session.id },
       data: {
@@ -167,12 +161,6 @@ export async function performAttendanceAction(params: {
         endedAt: now,
         totalWorkedMinutes: worked,
         breakStartedAt: null,
-        ...(proof
-          ? {
-              checkOutPhotoUrl: proof.url,
-              checkOutPhotoExpiresAt: proof.expiresAt,
-            }
-          : {}),
       },
     });
     message = `Zakończono pracę o ${formatTimeHm(now.toISOString())}`;

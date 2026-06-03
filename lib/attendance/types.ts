@@ -24,11 +24,6 @@ export type AttendanceEmployeeRef = {
   email: string;
 };
 
-export type AttendancePhotoView = {
-  url: string | null;
-  expired: boolean;
-};
-
 export type AttendanceDashboardRow = {
   userId: string;
   displayName: string;
@@ -39,7 +34,6 @@ export type AttendanceDashboardRow = {
   workDurationMs: number | null;
   breakDurationMs: number | null;
   locationText: string | null;
-  proofPhoto: AttendancePhotoView;
   sessionId: string | null;
 };
 

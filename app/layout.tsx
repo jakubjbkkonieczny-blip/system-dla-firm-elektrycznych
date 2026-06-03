@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { AppShell } from "@/components/AppShell";
-import { getMeData } from "@/lib/server/me/get-me";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,13 +19,7 @@ export const metadata: Metadata = {
   description: "System ogarniania zleceń dla ekip technicznych",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  let initialDisplayName: string | null = null;
-  try {
-    const me = await getMeData();
-    initialDisplayName = me.displayName;
-  } catch {}
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl">
       <head>
@@ -37,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
-          <AppShell initialDisplayName={initialDisplayName}>{children}</AppShell>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>

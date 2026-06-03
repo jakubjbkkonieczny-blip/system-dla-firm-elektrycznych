@@ -13,6 +13,7 @@ import {
 type User = {
   uid: string;
   email?: string | null;
+  displayName?: string | null;
 };
 
 type AuthCtx = {
@@ -27,6 +28,7 @@ const Ctx = createContext<AuthCtx | null>(null);
 type AuthMeResponse = {
   id?: unknown;
   email?: unknown;
+  displayName?: unknown;
 };
 
 async function fetchSessionUser(): Promise<User | null> {
@@ -47,6 +49,8 @@ async function fetchSessionUser(): Promise<User | null> {
     return {
       uid: data.id,
       email: typeof data.email === "string" ? data.email : null,
+      displayName:
+        typeof data.displayName === "string" ? data.displayName : null,
     };
   } catch {
     return null;

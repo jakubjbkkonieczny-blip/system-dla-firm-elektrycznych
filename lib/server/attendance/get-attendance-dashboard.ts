@@ -4,7 +4,6 @@ import {
   computeBreakDurationMs,
   computeWorkDurationMs,
 } from "@/lib/attendance/duration";
-import { toAttendancePhotoView } from "@/lib/attendance/photos";
 import { toDashboardStatus } from "@/lib/attendance/status";
 import type {
   AttendanceDashboardResponse,
@@ -44,8 +43,6 @@ function serializeSessionRow(
     endedAt: Date | null;
     totalBreakMinutes: number;
     totalWorkedMinutes: number | null;
-    checkOutPhotoUrl: string | null;
-    checkOutPhotoExpiresAt: Date | null;
     locationText: string | null;
     user: { id: string; email: string; displayName: string | null };
   },
@@ -73,11 +70,6 @@ function serializeSessionRow(
     workDurationMs: computeWorkDurationMs(durationInput),
     breakDurationMs: computeBreakDurationMs(durationInput),
     locationText: session.locationText,
-    proofPhoto: toAttendancePhotoView(
-      session.checkOutPhotoUrl,
-      session.checkOutPhotoExpiresAt,
-      now
-    ),
     sessionId: session.id,
   };
 }
@@ -98,7 +90,6 @@ function absentRow(user: {
     workDurationMs: null,
     breakDurationMs: null,
     locationText: null,
-    proofPhoto: { url: null, expired: false },
     sessionId: null,
   };
 }

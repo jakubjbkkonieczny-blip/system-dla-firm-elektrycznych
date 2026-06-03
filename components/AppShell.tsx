@@ -42,21 +42,13 @@ function SidebarItem({
   );
 }
 
-export function AppShell({
-  children,
-  initialDisplayName,
-}: {
-  children: React.ReactNode;
-  initialDisplayName?: string | null;
-}) {
+export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const companyId = useActiveCompanyId();
 
   const [role, setRole] = useState<Role>("staff");
-  const [displayName, setDisplayName] = useState<string>(initialDisplayName ?? "");
-
   const [roleLoaded, setRoleLoaded] = useState(false);
 
   const hideShell =
@@ -108,14 +100,6 @@ export function AppShell({
     };
   }, [isAuthed, companyId, hideShell]);
 
-  useEffect(() => {
-    if (!isAuthed || hideShell) {
-      setDisplayName("");
-      return;
-    }
-    setDisplayName(initialDisplayName ?? "");
-  }, [isAuthed, hideShell, initialDisplayName, user?.uid, pathname]);
-
   const isOwnerOrAdmin = role === "owner" || role === "admin";
 
   const roleLabel = useMemo(() => {
@@ -134,7 +118,8 @@ export function AppShell({
   if (!user) return <>{children}</>;
   if (!roleLoaded && companyId) return null;
 
-  const topLabel = displayName.trim() || user.email || "Użytkownik";
+  const topLabel =
+    (user.displayName ?? "").trim() || user.email || "Użytkownik";
 
   return (
    <div className="h-screen bg-gray-50 flex overflow-hidden">

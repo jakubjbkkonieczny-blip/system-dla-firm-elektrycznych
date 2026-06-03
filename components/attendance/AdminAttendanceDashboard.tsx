@@ -1,7 +1,6 @@
 "use client";
 
 import { AttendanceHoursModal } from "@/components/attendance/AttendanceHoursModal";
-import { AttendancePhotoCell } from "@/components/attendance/AttendancePhotoCell";
 import { AttendanceStatusBadge } from "@/components/attendance/AttendanceStatusBadge";
 import { apiFetch } from "@/lib/api";
 import {
@@ -10,7 +9,6 @@ import {
   formatTimeHm,
 } from "@/lib/attendance/dates";
 import { formatWorkDuration } from "@/lib/attendance/duration";
-import { ATTENDANCE_PHOTO_HELPER_TEXT } from "@/lib/attendance/photos";
 import { getAttendanceStatusColors } from "@/lib/attendance/labels";
 import type {
   AttendanceDashboardResponse,
@@ -97,10 +95,6 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
         Widok pokazuje wybrany dzień. Historia godzin jest dostępna osobno.
       </p>
 
-      <p className="text-xs text-gray-500 border border-gray-200 bg-gray-50 rounded-lg px-3 py-2">
-        {ATTENDANCE_PHOTO_HELPER_TEXT}
-      </p>
-
       {err && (
         <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg">
           {err}
@@ -172,7 +166,7 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
       </div>
 
       <div className="border rounded-lg bg-white overflow-x-auto">
-        <table className="w-full text-sm min-w-[900px]">
+        <table className="w-full text-sm min-w-[760px]">
           <thead>
             <tr className="border-b bg-gray-50 text-left text-gray-600">
               <th className="p-3 font-medium">Pracownik</th>
@@ -182,14 +176,13 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
               <th className="p-3 font-medium">Czas pracy</th>
               <th className="p-3 font-medium">Przerwy</th>
               <th className="p-3 font-medium">Lokalizacja</th>
-              <th className="p-3 font-medium">Zdjęcie (opc.)</th>
               <th className="p-3 font-medium">Akcje</th>
             </tr>
           </thead>
           <tbody>
             {!data?.rows.length ? (
               <tr>
-                <td colSpan={9} className="p-6 text-center text-gray-500">
+                <td colSpan={8} className="p-6 text-center text-gray-500">
                   {busy ? "Ładowanie..." : "Brak danych obecności dla wybranego dnia."}
                 </td>
               </tr>
@@ -219,17 +212,10 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
                   <td className="p-3 text-gray-700">
                     {formatWorkDuration(row.breakDurationMs)}
                   </td>
-                  <td className="p-3 text-gray-700 max-w-[180px]">
+                  <td className="p-3 text-gray-700 max-w-[220px]">
                     {row.locationText || "—"}
                   </td>
-                  <td className="p-3">
-                    <AttendancePhotoCell
-                      photo={row.proofPhoto}
-                      label="Dowód"
-                      allowDownload
-                    />
-                  </td>
-                  <td className="p-3">
+                  <td className="p-3 whitespace-nowrap">
                     <button
                       type="button"
                       className="text-sm px-2 py-1 rounded border bg-white hover:bg-gray-50"

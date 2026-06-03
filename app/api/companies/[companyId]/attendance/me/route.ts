@@ -42,7 +42,6 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const body = (await req.json()) as {
       action?: string;
       locationText?: string;
-      proofPhotoBase64?: string;
     };
 
     const action = body.action as AttendanceAction;
@@ -55,7 +54,6 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       userId: sessionUser.id,
       action,
       locationText: body.locationText,
-      proofPhotoBase64: body.proofPhotoBase64,
     });
 
     return NextResponse.json(result, { status: 200 });
@@ -66,8 +64,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
         msg === "ALREADY_FINISHED" ||
         msg === "INVALID_STATE" ||
         msg === "NOT_STARTED" ||
-        msg === "NO_BREAK_START" ||
-        msg === "PHOTO_TOO_LARGE"
+        msg === "NO_BREAK_START"
       ) {
         return 400;
       }
