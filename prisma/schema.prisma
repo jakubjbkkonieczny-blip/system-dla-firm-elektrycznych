@@ -28,7 +28,8 @@ model User {
   memberships         CompanyMember[]
   createdJobs         Job[]               @relation("JobCreatedBy")
   jobAssignments      JobAssignment[]
-  completedStages     JobStage[]          @relation("StageCompletedBy")
+  completedStages     JobStage[]              @relation("StageCompletedBy")
+  stageNoteEdits      JobStageNoteHistory[]   @relation("StageNoteEditedBy")
   statusChanges       JobStatusHistory[]  @relation("StatusChangedBy")
   auditLogs           AuditLog[]
   idempotencyKeys     IdempotencyKey[]
@@ -54,6 +55,7 @@ model Company {
   jobs                 Job[]
   jobAssignments       JobAssignment[]
   jobStages            JobStage[]
+  jobStageNoteHistory  JobStageNoteHistory[]
   jobStagePhotos       JobStagePhoto[]
   jobStatusHistory     JobStatusHistory[]
   auditLogs            AuditLog[]
@@ -96,7 +98,7 @@ model Job {
   description       String
   preferredFrom     DateTime?
   preferredTo       DateTime?
-  priority          String   // normal, urgent
+  priority          String   // normal, important (legacy: urgent, standard, high)
   status            String   // new, scheduled, in_progress, done, cancelled
   statusUpdatedAt   DateTime @default(now())
 
@@ -110,6 +112,7 @@ model Job {
   createdBy         User               @relation("JobCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
   assignments       JobAssignment[]
   stages            JobStage[]
+  stageNoteHistory  JobStageNoteHistory[]
   statusHistory     JobStatusHistory[]
 
   @@unique([companyId, jobNumber])
@@ -162,6 +165,7 @@ model JobStage {
   job                Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   completedBy        User?    @relation("StageCompletedBy", fields: [completedByUserId], references: [id], onDelete: SetNull)
   photos             JobStagePhoto[]
+  noteHistory        JobStageNoteHistory[]
 
   @@index([companyId])
   @@index([jobId])
@@ -169,6 +173,26 @@ model JobStage {
   @@index([companyId, plannedDate])
   @@index([companyId, status])
   @@index([jobId, sortOrder])
+}
+
+model JobStageNoteHistory {
+  id             String   @id @default(cuid())
+  companyId      String
+  jobId          String
+  stageId        String
+  editedByUserId String
+  previousNote   String
+  newNote        String
+  createdAt      DateTime @default(now())
+
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job            Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  stage          JobStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  editedBy       User     @relation("StageNoteEditedBy", fields: [editedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([companyId, jobId, stageId, createdAt])
+  @@index([stageId, createdAt])
+  @@index([editedByUserId])
 }
 
 model JobStagePhoto {

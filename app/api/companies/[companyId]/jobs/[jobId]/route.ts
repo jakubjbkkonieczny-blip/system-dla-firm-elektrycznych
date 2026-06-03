@@ -17,7 +17,7 @@ import {
 import {
   hasJobDetailPatchKeys,
   parseJobDetailPatchBody,
-  validateJobDetailPatch,
+  jobDetailPatchValidationError,
 } from "@/lib/server/jobs/job-detail-fields";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
@@ -104,8 +104,15 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       }
 
       const detail = parseJobDetailPatchBody(body);
-      if (!validateJobDetailPatch(detail)) {
-        return NextResponse.json({ error: "MISSING_FIELDS" }, { status: 400 });
+      if (!detail) {
+        return NextResponse.json({ error: "INVALID_PRIORITY" }, { status: 400 });
+      }
+      const detailErr = jobDetailPatchValidationError(detail);
+      if (detailErr) {
+        return NextResponse.json(
+          { error: detailErr === "MISSING_FIELDS" ? "MISSING_FIELDS" : "INVALID_PREFERRED_RANGE", message: detailErr },
+          { status: 400 }
+        );
       }
 
       Object.assign(data, detail);

@@ -10,7 +10,9 @@ import {
   type CompanyMemberOption,
   filterAssignableMembers,
 } from "@/lib/company/member-options";
-import { getJobPriorityLabel } from "@/lib/jobs/job-priority";
+import { JobDateRangeEditor } from "@/components/jobs/JobDateRangeEditor";
+import { JobPrioritySelect, type JobPriority } from "@/lib/jobs/job-priority";
+import { validatePreferredRange } from "@/lib/jobs/job-detail-form";
 
 export default function NewJobPage() {
   const { user, loading } = useAuth();
@@ -29,7 +31,7 @@ export default function NewJobPage() {
   const [description, setDescription] = useState("");
   const [preferredFrom, setPreferredFrom] = useState("");
   const [preferredTo, setPreferredTo] = useState("");
-  const [priority, setPriority] = useState<"normal" | "urgent">("normal");
+  const [priority, setPriority] = useState<JobPriority>("normal");
 
   const [members, setMembers] = useState<CompanyMemberOption[]>([]);
   const [assignedToUids, setAssignedToUids] = useState<string[]>([]);
@@ -69,6 +71,13 @@ export default function NewJobPage() {
 
   async function create() {
     if (!companyId) return;
+
+    const rangeErr = validatePreferredRange(preferredFrom, preferredTo);
+    if (rangeErr) {
+      setErr(rangeErr);
+      return;
+    }
+
     setBusy(true);
     setErr(null);
 
@@ -172,31 +181,28 @@ export default function NewJobPage() {
         onChange={(e) => setDescription(e.target.value)}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input
-          className="border rounded px-3 py-2"
-          placeholder="Preferowany termin od (np. 2026-02-25 10:00)"
-          value={preferredFrom}
-          onChange={(e) => setPreferredFrom(e.target.value)}
-        />
-        <input
-          className="border rounded px-3 py-2"
-          placeholder="Preferowany termin do (opcjonalnie)"
-          value={preferredTo}
-          onChange={(e) => setPreferredTo(e.target.value)}
-        />
-      </div>
+      <JobDateRangeEditor
+        preferredFrom={preferredFrom}
+        preferredTo={preferredTo}
+        disabled={busy}
+        onChange={({ preferredFrom: from, preferredTo: to }) => {
+          setPreferredFrom(from);
+          setPreferredTo(to);
+        }}
+      />
 
-      <div className="flex gap-2 items-center">
-        <label className="text-sm">Priorytet:</label>
-        <select
-          className="border rounded px-3 py-2"
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium text-gray-700" id="new-job-priority-label">
+          Priorytet
+        </span>
+        <JobPrioritySelect
+          id="new-job-priority"
           value={priority}
-          onChange={(e) => setPriority(e.target.value as "normal" | "urgent")}
-        >
-          <option value="normal">{getJobPriorityLabel("normal")}</option>
-          <option value="urgent">{getJobPriorityLabel("urgent")}</option>
-        </select>
+          onChange={setPriority}
+          disabled={busy}
+          aria-label="Priorytet zlecenia"
+          aria-labelledby="new-job-priority-label"
+        />
       </div>
 
       <div className="space-y-3 border rounded-xl p-4 bg-white">

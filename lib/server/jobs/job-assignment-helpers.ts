@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db/prisma";
+import { normalizeJobPriority } from "@/lib/server/jobs/job-priority";
 
 export type JobVisibilityMember = {
   role: string;
@@ -55,13 +56,20 @@ export function canMemberSeeJob(
   return assignedIds.includes(userId) || scope === "all";
 }
 
-export function jobWithAssignmentFields<T extends { assignments: { userId: string }[] }>(
+export function jobWithAssignmentFields<
+  T extends { assignments: { userId: string }[]; priority?: string },
+>(
   job: T
-): Omit<T, "assignments"> & { assignedToUids: string[]; assignedTo: string | null } {
+): Omit<T, "assignments"> & {
+  priority: ReturnType<typeof normalizeJobPriority>;
+  assignedToUids: string[];
+  assignedTo: string | null;
+} {
   const assignedToUids = readAssignedToUids(job);
-  const { assignments: _assignments, ...rest } = job;
+  const { assignments: _assignments, priority: rawPriority, ...rest } = job;
   return {
     ...rest,
+    priority: normalizeJobPriority(rawPriority),
     assignedToUids,
     assignedTo: assignedToUids[0] || null,
   };

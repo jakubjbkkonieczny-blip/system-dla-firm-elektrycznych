@@ -1,4 +1,13 @@
 import "server-only";
+import {
+  PREFERRED_RANGE_ERROR,
+  parsePreferredDateTime,
+  toPreferredIso,
+} from "@/lib/jobs/preferred-schedule";
+import {
+  parseJobPriorityForWrite,
+  type JobPriority,
+} from "@/lib/server/jobs/job-priority";
 
 export const JOB_DETAIL_PATCH_KEYS = [
   "customerName",
@@ -23,7 +32,7 @@ export type JobDetailPatchInput = {
   description: string;
   preferredFrom: Date | null;
   preferredTo: Date | null;
-  priority: "normal" | "urgent";
+  priority: JobPriority;
 };
 
 export function hasJobDetailPatchKeys(body: Record<string, unknown>): boolean {
@@ -32,7 +41,7 @@ export function hasJobDetailPatchKeys(body: Record<string, unknown>): boolean {
 
 export function parseJobDetailPatchBody(
   body: Record<string, unknown>
-): JobDetailPatchInput {
+): JobDetailPatchInput | null {
   const customerName = (typeof body.customerName === "string" ? body.customerName : "").trim();
   const customerPhone = (typeof body.customerPhone === "string" ? body.customerPhone : "").trim();
   const addressCity = (typeof body.addressCity === "string" ? body.addressCity : "").trim();
@@ -42,7 +51,15 @@ export function parseJobDetailPatchBody(
   const description = (typeof body.description === "string" ? body.description : "").trim();
   const preferredFrom = (typeof body.preferredFrom === "string" ? body.preferredFrom : "").trim();
   const preferredTo = (typeof body.preferredTo === "string" ? body.preferredTo : "").trim();
-  const priority = body.priority === "urgent" ? "urgent" : "normal";
+  let priority: JobPriority = "normal";
+  if (body.priority !== undefined) {
+    const parsed = parseJobPriorityForWrite(body.priority);
+    if (parsed === null) return null;
+    priority = parsed;
+  }
+
+  const fromIso = preferredFrom ? toPreferredIso(preferredFrom) : "";
+  const toIso = preferredTo ? toPreferredIso(preferredTo) : "";
 
   return {
     customerName,
@@ -52,18 +69,52 @@ export function parseJobDetailPatchBody(
     addressZip: addressZip || null,
     addressNotes: addressNotes || null,
     description,
-    preferredFrom: preferredFrom ? new Date(preferredFrom) : null,
-    preferredTo: preferredTo ? new Date(preferredTo) : null,
+    preferredFrom: fromIso ? parsePreferredDateTime(fromIso) : null,
+    preferredTo: toIso ? parsePreferredDateTime(toIso) : null,
     priority,
   };
 }
 
 export function validateJobDetailPatch(fields: JobDetailPatchInput): boolean {
-  return Boolean(
-    fields.customerName &&
-      fields.customerPhone &&
-      fields.addressCity &&
-      fields.addressStreet &&
-      fields.description
-  );
+  if (
+    !fields.customerName ||
+    !fields.customerPhone ||
+    !fields.addressCity ||
+    !fields.addressStreet ||
+    !fields.description
+  ) {
+    return false;
+  }
+
+  if (fields.preferredFrom && fields.preferredTo) {
+    if (fields.preferredTo.getTime() < fields.preferredFrom.getTime()) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function jobDetailPatchValidationError(
+  fields: JobDetailPatchInput
+): string | null {
+  if (
+    !fields.customerName ||
+    !fields.customerPhone ||
+    !fields.addressCity ||
+    !fields.addressStreet ||
+    !fields.description
+  ) {
+    return "MISSING_FIELDS";
+  }
+
+  if (
+    fields.preferredFrom &&
+    fields.preferredTo &&
+    fields.preferredTo.getTime() < fields.preferredFrom.getTime()
+  ) {
+    return PREFERRED_RANGE_ERROR;
+  }
+
+  return null;
 }

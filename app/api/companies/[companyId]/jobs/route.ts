@@ -16,6 +16,15 @@ import {
   validateAssignedMembers,
 } from "@/lib/server/jobs/job-assignment-helpers";
 import { allocateNextJobNumber } from "@/lib/server/jobs/job-number";
+import {
+  parsePreferredDateTime,
+  PREFERRED_RANGE_ERROR,
+  toPreferredIso,
+} from "@/lib/jobs/preferred-schedule";
+import {
+  parseJobPriorityForWrite,
+  type JobPriority,
+} from "@/lib/server/jobs/job-priority";
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -35,7 +44,7 @@ type CreateJobBody = {
   description: string;
   preferredFrom?: string;
   preferredTo?: string;
-  priority?: "normal" | "urgent";
+  priority?: string;
   assignedToUids?: string[];
 };
 
@@ -109,11 +118,31 @@ export async function POST(
     const description = (body.description || "").trim();
     const preferredFrom = (body.preferredFrom || "").trim();
     const preferredTo = (body.preferredTo || "").trim();
-    const priority = body.priority === "urgent" ? "urgent" : "normal";
+    const priorityParsed = parseJobPriorityForWrite(body.priority);
+    if (priorityParsed === null) {
+      return NextResponse.json({ error: "INVALID_PRIORITY" }, { status: 400 });
+    }
+    const priority: JobPriority = priorityParsed;
     const assignedToUids = normalizeAssignedToUids(body.assignedToUids);
 
     if (!customerName || !customerPhone || !addressCity || !addressStreet || !description) {
       return NextResponse.json({ error: "MISSING_FIELDS" }, { status: 400 });
+    }
+
+    const fromIso = preferredFrom ? toPreferredIso(preferredFrom) : "";
+    const toIso = preferredTo ? toPreferredIso(preferredTo) : "";
+    const preferredFromDate = fromIso ? parsePreferredDateTime(fromIso) : null;
+    const preferredToDate = toIso ? parsePreferredDateTime(toIso) : null;
+
+    if (
+      preferredFromDate &&
+      preferredToDate &&
+      preferredToDate.getTime() < preferredFromDate.getTime()
+    ) {
+      return NextResponse.json(
+        { error: "INVALID_PREFERRED_RANGE", message: PREFERRED_RANGE_ERROR },
+        { status: 400 }
+      );
     }
 
     const jobId = await prisma.$transaction(async (tx) => {
@@ -141,8 +170,8 @@ export async function POST(
           addressZip: addressZip || null,
           addressNotes: addressNotes || null,
           description,
-          preferredFrom: preferredFrom ? new Date(preferredFrom) : null,
-          preferredTo: preferredTo ? new Date(preferredTo) : null,
+          preferredFrom: preferredFromDate,
+          preferredTo: preferredToDate,
           priority,
           status: "new",
           statusUpdatedAt: new Date(),

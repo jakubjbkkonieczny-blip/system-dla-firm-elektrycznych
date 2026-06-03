@@ -17,11 +17,14 @@ import {
   filterAssignableMembers,
 } from "@/lib/company/member-options";
 import {
-  formatPreferredDisplay,
   jobToDetailsDraft,
   type JobDetailsDraft,
+  validatePreferredRange,
 } from "@/lib/jobs/job-detail-form";
-import { getJobPriorityLabel, JobPriorityBadge } from "@/lib/jobs/job-priority";
+import { JobDateRangeEditor } from "@/components/jobs/JobDateRangeEditor";
+import { JobDateRangeView } from "@/components/jobs/JobDateRangeView";
+import { JobPriorityBadge, JobPrioritySelect } from "@/lib/jobs/job-priority";
+import { JobStageNoteHistoryModal } from "@/components/jobs/JobStageNoteHistoryModal";
 
 
 
@@ -45,7 +48,7 @@ status: "do_wykonania" | "zakonczony";
 
 data_zakonczenia?: string | null; // YYYY-MM-DD
 
-zakonczone_przez?: string | null;
+zakonczone_przez?: { displayName: string; email: string | null } | null;
 
 notatka_pracownika?: string;
 
@@ -234,6 +237,11 @@ const [uploadPct, setUploadPct] = useState<number>(0);
 const [noteId, setNoteId] = useState<string | null>(null);
 
 const [noteValue, setNoteValue] = useState("");
+
+const [noteHistoryStage, setNoteHistoryStage] = useState<{
+  id: string;
+  name: string;
+} | null>(null);
 
 
 
@@ -459,7 +467,15 @@ detailsDraft.addressCity.trim() &&
 
 detailsDraft.addressStreet.trim() &&
 
-detailsDraft.description.trim()
+detailsDraft.description.trim() &&
+
+!validatePreferredRange(
+
+detailsDraft.preferredFrom,
+
+detailsDraft.preferredTo
+
+)
 
 );
 
@@ -470,6 +486,22 @@ detailsDraft.description.trim()
 async function saveJobDetails() {
 
 if (!companyId || !isOwnerOrAdmin || !detailsDraft) return;
+
+const rangeErr = validatePreferredRange(
+
+detailsDraft.preferredFrom,
+
+detailsDraft.preferredTo
+
+);
+
+if (rangeErr) {
+
+setDetailsErr(rangeErr);
+
+return;
+
+}
 
 setDetailsBusy(true);
 
@@ -1317,75 +1349,52 @@ onChange={(e) => setDetailsField("description", e.target.value)}
 
 </label>
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+<JobDateRangeEditor
 
-<label className="block space-y-1">
+preferredFrom={detailsDraft.preferredFrom}
 
-<span className="text-xs text-gray-600">Preferowany termin od</span>
-
-<input
-
-className="border rounded-lg px-3 py-2 w-full"
-
-placeholder="np. 2026-02-25 10:00"
-
-value={detailsDraft.preferredFrom}
+preferredTo={detailsDraft.preferredTo}
 
 disabled={detailsBusy}
 
-onChange={(e) => setDetailsField("preferredFrom", e.target.value)}
+error={validatePreferredRange(
+  detailsDraft.preferredFrom,
+  detailsDraft.preferredTo
+)}
 
-/>
+onChange={({ preferredFrom, preferredTo }) =>
 
-</label>
+setDetailsDraft((prev) =>
 
-<label className="block space-y-1">
+prev ? { ...prev, preferredFrom, preferredTo } : prev
 
-<span className="text-xs text-gray-600">Preferowany termin do</span>
-
-<input
-
-className="border rounded-lg px-3 py-2 w-full"
-
-placeholder="opcjonalnie"
-
-value={detailsDraft.preferredTo}
-
-disabled={detailsBusy}
-
-onChange={(e) => setDetailsField("preferredTo", e.target.value)}
-
-/>
-
-</label>
-
-</div>
-
-<div className="flex gap-2 items-center">
-
-<label className="text-sm">Priorytet:</label>
-
-<select
-
-className="border rounded-lg px-3 py-2"
-
-value={detailsDraft.priority}
-
-disabled={detailsBusy}
-
-onChange={(e) =>
-
-setDetailsField("priority", e.target.value as "normal" | "urgent")
+)
 
 }
 
->
+/>
 
-<option value="normal">{getJobPriorityLabel("normal")}</option>
+<div className="flex flex-col gap-2">
 
-<option value="urgent">{getJobPriorityLabel("urgent")}</option>
+<span className="text-sm font-medium text-gray-700" id="job-detail-priority-label">
 
-</select>
+Priorytet
+
+</span>
+
+<JobPrioritySelect
+
+value={detailsDraft.priority}
+
+onChange={(p) => setDetailsField("priority", p)}
+
+disabled={detailsBusy}
+
+aria-label="Priorytet zlecenia"
+
+aria-labelledby="job-detail-priority-label"
+
+/>
 
 </div>
 
@@ -1459,31 +1468,17 @@ Anuluj
 
 </div>
 
-{job.preferredFrom || job.preferredTo ? (
+<JobDateRangeView
 
-<div>
+preferredFrom={job.preferredFrom}
 
-<b>Preferowany termin:</b>{" "}
+preferredTo={job.preferredTo}
 
-{formatPreferredDisplay(job.preferredFrom)}
+/>
 
-{job.preferredTo
+<div className="flex items-center gap-2 flex-wrap pt-1">
 
-? ` → ${formatPreferredDisplay(job.preferredTo)}`
-
-: ""}
-
-</div>
-
-) : null}
-
-<div className="flex items-center gap-2 flex-wrap">
-
-<span className="text-sm">
-
-<b>Priorytet:</b>
-
-</span>
+<span className="text-sm font-medium text-gray-700">Priorytet</span>
 
 <JobPriorityBadge priority={job.priority} />
 
@@ -1792,8 +1787,25 @@ return (
 {" "}
 
 • {s.data_zakonczenia || "(brak daty)"} • przez:{" "}
-
-{s.zakonczone_przez || "(brak)"}
+{s.zakonczone_przez ? (
+  <span className="text-gray-700">
+    {s.zakonczone_przez.displayName}
+    {s.zakonczone_przez.email &&
+    s.zakonczone_przez.displayName !== s.zakonczone_przez.email ? (
+      <>
+        <span className="hidden sm:inline text-gray-600">
+          {" "}
+          ({s.zakonczone_przez.email})
+        </span>
+        <span className="sm:hidden block text-xs text-gray-600">
+          {s.zakonczone_przez.email}
+        </span>
+      </>
+    ) : null}
+  </span>
+) : (
+  "(brak)"
+)}
 
 </span>
 
@@ -1805,9 +1817,11 @@ return (
 
 {/* NOTATKA (widok) */}
 
+<div className="pt-1 space-y-1">
+
 {s.notatka_pracownika ? (
 
-<div className="pt-1">
+<div>
 
 <span className="text-gray-500">Notatka:</span> {s.notatka_pracownika}
 
@@ -1815,9 +1829,29 @@ return (
 
 ) : (
 
-<div className="pt-1 text-gray-500 text-xs">Notatka: (brak)</div>
+<div className="text-gray-500 text-xs">Notatka: (brak)</div>
 
 )}
+
+<button
+
+type="button"
+
+className="min-h-[44px] px-2 py-1 rounded-lg border bg-white hover:bg-gray-50 text-xs font-medium text-gray-800 disabled:opacity-60"
+
+disabled={busy || (role === "staff" && !isAssignedToMe)}
+
+onClick={() => setNoteHistoryStage({ id: s.id, name: s.nazwa_etapu })}
+
+title={role === "staff" && !isAssignedToMe ? "Zlecenie nie jest przypisane do Ciebie" : "Historia notatki"}
+
+>
+
+Historia notatki
+
+</button>
+
+</div>
 
 </div>
 
@@ -2198,6 +2232,26 @@ Zapisz
 </div>
 
 </div>
+
+) : null}
+
+
+
+{noteHistoryStage && companyId ? (
+
+<JobStageNoteHistoryModal
+
+companyId={companyId}
+
+jobId={jobId}
+
+stageId={noteHistoryStage.id}
+
+stageName={noteHistoryStage.name}
+
+onClose={() => setNoteHistoryStage(null)}
+
+/>
 
 ) : null}
 

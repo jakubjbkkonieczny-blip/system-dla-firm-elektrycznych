@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
+import { updateStageWorkerNoteWithHistory } from "@/lib/server/jobs/stage-note-history";
 import {
   companyRouteErrorStatus,
   handleSessionRouteErrorOr,
@@ -52,12 +53,20 @@ export async function PATCH(
         data.plannedDate = v ? new Date(`${v}T00:00:00.000Z`) : null;
       }
       if (body.notatka_pracownika !== undefined) {
-        data.workerNote = String(body.notatka_pracownika || "");
+        await updateStageWorkerNoteWithHistory({
+          companyId,
+          jobId,
+          stageId,
+          userId,
+          newNote: String(body.notatka_pracownika || ""),
+        });
       }
-      await prisma.jobStage.update({
-        where: { id: stageId },
-        data: data as object,
-      });
+      if (Object.keys(data).length > 0) {
+        await prisma.jobStage.update({
+          where: { id: stageId },
+          data: data as object,
+        });
+      }
       return NextResponse.json({ ok: true }, { status: 200 });
     }
 
@@ -71,20 +80,24 @@ export async function PATCH(
       if (keys.some((k) => !allowedKeys.includes(k))) {
         return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
       }
-      const data: Record<string, unknown> = {};
       if (body.notatka_pracownika !== undefined) {
-        data.workerNote = String(body.notatka_pracownika || "");
+        await updateStageWorkerNoteWithHistory({
+          companyId,
+          jobId,
+          stageId,
+          userId,
+          newNote: String(body.notatka_pracownika || ""),
+        });
       }
-      await prisma.jobStage.update({
-        where: { id: stageId },
-        data: data as object,
-      });
       return NextResponse.json({ ok: true }, { status: 200 });
     }
 
     return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   } catch (e: unknown) {
-    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
+    return handleSessionRouteErrorOr(e, (msg) => {
+      if (msg === "STAGE_NOT_FOUND") return 404;
+      return companyRouteErrorStatus(msg);
+    });
   }
 }
 

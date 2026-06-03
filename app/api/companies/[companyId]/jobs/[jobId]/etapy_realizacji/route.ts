@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
+import { jobStageListInclude, jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
 import {
   companyRouteErrorStatus,
   handleSessionRouteErrorOr,
@@ -32,7 +32,7 @@ export async function GET(
     const rows = await prisma.jobStage.findMany({
       where: { companyId, jobId },
       orderBy: [{ plannedDate: "asc" }, { createdAt: "asc" }],
-      include: { photos: true },
+      include: jobStageListInclude,
     });
 
     const stages = rows.map((r) => jobStageToPl(r));
