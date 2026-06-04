@@ -145,8 +145,8 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="w-full max-w-full min-w-0">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
 
         <div>
           <h1 className="text-3xl font-semibold text-gray-900">
@@ -163,7 +163,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center justify-between">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="text-sm text-gray-500">Typ konta</div>
             <div className="font-medium text-gray-900">
@@ -190,7 +190,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
               Firmy
             </h2>

@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
   },
 
   allowedDevOrigins: [
-    "http://192.168.1.24:3000",
-    "http://localhost:3000",
+    "192.168.1.24",
+    "localhost",
   ],
 };
 
