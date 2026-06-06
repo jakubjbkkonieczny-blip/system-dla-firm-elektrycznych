@@ -87,6 +87,10 @@ function SidebarContent({
           <SidebarItem href="/members" label="Pracownicy" icon="👥" onNavigate={onNavigate} />
         )}
 
+        {isOwnerOrAdmin && companyId && (
+          <SidebarItem href="/kosztorysy" label="Kosztorysy" icon="📊" onNavigate={onNavigate} />
+        )}
+
         {companyId && (
           <SidebarItem href="/attendance" label="Obecność" icon="🕐" onNavigate={onNavigate} />
         )}

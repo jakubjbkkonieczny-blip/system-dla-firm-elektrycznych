@@ -36,6 +36,10 @@ model User {
   attendanceSessions  AttendanceSession[]
   vacationRequests    VacationRequest[]     @relation("VacationEmployee")
   vacationDecisions   VacationRequest[]     @relation("VacationDecidedBy")
+  budgetItemsAssigned JobBudgetItem[]         @relation("BudgetItemAssignedUser")
+  budgetItemsCreated  JobBudgetItem[]         @relation("BudgetItemCreatedBy")
+  budgetLaborAssigned JobBudgetLaborItem[]    @relation("BudgetLaborUser")
+  budgetLaborCreated  JobBudgetLaborItem[]    @relation("BudgetLaborCreatedBy")
 
 }
 
@@ -62,6 +66,9 @@ model Company {
   idempotencyKeys      IdempotencyKey[]
   attendanceSessions   AttendanceSession[]
   vacationRequests     VacationRequest[]
+  jobBudgets           JobBudget[]
+  jobBudgetItems       JobBudgetItem[]
+  jobBudgetLaborItems  JobBudgetLaborItem[]
 }
 
 model CompanyMember {
@@ -114,6 +121,9 @@ model Job {
   stages            JobStage[]
   stageNoteHistory  JobStageNoteHistory[]
   statusHistory     JobStatusHistory[]
+  budget            JobBudget?
+  budgetItems       JobBudgetItem[]
+  budgetLaborItems  JobBudgetLaborItem[]
 
   @@unique([companyId, jobNumber])
   @@index([companyId])
@@ -338,4 +348,83 @@ model VacationRequest {
   @@index([companyId, startDate])
   @@index([companyId, endDate])
   @@index([companyId, startDate, endDate])
+}
+
+/// Owner/admin project cost estimate for a job.
+model JobBudget {
+  id               String   @id @default(cuid())
+  companyId        String
+  jobId            String   @unique
+  totalBudgetCents Int      @default(0)
+  note             String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company    Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job        Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  items      JobBudgetItem[]
+  laborItems JobBudgetLaborItem[]
+
+  @@index([companyId, jobId])
+}
+
+model JobBudgetItem {
+  id               String    @id @default(cuid())
+  companyId        String
+  jobId            String
+  budgetId         String
+  category         String
+  taxCategory      String
+  name             String
+  netAmountCents   Int?
+  vatRate          String?
+  grossAmountCents Int
+  deductible       Boolean   @default(true)
+  documentType     String?
+  documentNumber   String?
+  supplier         String?
+  plannedDate      DateTime?
+  assignedUserId   String?
+  note             String?
+  createdByUserId  String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job          Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  budget       JobBudget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  assignedUser User?    @relation("BudgetItemAssignedUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  createdBy    User     @relation("BudgetItemCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([companyId, jobId])
+  @@index([budgetId])
+  @@index([companyId, jobId, createdAt])
+  @@index([companyId, jobId, category])
+  @@index([companyId, jobId, taxCategory])
+}
+
+model JobBudgetLaborItem {
+  id               String    @id @default(cuid())
+  companyId        String
+  jobId            String
+  budgetId         String
+  userId           String?
+  employmentType   String    @default("b2b") // b2b, subcontractor, student_under_26, mandate_contract, employment_contract
+  plannedMinutes   Int
+  hourlyRateCents  Int
+  plannedDate      DateTime?
+  note             String?
+  createdByUserId  String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  budget    JobBudget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  user      User?    @relation("BudgetLaborUser", fields: [userId], references: [id], onDelete: SetNull)
+  createdBy User     @relation("BudgetLaborCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([companyId, jobId])
+  @@index([budgetId])
+  @@index([companyId, jobId, createdAt])
 }

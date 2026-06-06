@@ -8,7 +8,8 @@
     "start": "next start",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "test": "tsx --test lib/jobs/budget/__tests__/*.test.ts"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",

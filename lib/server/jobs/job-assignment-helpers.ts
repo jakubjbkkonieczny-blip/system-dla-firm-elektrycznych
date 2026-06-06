@@ -60,7 +60,7 @@ export function jobWithAssignmentFields<
   T extends { assignments: { userId: string }[]; priority?: string },
 >(
   job: T
-): Omit<T, "assignments"> & {
+): Omit<T, "assignments" | "priority"> & {
   priority: ReturnType<typeof normalizeJobPriority>;
   assignedToUids: string[];
   assignedTo: string | null;
