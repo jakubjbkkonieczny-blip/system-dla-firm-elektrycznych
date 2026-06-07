@@ -35,11 +35,18 @@ const TABS: { id: BudgetTabId; label: string }[] = [
 type Props = {
   companyId: string;
   jobId: string;
+  jobNumber: number;
   jobLabel: string;
   members: CompanyMemberOption[];
 };
 
-export function ProjectBudgetDashboard({ companyId, jobId, jobLabel, members }: Props) {
+export function ProjectBudgetDashboard({
+  companyId,
+  jobId,
+  jobNumber,
+  jobLabel,
+  members,
+}: Props) {
   const [activeTab, setActiveTab] = useState<BudgetTabId>("materials");
   const [budgetOpen, setBudgetOpen] = useState(false);
   const [budgetPln, setBudgetPln] = useState("");
@@ -65,13 +72,8 @@ export function ProjectBudgetDashboard({ companyId, jobId, jobLabel, members }: 
 
   const exportContext = useMemo(() => {
     if (!header) return null;
-    return {
-      companyId,
-      jobId,
-      jobLabel,
-      header,
-    };
-  }, [companyId, jobId, jobLabel, header]);
+    return { companyId, jobId, jobNumber };
+  }, [companyId, jobId, jobNumber, header]);
 
   function openBudgetEdit() {
     if (!header) return;

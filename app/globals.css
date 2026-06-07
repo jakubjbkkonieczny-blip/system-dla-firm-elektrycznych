@@ -1,9 +1,96 @@
 @import "tailwindcss";
 
-/* MVP: jasny, czytelny UI */
+/* ===== THEME TOKENS ===== */
+html[data-theme="light-business"],
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
+  --bg: #f5f6f8;
+  --bg-secondary: #eef0f3;
+  --card: #ffffff;
+  --card-hover: #f9fafb;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --primary: #111827;
+  --primary-hover: #374151;
+  --primary-fg: #ffffff;
+  --success: #15803d;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --warning: #a16207;
+  --warning-bg: #fefce8;
+  --warning-border: #fef08a;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --sidebar: #ffffff;
+  --sidebar-active: #111827;
+  --sidebar-active-fg: #ffffff;
+  --input: #ffffff;
+  --overlay: rgba(0, 0, 0, 0.4);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --accent: #3b82f6;
+  --background: var(--bg);
+  --foreground: var(--text);
+}
+
+html[data-theme="dark-electric"] {
+  --bg: #070d18;
+  --bg-secondary: #0c1528;
+  --card: rgba(15, 23, 42, 0.55);
+  --card-hover: rgba(30, 41, 59, 0.65);
+  --border: rgba(56, 189, 248, 0.18);
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --primary: #fbbf24;
+  --primary-hover: #f59e0b;
+  --primary-fg: #0f172a;
+  --success: #4ade80;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --success-border: rgba(34, 197, 94, 0.3);
+  --warning: #facc15;
+  --warning-bg: rgba(234, 179, 8, 0.12);
+  --warning-border: rgba(234, 179, 8, 0.3);
+  --danger: #f87171;
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --danger-border: rgba(239, 68, 68, 0.3);
+  --sidebar: rgba(12, 21, 40, 0.95);
+  --sidebar-active: rgba(56, 189, 248, 0.25);
+  --sidebar-active-fg: #ffffff;
+  --input: rgba(15, 23, 42, 0.6);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.35), 0 0 1px rgba(56, 189, 248, 0.12);
+  --accent: #38bdf8;
+  --background: var(--bg);
+  --foreground: var(--text);
+}
+
+/* Tailwind v4 theme bridge */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-border: var(--warning-border);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
+  --color-input: var(--input);
+  --color-overlay: var(--overlay);
+  --color-accent: var(--accent);
 }
 
 html,
@@ -16,49 +103,22 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-
-
-
-
-
-
-
-
-
-
-/* ===== THEME BACKGROUNDS (tylko tło aplikacji) ===== */
-:root {
-  --app-bg: #f5f6f8; /* default: jasny szaro-biały */
+/* Glassmorphism cards in dark theme */
+html[data-theme="dark-electric"] .theme-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-html[data-theme="default"] {
-  --app-bg: #f5f6f8;
-}
-
-html[data-theme="beige"] {
-  --app-bg: rgba(245, 238, 224, 0.65); /* biało-beżowy, delikatny */
-}
-
-html[data-theme="green"] {
-  --app-bg: rgba(210, 230, 218, 0.55); /* biało-zielony, delikatny */
-}
-
-html[data-theme="pink"] {
-  --app-bg: rgba(245, 214, 226, 0.45); /* biało-różowy, delikatny */
-}
-
-html[data-theme="blue"] {
-  --app-bg: rgba(207, 226, 255, 0.55); /* biało-niebieski, delikatny */
-}
-
-/* tło całej strony */
-body {
-  background: var(--app-bg);
+/* Dark electric ambient glow for app shell */
+html[data-theme="dark-electric"] .theme-ambient {
+  background:
+    radial-gradient(ellipse 120% 80% at 75% 0%, rgba(56, 189, 248, 0.08), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 10% 100%, rgba(30, 58, 138, 0.2), transparent 55%);
 }
 
 /* Landing page — lightweight motion only */

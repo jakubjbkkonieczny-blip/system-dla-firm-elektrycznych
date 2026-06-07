@@ -17,16 +17,18 @@ function getSessionSecret(): string {
 /**
  * payload JSON → HMAC-SHA256 → opaque base64url token (not a raw user id).
  */
-export function createSignedSessionToken(userId: string): string {
+export function createSignedSessionToken(userId: string, sessionVersion = 0): string {
   const exp = Math.floor(Date.now() / 1000) + SESSION_COOKIE_MAX_AGE_SECONDS;
-  const payload = JSON.stringify({ userId, exp });
+  const payload = JSON.stringify({ userId, exp, sessionVersion });
   const payloadB64 = Buffer.from(payload, "utf8").toString("base64url");
   const sig = createHmac("sha256", getSessionSecret()).update(payload, "utf8").digest("base64url");
   const inner = `${payloadB64}.${sig}`;
   return Buffer.from(inner, "utf8").toString("base64url");
 }
 
-export function verifySignedSessionToken(token: string): { userId: string; exp: number } | null {
+export function verifySignedSessionToken(
+  token: string
+): { userId: string; exp: number; sessionVersion: number } | null {
   try {
     const inner = Buffer.from(token, "base64url").toString("utf8");
     const dot = inner.indexOf(".");
@@ -38,11 +40,19 @@ export function verifySignedSessionToken(token: string): { userId: string; exp: 
     const a = Buffer.from(sig, "utf8");
     const b = Buffer.from(expectedSig, "utf8");
     if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-    const data = JSON.parse(payload) as { userId?: unknown; exp?: unknown };
+    const data = JSON.parse(payload) as {
+      userId?: unknown;
+      exp?: unknown;
+      sessionVersion?: unknown;
+    };
     if (typeof data.userId !== "string" || data.userId.length === 0) return null;
     if (typeof data.exp !== "number" || !Number.isFinite(data.exp)) return null;
     if (Math.floor(Date.now() / 1000) >= data.exp) return null;
-    return { userId: data.userId, exp: data.exp };
+    const sessionVersion =
+      typeof data.sessionVersion === "number" && Number.isFinite(data.sessionVersion)
+        ? data.sessionVersion
+        : 0;
+    return { userId: data.userId, exp: data.exp, sessionVersion };
   } catch {
     return null;
   }

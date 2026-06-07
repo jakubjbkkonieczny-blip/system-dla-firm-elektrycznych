@@ -33,10 +33,10 @@ function SidebarItem({
       href={href}
       onClick={onNavigate}
       className={[
-        "flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-sm border",
+        "flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-sm border transition-colors",
         active
-          ? "bg-gray-900 text-white border-gray-900"
-          : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50",
+          ? "bg-sidebar-active text-sidebar-active-fg border-accent/40"
+          : "bg-card text-text border-border hover:bg-card-hover",
       ].join(" ")}
     >
       <span className="w-5 text-center shrink-0">{icon}</span>
@@ -65,18 +65,18 @@ function SidebarContent({
   return (
     <>
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gray-900 text-white flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-primary text-primary-fg flex items-center justify-center shrink-0">
           ⚡
         </div>
         <div className="leading-tight min-w-0">
-          <div className="font-semibold text-lg">Elektra</div>
-          <div className="text-xs text-gray-500">Panel</div>
+          <div className="font-semibold text-lg text-text">Elektra</div>
+          <div className="text-xs text-text-muted">Panel</div>
         </div>
       </div>
 
-      <div className="border rounded-xl p-3 bg-gray-50">
-        <div className="text-sm font-medium text-gray-900 truncate">{topLabel}</div>
-        <div className="text-xs text-gray-600">{roleLabel}</div>
+      <div className="border border-border rounded-xl p-3 bg-bg-secondary">
+        <div className="text-sm font-medium text-text truncate">{topLabel}</div>
+        <div className="text-xs text-text-muted">{roleLabel}</div>
       </div>
 
       <nav className="flex flex-col gap-2">
@@ -118,7 +118,7 @@ function SidebarContent({
             onNavigate?.();
             onLogout();
           }}
-          className="w-full min-h-[44px] px-3 py-2 rounded-xl border bg-white hover:bg-gray-50 text-sm"
+          className="w-full min-h-[44px] px-3 py-2 rounded-xl border border-border bg-card hover:bg-card-hover text-sm text-text"
         >
           Wyloguj
         </button>
@@ -240,15 +240,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="h-[100dvh] w-full max-w-[100vw] overflow-x-hidden bg-gray-50 flex flex-col lg:flex-row">
-      {/* Mobile header */}
-      <header
-        className="lg:hidden shrink-0 flex items-center gap-2 px-3 py-2 border-b bg-white z-30 pt-[max(0.5rem,env(safe-area-inset-top))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]"
-      >
+    <div className="h-[100dvh] w-full max-w-[100vw] overflow-x-hidden bg-bg theme-ambient flex flex-col lg:flex-row">
+      <header className="lg:hidden shrink-0 flex items-center gap-2 px-3 py-2 border-b border-border bg-sidebar z-30 pt-[max(0.5rem,env(safe-area-inset-top))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
         <button
           type="button"
           onClick={() => setMobileNavOpen(true)}
-          className="min-h-[44px] min-w-[44px] rounded-xl border flex items-center justify-center shrink-0"
+          className="min-h-[44px] min-w-[44px] rounded-xl border border-border bg-card flex items-center justify-center shrink-0 text-text"
           aria-label="Otwórz menu"
           aria-expanded={mobileNavOpen}
           aria-controls="app-mobile-nav"
@@ -259,51 +256,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </button>
 
         <div className="flex-1 min-w-0 flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center shrink-0 text-sm">
+          <div className="w-8 h-8 rounded-lg bg-primary text-primary-fg flex items-center justify-center shrink-0 text-sm">
             ⚡
           </div>
           <div className="min-w-0 leading-tight">
-            <div className="font-semibold text-gray-900 truncate">Elektra</div>
-            <div className="text-xs text-gray-500 truncate">Panel</div>
+            <div className="font-semibold text-text truncate">Elektra</div>
+            <div className="text-xs text-text-muted truncate">Panel</div>
           </div>
         </div>
 
         <Link
           href="/notifications"
-          className="min-h-[44px] min-w-[44px] rounded-xl border flex items-center justify-center shrink-0"
+          className="min-h-[44px] min-w-[44px] rounded-xl border border-border bg-card flex items-center justify-center shrink-0"
           aria-label="Powiadomienia"
         >
           🔔
         </Link>
         <Link
           href="/settings"
-          className="min-h-[44px] min-w-[44px] rounded-xl border flex items-center justify-center shrink-0"
+          className="min-h-[44px] min-w-[44px] rounded-xl border border-border bg-card flex items-center justify-center shrink-0"
           aria-label="Ustawienia"
         >
           ⚙️
         </Link>
       </header>
 
-      {/* Mobile nav backdrop */}
       {mobileNavOpen ? (
         <button
           type="button"
-          className="lg:hidden fixed inset-0 z-40 bg-black/40"
+          className="lg:hidden fixed inset-0 z-40 bg-overlay"
           aria-label="Zamknij menu"
           onClick={closeMobileNav}
         />
       ) : null}
 
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 bg-white border-r px-4 py-4 flex-col gap-4 overflow-y-auto shrink-0">
+      <aside className="hidden lg:flex w-64 bg-sidebar border-r border-border px-4 py-4 flex-col gap-4 overflow-y-auto shrink-0 theme-glass">
         <SidebarContent {...sidebarProps} />
       </aside>
 
-      {/* Mobile drawer */}
       <aside
         id="app-mobile-nav"
         className={[
-          "lg:hidden fixed inset-y-0 left-0 z-50 w-[min(100vw,18rem)] max-w-[85vw] bg-white border-r px-4 py-4 flex flex-col gap-4 overflow-y-auto shadow-xl transition-transform duration-200 ease-out pb-[env(safe-area-inset-bottom)]",
+          "lg:hidden fixed inset-y-0 left-0 z-50 w-[min(100vw,18rem)] max-w-[85vw] bg-sidebar border-r border-border px-4 py-4 flex flex-col gap-4 overflow-y-auto shadow-xl transition-transform duration-200 ease-out pb-[env(safe-area-inset-bottom)] theme-glass",
           mobileNavOpen ? "translate-x-0" : "-translate-x-full pointer-events-none",
         ].join(" ")}
         aria-hidden={!mobileNavOpen}
@@ -312,17 +306,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <main className="flex-1 min-w-0 w-full flex flex-col overflow-hidden">
-        <div className="hidden lg:flex h-14 bg-white border-b items-center justify-end px-4 gap-2 shrink-0">
+        <div className="hidden lg:flex h-14 bg-sidebar border-b border-border items-center justify-end px-4 gap-2 shrink-0">
           <Link
             href="/notifications"
-            className="w-9 h-9 rounded-xl border flex items-center justify-center"
+            className="w-9 h-9 rounded-xl border border-border bg-card flex items-center justify-center"
             aria-label="Powiadomienia"
           >
             🔔
           </Link>
           <Link
             href="/settings"
-            className="w-9 h-9 rounded-xl border flex items-center justify-center"
+            className="w-9 h-9 rounded-xl border border-border bg-card flex items-center justify-center"
             aria-label="Ustawienia"
           >
             ⚙️

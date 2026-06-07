@@ -12,6 +12,7 @@ export type MeData = {
   billingStatus: BillingStatus | null;
   billing: Record<string, unknown> | null;
   displayName: string | null;
+  theme: "LIGHT_BUSINESS" | "DARK_ELECTRIC";
 };
 
 export async function getMeData(): Promise<MeData> {
@@ -27,6 +28,7 @@ export async function getMeData(): Promise<MeData> {
     select: {
       displayName: true,
       accountRole: true,
+      theme: true,
     },
   });
 
@@ -62,5 +64,6 @@ export async function getMeData(): Promise<MeData> {
     billingStatus,
     billing: null,
     displayName: user.displayName ?? null,
+    theme: user.theme,
   };
 }

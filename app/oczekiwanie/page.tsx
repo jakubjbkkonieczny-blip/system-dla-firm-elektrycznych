@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { getMyCompanies } from "@/lib/server/me/get-my-companies";
-import { getCurrentUser } from "@/lib/server/auth/get-current-user";
 import OczekiwanieClient from "@/components/OczekiwanieClient";
+import { getUserFromSession } from "@/lib/server/auth/getUserFromSession";
+import { getMyCompanies } from "@/lib/server/me/get-my-companies";
 
 export default async function OczekiwaniePage() {
-  const user = await getCurrentUser();
+  const user = await getUserFromSession();
   if (!user) {
     redirect("/login");
   }
@@ -21,5 +21,10 @@ export default async function OczekiwaniePage() {
     }
   }
 
-  return <OczekiwanieClient />;
+  return (
+    <OczekiwanieClient
+      createdAt={user.createdAt.toISOString()}
+      displayName={user.displayName}
+    />
+  );
 }

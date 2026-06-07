@@ -136,4 +136,4 @@ export type BudgetTabId =
   | "documents"
   | "notes";
 
-export type BudgetExportFormat = "pdf" | "excel" | "csv";
+export type BudgetExportFormat = "pdf" | "xlsx" | "csv";

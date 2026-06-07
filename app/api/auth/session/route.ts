@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "ACCOUNT_DISABLED" }, { status: 403 });
     }
 
-    const sessionToken = createSignedSessionToken(user.id);
+    const sessionToken = createSignedSessionToken(user.id, user.sessionVersion);
     const res = NextResponse.json({ ok: true }, { status: 200 });
     return setSessionCookie(res, sessionToken);
   } catch (e: unknown) {

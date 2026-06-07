@@ -8,12 +8,19 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum UserTheme {
+  LIGHT_BUSINESS
+  DARK_ELECTRIC
+}
+
 model User {
   id          String   @id @default(cuid())
   email       String   @unique
   passwordHash String
   displayName String?
   accountRole String?  // worker | employer (app-level account type)
+  theme       UserTheme @default(LIGHT_BUSINESS)
+  sessionVersion Int    @default(0)
   stripeCustomerId     String?  @unique
   stripeSubscriptionId String?
   subscriptionEndsAt   DateTime?

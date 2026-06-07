@@ -32,10 +32,12 @@ export async function getUserFromSession(): Promise<SessionUser | null> {
       isActive: true,
       createdAt: true,
       updatedAt: true,
+      sessionVersion: true,
     },
   });
 
   if (!user || !user.isActive) return null;
+  if (user.sessionVersion !== verified.sessionVersion) return null;
   return user;
 }
 

@@ -2,20 +2,37 @@
 
 import { useState } from "react";
 import { BUDGET_BTN_SECONDARY } from "@/components/budget/constants";
-import { BUDGET_EXPORT_FORMATS, triggerBudgetExport } from "@/lib/jobs/budget/exports";
-import type { BudgetExportContext } from "@/lib/jobs/budget/exports";
+import { downloadBudgetExport } from "@/lib/jobs/budget/export-download";
+import { BUDGET_EXPORT_FORMATS, type BudgetExportMenuContext } from "@/lib/jobs/budget/exports";
 
-export function ExportMenu({ context }: { context: BudgetExportContext | null }) {
+export function ExportMenu({ context }: { context: BudgetExportMenuContext | null }) {
   const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [busyFormat, setBusyFormat] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
   async function handleExport(format: (typeof BUDGET_EXPORT_FORMATS)[number]["id"]) {
-    if (!context) return;
+    if (!context || busyFormat) return;
     setOpen(false);
-    const result = await triggerBudgetExport(format, context);
-    setMessage(result.message);
-    setTimeout(() => setMessage(null), 4000);
+    setBusyFormat(format);
+    setMessage(null);
+
+    const result = await downloadBudgetExport({
+      companyId: context.companyId,
+      jobId: context.jobId,
+      jobNumber: context.jobNumber,
+      format,
+    });
+
+    setBusyFormat(null);
+    if (result.ok) {
+      setMessage({ text: `Pobrano: ${result.filename}`, error: false });
+    } else {
+      setMessage({ text: result.message, error: true });
+    }
+    setTimeout(() => setMessage(null), 5000);
   }
+
+  const disabled = !context || busyFormat != null;
 
   return (
     <div className="relative">
@@ -23,11 +40,12 @@ export function ExportMenu({ context }: { context: BudgetExportContext | null })
         type="button"
         className={BUDGET_BTN_SECONDARY}
         onClick={() => setOpen((v) => !v)}
-        disabled={!context}
+        disabled={disabled}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-busy={busyFormat != null}
       >
-        Eksport ▾
+        {busyFormat ? "Eksportowanie…" : "Eksport ▾"}
       </button>
       {open ? (
         <div
@@ -39,8 +57,9 @@ export function ExportMenu({ context }: { context: BudgetExportContext | null })
               key={f.id}
               type="button"
               role="menuitem"
-              className="w-full text-left px-4 py-2.5 min-h-[44px] text-sm hover:bg-gray-50"
+              className="w-full text-left px-4 py-2.5 min-h-[44px] text-sm hover:bg-gray-50 disabled:opacity-60"
               onClick={() => handleExport(f.id)}
+              disabled={busyFormat != null}
             >
               {f.label}
             </button>
@@ -48,8 +67,15 @@ export function ExportMenu({ context }: { context: BudgetExportContext | null })
         </div>
       ) : null}
       {message ? (
-        <div className="absolute right-0 mt-1 z-10 text-xs text-gray-600 bg-gray-50 border rounded-lg px-3 py-2 whitespace-nowrap">
-          {message}
+        <div
+          className={[
+            "absolute right-0 mt-1 z-10 text-xs border rounded-lg px-3 py-2 max-w-[260px]",
+            message.error
+              ? "text-red-700 bg-red-50 border-red-200"
+              : "text-gray-700 bg-gray-50 border-gray-200",
+          ].join(" ")}
+        >
+          {message.text}
         </div>
       ) : null}
     </div>

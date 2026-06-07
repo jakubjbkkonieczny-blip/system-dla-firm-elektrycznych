@@ -180,6 +180,7 @@ export default function KosztorysyPage() {
             <ProjectBudgetDashboard
               companyId={companyId}
               jobId={selectedJob.id}
+              jobNumber={selectedJob.jobNumber}
               jobLabel={`#${selectedJob.jobNumber} · ${selectedJob.customerName}`}
               members={members}
             />

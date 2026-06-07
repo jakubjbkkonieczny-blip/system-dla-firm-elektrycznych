@@ -1,17 +1,7 @@
 import type { AuthAccountType } from "@/components/auth/auth-accent";
 import { getAuthAccent } from "@/components/auth/auth-accent";
+import { ElektraLogo } from "@/components/auth/ElektraLogo";
 import Link from "next/link";
-
-function LogoMark() {
-  return (
-    <span
-      className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/25"
-      aria-hidden
-    >
-      ⚡
-    </span>
-  );
-}
 
 export function AuthCardHeader({
   accountType,
@@ -29,10 +19,7 @@ export function AuthCardHeader({
   return (
     <div className="px-6 pt-6 pb-2 sm:px-8 sm:pt-8">
       <div className="flex items-center justify-between gap-3 mb-6">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <LogoMark />
-          <span className="text-lg font-semibold text-white tracking-tight">Elektra</span>
-        </Link>
+        <ElektraLogo size="sm" />
         <Link
           href="/"
           className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors min-h-[44px] inline-flex items-center"
