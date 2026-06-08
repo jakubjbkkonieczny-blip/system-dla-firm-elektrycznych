@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
+import { PRICING_SUMMARY_LINES } from "@/lib/billing/pricing-ui-copy";
 
 export default function SubskrypcjaPage() {
   const router = useRouter();
@@ -55,12 +56,11 @@ export default function SubskrypcjaPage() {
           <div>
             Status subskrypcji: <b>{billingStatus ?? "..."}</b>
           </div>
-          <div>
-            Pierwsza firma: <b>400 zł / miesiąc</b>
-          </div>
-          <div>
-            Każda kolejna firma: <b>+250 zł / miesiąc</b>
-          </div>
+          <ul className="list-disc list-inside space-y-1 pt-1">
+            {PRICING_SUMMARY_LINES.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
         </div>
 
         {msg ? <div className="text-sm border rounded p-3 bg-red-50 text-red-700">{msg}</div> : null}

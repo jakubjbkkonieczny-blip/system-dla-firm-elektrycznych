@@ -1,6 +1,7 @@
 "use client";
 
 import { LandingHeader } from "@/components/landing/LandingHeader";
+import { PRICING_SUMMARY_COMPACT } from "@/lib/billing/pricing-ui-copy";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -185,7 +186,7 @@ export default function LoginTypeSelect() {
                   variant="employer"
                   title="PRACODAWCA"
                   description="Zarządzaj zleceniami i pracownikami. Porządek w robocie bez chaosu w wiadomościach."
-                  subscription="Subskrypcja: 400 zł / miesiąc"
+                  subscription={PRICING_SUMMARY_COMPACT}
                   onClick={() => router.push("/login?type=employer")}
                 />
               </div>

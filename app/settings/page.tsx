@@ -4,6 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { apiFetch } from "@/lib/api";
+import { PRICING_SUMMARY_LINES } from "@/lib/billing/pricing-ui-copy";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -389,6 +390,12 @@ export default function SettingsPage() {
             description="Zarządzaj planem i dostępem do funkcji"
             badge={billingBadge}
           >
+            <ul className="text-sm text-text list-disc list-inside space-y-1 mb-4">
+              {PRICING_SUMMARY_LINES.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+
             {formattedEndsAt ? (
               <div className="text-sm text-text">
                 {subscriptionExpired ? (
