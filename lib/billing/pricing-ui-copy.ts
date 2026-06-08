@@ -3,7 +3,7 @@
 export const PRICING_INTRO_LINE = "250 zł / miesiąc przez pierwsze 2 miesiące";
 export const PRICING_STANDARD_LINE = "potem 400 zł / miesiąc";
 export const PRICING_INCLUDED_SEATS_LINE = "10 osób w cenie";
-export const PRICING_EXTRA_SEAT_LINE = "każda kolejna aktywna osoba: +40 zł / miesiąc";
+export const PRICING_EXTRA_SEAT_LINE = "+40 zł za każdą kolejną aktywną osobę";
 export const PRICING_WHO_COUNTS_LINE =
   "Właściciel, kierownik/admin i pracownik liczą się jako osoby.";
 
