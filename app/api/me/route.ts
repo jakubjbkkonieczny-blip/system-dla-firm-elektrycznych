@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { getMeData } from "@/lib/server/me/get-me";
 import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
+import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
 
 function getDeleteAtIso() {
   const d = new Date();
@@ -50,6 +51,10 @@ export async function DELETE(_req: NextRequest) {
           where: { companyId },
           data: { isActive: false },
         });
+
+        void syncSubscriptionForCompany(companyId).catch((err) =>
+          console.error("syncSubscriptionForCompany", err)
+        );
       }
     }
 

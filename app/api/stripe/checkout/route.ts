@@ -4,7 +4,7 @@ import type Stripe from "stripe";
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { handleSessionRouteErrorOr } from "@/lib/server/auth/handle-session-route-error";
-import { BillingService } from "@/lib/server/billing/billing-service";
+import { assertCheckoutAllowed } from "@/lib/server/billing/checkout-guard";
 import { getStripeBillingPrices } from "@/lib/server/billing/stripe-price-config";
 import { getStripeClient } from "@/lib/server/billing/stripe-client";
 
@@ -37,10 +37,7 @@ export async function POST() {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
-    const effective = BillingService.deriveEffectiveStatus(user);
-    if (user.stripeSubscriptionId && effective.allowsAccess) {
-      return NextResponse.json({ error: "SUBSCRIPTION_ALREADY_ACTIVE" }, { status: 409 });
-    }
+    await assertCheckoutAllowed(user);
 
     const { basePriceId, introCouponId } = getStripeBillingPrices();
     const existingCustomerId = user.stripeCustomerId ?? undefined;

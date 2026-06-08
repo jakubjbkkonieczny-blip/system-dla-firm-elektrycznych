@@ -100,7 +100,7 @@ function LoginPageInner() {
   async function afterEmployerAuth() {
     try {
       const me = await apiFetch("/api/me");
-      if (me?.billingStatus !== "active") {
+      if (!me?.billingAllowsAccess) {
         router.replace("/subskrypcja");
         return;
       }

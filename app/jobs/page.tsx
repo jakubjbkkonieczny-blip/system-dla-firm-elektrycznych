@@ -165,12 +165,7 @@ export default function JobsPage() {
         setBillingStatus(me?.billingStatus ?? null);
         setSubscriptionEndsAt(me?.billing?.subscriptionEndsAt ?? null);
 
-        const expired =
-          me?.billingStatus === "inactive" ||
-          (me?.billing?.subscriptionEndsAt &&
-            new Date(me.billing.subscriptionEndsAt).getTime() < Date.now());
-
-        if (me?.role === "employer" && expired) {
+        if (me?.role === "employer" && !me?.billingAllowsAccess) {
           router.replace("/settings?expired=1");
         }
       } catch {}

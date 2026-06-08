@@ -30,7 +30,7 @@ export default function SubskrypcjaPage() {
           return;
         }
 
-        if (me?.billingStatus === "active") {
+        if (me?.billingAllowsAccess) {
           router.replace("/dashboard");
         }
       } catch {}

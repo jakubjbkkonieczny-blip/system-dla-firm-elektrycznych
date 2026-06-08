@@ -22,6 +22,7 @@ export default function SettingsPage() {
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"worker" | "employer" | null>(null);
   const [billingStatus, setBillingStatus] = useState<BillingStatus>(null);
+  const [billingAllowsAccess, setBillingAllowsAccess] = useState(false);
   const [subscriptionEndsAt, setSubscriptionEndsAt] = useState<string | null>(null);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
@@ -42,10 +43,7 @@ export default function SettingsPage() {
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
-  const subscriptionExpired = useMemo(() => {
-    if (!subscriptionEndsAt) return billingStatus === "inactive";
-    return new Date(subscriptionEndsAt).getTime() < Date.now();
-  }, [billingStatus, subscriptionEndsAt]);
+  const subscriptionExpired = useMemo(() => !billingAllowsAccess, [billingAllowsAccess]);
 
   const formattedEndsAt = useMemo(() => {
     if (!subscriptionEndsAt) return null;
@@ -88,6 +86,7 @@ export default function SettingsPage() {
     setDisplayName(String(me?.displayName ?? ""));
     setRole(me?.role ?? null);
     setBillingStatus((me?.billingStatus ?? null) as BillingStatus);
+    setBillingAllowsAccess(Boolean(me?.billingAllowsAccess ?? false));
     setSubscriptionEndsAt(me?.billing?.subscriptionEndsAt ?? null);
     setCancelAtPeriodEnd(Boolean(me?.billing?.cancelAtPeriodEnd ?? false));
     setHasStripeCustomer(Boolean(me?.billing?.hasStripeCustomer ?? false));
@@ -427,7 +426,7 @@ export default function SettingsPage() {
                   {resumeBusy ? "Wznawianie..." : "Wznów subskrypcję"}
                 </button>
               ) : null}
-              {subscriptionExpired || billingStatus === "inactive" ? (
+              {subscriptionExpired ? (
                 <button
                   onClick={() => void renewSubscription()}
                   disabled={busy || portalBusy || resumeBusy}

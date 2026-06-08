@@ -30,6 +30,7 @@ export default function DashboardPage() {
 
   const [meRole, setMeRole] = useState<MeRole>(null);
   const [billingStatus, setBillingStatus] = useState<BillingStatus>(null);
+  const [billingAllowsAccess, setBillingAllowsAccess] = useState(false);
   const [subscriptionEndsAt, setSubscriptionEndsAt] = useState<string | null>(null);
 
   const [bootLoaded, setBootLoaded] = useState(false);
@@ -45,6 +46,7 @@ export default function DashboardPage() {
     setCanCreateCompany(Boolean(data?.canCreateCompany ?? true));
     setMeRole((data?.role ?? null) as MeRole);
     setBillingStatus((data?.billingStatus ?? null) as BillingStatus);
+    setBillingAllowsAccess(Boolean(data?.billingAllowsAccess ?? false));
     setSubscriptionEndsAt(data?.billing?.subscriptionEndsAt ?? null);
   }
 
@@ -77,14 +79,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user || !bootLoaded) return;
 
-    const expired =
-      billingStatus === "inactive" ||
-      (subscriptionEndsAt ? new Date(subscriptionEndsAt).getTime() < Date.now() : false);
-
-    if (meRole === "employer" && expired) {
+    if (meRole === "employer" && !billingAllowsAccess) {
       router.replace("/settings?expired=1");
     }
-  }, [user, bootLoaded, meRole, billingStatus, subscriptionEndsAt, router]);
+  }, [user, bootLoaded, meRole, billingAllowsAccess, router]);
 
   useEffect(() => {
     if (!user || !bootLoaded) return;
@@ -101,7 +99,7 @@ export default function DashboardPage() {
 
   const showCreateCompany =
     meRole === "employer" &&
-    billingStatus === "active" &&
+    billingAllowsAccess &&
     canCreateCompany &&
     companies.length === 0;
 

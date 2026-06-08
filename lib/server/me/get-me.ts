@@ -18,6 +18,7 @@ export type MeData = {
   canCreateCompany: boolean;
   role: Role | null;
   billingStatus: SubscriptionStatus | null;
+  billingAllowsAccess: boolean;
   billing: MeBilling;
   displayName: string | null;
   theme: "LIGHT_BUSINESS" | "DARK_ELECTRIC";
@@ -76,9 +77,12 @@ export async function getMeData(): Promise<MeData> {
   const activeOwned = ownedCompanies.filter((m) => m.company.isActive);
 
   let billingStatus: SubscriptionStatus | null = null;
+  let billingAllowsAccess = false;
 
   if (role === "employer") {
-    billingStatus = BillingService.deriveEffectiveStatus(user).status;
+    const effective = BillingService.deriveEffectiveStatus(user);
+    billingStatus = effective.status;
+    billingAllowsAccess = effective.allowsAccess;
   }
 
   const canCreateCompany = role === "employer" || activeOwned.length > 0;
@@ -88,6 +92,7 @@ export async function getMeData(): Promise<MeData> {
     canCreateCompany,
     role,
     billingStatus,
+    billingAllowsAccess,
     billing: buildBillingObject(user),
     displayName: user.displayName ?? null,
     theme: user.theme,

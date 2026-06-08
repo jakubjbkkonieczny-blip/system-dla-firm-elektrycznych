@@ -1,5 +1,7 @@
 import "server-only";
 
+import { validateRequiredBillingEnv } from "@/lib/server/billing/validate-billing-env";
+
 export const DEFAULT_INCLUDED_SEATS = 10;
 
 export type StripeBillingPrices = {
@@ -21,6 +23,8 @@ export function getIncludedSeats(): number {
 }
 
 export function getStripeBillingPrices(): StripeBillingPrices {
+  validateRequiredBillingEnv();
+
   const basePriceId = process.env.STRIPE_PRICE_BASE_400?.trim();
   const extraSeatPriceId = process.env.STRIPE_PRICE_EXTRA_SEAT_40?.trim();
 
