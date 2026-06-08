@@ -8,9 +8,14 @@ function isoFromUnix(unix: number | null | undefined): Date | null {
   return new Date(unix * 1000);
 }
 
-export function resolveStripeCustomerId(
-  customer: Stripe.Subscription["customer"]
-): string | null {
+type StripeCustomerRef =
+  | string
+  | Stripe.Customer
+  | Stripe.DeletedCustomer
+  | null
+  | undefined;
+
+export function resolveStripeCustomerId(customer: StripeCustomerRef): string | null {
   if (typeof customer === "string") return customer;
   if (customer && typeof customer === "object" && "id" in customer) {
     return customer.id;

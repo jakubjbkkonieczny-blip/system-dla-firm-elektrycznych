@@ -6,11 +6,15 @@ import { NextResponse } from "next/server";
 export type SessionRouteErrorMap = (message: string) => number | null;
 
 export function handleSessionRouteError(e: unknown): NextResponse {
-  return handleSessionRouteErrorOr(e, () => null);
+  return handleSessionRouteErrorOr(e, (msg) => {
+    if (msg === "BILLING_INACTIVE") return 402;
+    return null;
+  });
 }
 
 /** Shared mapping for company-scoped API routes. */
 export function companyRouteErrorStatus(message: string): number | null {
+  if (message === "BILLING_INACTIVE") return 402;
   if (message === "NOT_MEMBER" || message === "NOT_ACTIVE_MEMBER") return 403;
   if (
     message === "JOB_NOT_FOUND" ||

@@ -1,9 +1,10 @@
 import "server-only";
+import { BillingService } from "@/lib/server/billing/billing-service";
 import { prisma } from "@/lib/db/prisma";
 import { getCurrentUser } from "@/lib/server/auth/get-current-user";
+import type { SubscriptionStatus } from "@/lib/server/billing/types";
 
 type Role = "worker" | "employer";
-type BillingStatus = "active" | "inactive" | "cancelled";
 
 export type MeBilling = {
   subscriptionEndsAt: string | null;
@@ -16,51 +17,24 @@ export type MeData = {
   uid: string;
   canCreateCompany: boolean;
   role: Role | null;
-  billingStatus: BillingStatus | null;
+  billingStatus: SubscriptionStatus | null;
   billing: MeBilling;
   displayName: string | null;
   theme: "LIGHT_BUSINESS" | "DARK_ELECTRIC";
 };
 
-type UserBillingFields = {
+function buildBillingObject(user: {
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   subscriptionEndsAt: Date | null;
   subscriptionCancelAtPeriodEnd: boolean;
-};
-
-function buildBillingObject(user: UserBillingFields): MeBilling {
+}): MeBilling {
   return {
     subscriptionEndsAt: user.subscriptionEndsAt?.toISOString() ?? null,
     cancelAtPeriodEnd: user.subscriptionCancelAtPeriodEnd,
     hasStripeCustomer: Boolean(user.stripeCustomerId),
     hasStripeSubscription: Boolean(user.stripeSubscriptionId),
   };
-}
-
-function subscriptionPeriodActive(subscriptionEndsAt: Date | null): boolean {
-  if (!subscriptionEndsAt) return true;
-  return subscriptionEndsAt.getTime() > Date.now();
-}
-
-function deriveBillingStatusFromUser(user: UserBillingFields): BillingStatus {
-  if (!user.stripeSubscriptionId) {
-    return "inactive";
-  }
-
-  const periodActive = subscriptionPeriodActive(user.subscriptionEndsAt);
-
-  if (user.subscriptionCancelAtPeriodEnd) {
-    return periodActive ? "cancelled" : "inactive";
-  }
-
-  return periodActive ? "active" : "inactive";
-}
-
-function deriveBillingStatusFromCompanies(
-  activeOwned: { company: { billingStatus: string | null } }[]
-): BillingStatus {
-  return activeOwned.some((m) => m.company.billingStatus === "active") ? "active" : "inactive";
 }
 
 export async function getMeData(): Promise<MeData> {
@@ -79,6 +53,7 @@ export async function getMeData(): Promise<MeData> {
       theme: true,
       stripeCustomerId: true,
       stripeSubscriptionId: true,
+      subscriptionStatus: true,
       subscriptionEndsAt: true,
       subscriptionCancelAtPeriodEnd: true,
     },
@@ -95,19 +70,15 @@ export async function getMeData(): Promise<MeData> {
 
   const ownedCompanies = await prisma.companyMember.findMany({
     where: { userId: uid, role: "owner", isActive: true },
-    include: { company: { select: { billingStatus: true, isActive: true } } },
+    include: { company: { select: { isActive: true } } },
   });
 
   const activeOwned = ownedCompanies.filter((m) => m.company.isActive);
 
-  let billingStatus: BillingStatus | null = null;
+  let billingStatus: SubscriptionStatus | null = null;
 
   if (role === "employer") {
-    if (activeOwned.length > 0) {
-      billingStatus = deriveBillingStatusFromCompanies(activeOwned);
-    } else {
-      billingStatus = deriveBillingStatusFromUser(user);
-    }
+    billingStatus = BillingService.deriveEffectiveStatus(user).status;
   }
 
   const canCreateCompany = role === "employer" || activeOwned.length > 0;

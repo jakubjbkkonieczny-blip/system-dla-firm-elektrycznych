@@ -1,4 +1,5 @@
 import "server-only";
+import { BillingService } from "@/lib/server/billing/billing-service";
 import { prisma } from "@/lib/db/prisma";
 
 export type ActiveMember = {
@@ -14,6 +15,8 @@ export async function requireActiveMember(companyId: string, userId: string): Pr
   });
 
   if (!m || !m.isActive) throw new Error("NOT_MEMBER");
+
+  await BillingService.assertCompanyAccessAllowed(companyId);
 
   return {
     role: m.role,

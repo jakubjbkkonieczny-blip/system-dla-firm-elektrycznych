@@ -24,6 +24,7 @@ export default function SettingsPage() {
   const [billingStatus, setBillingStatus] = useState<BillingStatus>(null);
   const [subscriptionEndsAt, setSubscriptionEndsAt] = useState<string | null>(null);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
+  const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -33,6 +34,8 @@ export default function SettingsPage() {
 
   const [cancelSubOpen, setCancelSubOpen] = useState(false);
   const [cancelSubBusy, setCancelSubBusy] = useState(false);
+  const [portalBusy, setPortalBusy] = useState(false);
+  const [resumeBusy, setResumeBusy] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState("");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -87,6 +90,7 @@ export default function SettingsPage() {
     setBillingStatus((me?.billingStatus ?? null) as BillingStatus);
     setSubscriptionEndsAt(me?.billing?.subscriptionEndsAt ?? null);
     setCancelAtPeriodEnd(Boolean(me?.billing?.cancelAtPeriodEnd ?? false));
+    setHasStripeCustomer(Boolean(me?.billing?.hasStripeCustomer ?? false));
   }
 
   useEffect(() => {
@@ -199,6 +203,40 @@ export default function SettingsPage() {
       setErr(message);
     } finally {
       setSessionsBusy(false);
+    }
+  }
+
+  async function openBillingPortal() {
+    setPortalBusy(true);
+    setErr(null);
+    setMsg(null);
+
+    try {
+      const data = await apiFetch("/api/stripe/portal", { method: "POST" });
+      if (!data?.url) throw new Error("NO_PORTAL_URL");
+      window.location.href = data.url;
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "PORTAL_ERROR";
+      setErr(message);
+    } finally {
+      setPortalBusy(false);
+    }
+  }
+
+  async function resumeSubscription() {
+    setResumeBusy(true);
+    setErr(null);
+    setMsg(null);
+
+    try {
+      await apiFetch("/api/stripe/resume", { method: "POST" });
+      await loadMe();
+      setMsg("Subskrypcja została wznowiona.");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "RESUME_ERROR";
+      setErr(message);
+    } finally {
+      setResumeBusy(false);
     }
   }
 
@@ -370,26 +408,42 @@ export default function SettingsPage() {
               </div>
             ) : null}
 
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-end gap-2">
+              {hasStripeCustomer ? (
+                <button
+                  onClick={() => void openBillingPortal()}
+                  disabled={portalBusy || busy || resumeBusy}
+                  className="px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary hover:text-primary-fg transition disabled:opacity-50"
+                >
+                  {portalBusy ? "Przekierowanie..." : "Zarządzaj płatnościami"}
+                </button>
+              ) : null}
+              {cancelAtPeriodEnd && !subscriptionExpired ? (
+                <button
+                  onClick={() => void resumeSubscription()}
+                  disabled={resumeBusy || busy || portalBusy}
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-fg hover:opacity-90 disabled:opacity-50 transition"
+                >
+                  {resumeBusy ? "Wznawianie..." : "Wznów subskrypcję"}
+                </button>
+              ) : null}
               {subscriptionExpired || billingStatus === "inactive" ? (
                 <button
                   onClick={() => void renewSubscription()}
-                  disabled={busy}
+                  disabled={busy || portalBusy || resumeBusy}
                   className="px-4 py-2 rounded-lg bg-primary text-primary-fg hover:opacity-90 disabled:opacity-50 transition"
                 >
                   {busy ? "Przekierowanie..." : "Zarządzaj subskrypcją"}
                 </button>
-              ) : (
+              ) : !cancelAtPeriodEnd && billingStatus !== "cancelled" ? (
                 <button
                   onClick={() => setCancelSubOpen(true)}
-                  disabled={busy || cancelAtPeriodEnd || billingStatus === "cancelled"}
+                  disabled={busy || portalBusy || resumeBusy}
                   className="px-4 py-2 rounded-lg bg-danger text-white hover:opacity-90 disabled:opacity-50 transition"
                 >
-                  {cancelAtPeriodEnd || billingStatus === "cancelled"
-                    ? "Subskrypcja już anulowana"
-                    : "Zarządzaj subskrypcją"}
+                  Anuluj subskrypcję
                 </button>
-              )}
+              ) : null}
             </div>
           </SettingsSection>
         ) : null}

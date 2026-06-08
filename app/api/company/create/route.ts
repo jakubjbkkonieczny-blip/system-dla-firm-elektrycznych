@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { syncSubscriptionForUser } from "@/app/api/_lib/billing";
+import { BillingService } from "@/lib/server/billing/billing-service";
 import { handleSessionRouteErrorOr } from "@/lib/server/auth/handle-session-route-error";
 
 type Body = { name: string };
@@ -17,16 +18,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "NAME_REQUIRED" }, { status: 400 });
     }
 
-    const companyId = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findUnique({ where: { id: userId } });
-      if (!user) throw new Error("USER_NOT_FOUND");
-      if (user.accountRole !== "employer") {
-        throw new Error("FORBIDDEN_ROLE");
-      }
-      if (!user.stripeSubscriptionId) {
-        throw new Error("SUBSCRIPTION_REQUIRED");
-      }
+    await BillingService.assertUserCanCreateCompany(userId);
 
+    const companyId = await prisma.$transaction(async (tx) => {
       const owned = await tx.companyMember.count({
         where: { userId, role: "owner", isActive: true },
       });
@@ -62,7 +56,7 @@ export async function POST(req: NextRequest) {
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, (msg) => {
       if (msg === "FORBIDDEN_ROLE" || msg === "COMPANY_LIMIT_REACHED") return 403;
-      if (msg === "SUBSCRIPTION_REQUIRED") return 402;
+      if (msg === "BILLING_INACTIVE") return 402;
       if (msg === "USER_NOT_FOUND") return 404;
       return null;
     });
