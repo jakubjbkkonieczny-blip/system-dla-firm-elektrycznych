@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-
-import { prisma } from "@/lib/db/prisma";
+import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
+import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany();
-    return NextResponse.json(users);
-  } catch (error) {
-    console.error("Failed to fetch users:", error);
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    await requireSessionUser();
+    return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+  } catch (e: unknown) {
+    return handleSessionRouteError(e);
   }
 }
