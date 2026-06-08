@@ -6,6 +6,7 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
+import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
 
 type Ctx = { params: Promise<{ companyId: string; memberUid: string }> };
 
@@ -41,6 +42,10 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       data: { isActive: active },
     });
 
+    void syncSubscriptionForCompany(companyId).catch((err) =>
+      console.error("syncSubscriptionForCompany", err)
+    );
+
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, (msg) => {
@@ -70,6 +75,10 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     await prisma.companyMember.delete({
       where: { companyId_userId: { companyId, userId: memberUid } },
     });
+
+    void syncSubscriptionForCompany(companyId).catch((err) =>
+      console.error("syncSubscriptionForCompany", err)
+    );
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

@@ -6,6 +6,7 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
+import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
 
 type Body = {
   email: string;
@@ -69,6 +70,10 @@ export async function POST(req: NextRequest, { params }: Ctx) {
         },
       });
     }
+
+    void syncSubscriptionForCompany(companyId).catch((err) =>
+      console.error("syncSubscriptionForCompany", err)
+    );
 
     return NextResponse.json({ ok: true, memberUid: invited.id }, { status: 200 });
   } catch (e: unknown) {
