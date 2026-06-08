@@ -12,10 +12,6 @@ import { PRICING_SUMMARY_LINES } from "@/lib/billing/pricing-ui-copy";
 
 type BillingStatus = "active" | "inactive" | "cancelled" | "past_due" | "trialing" | null;
 
-const DEV_BYPASS_UI_ENABLED =
-  process.env.NODE_ENV !== "production" &&
-  process.env.NEXT_PUBLIC_ENABLE_DEV_BILLING_BYPASS === "true";
-
 function billingStatusLabel(status: BillingStatus): string {
   switch (status) {
     case "active":
@@ -52,7 +48,6 @@ export default function SubskrypcjaPage() {
   const accent = getAuthAccent("employer");
 
   const [busy, setBusy] = useState(false);
-  const [devBusy, setDevBusy] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -110,21 +105,6 @@ export default function SubskrypcjaPage() {
     }
   }
 
-  async function handleDevActivate() {
-    setDevBusy(true);
-    setError(null);
-    setMsg(null);
-    try {
-      await apiFetch("/api/dev/activate-billing", { method: "POST" });
-      router.replace("/dashboard");
-    } catch (e: unknown) {
-      const raw = e instanceof Error ? e.message : "DEV_ACTIVATE_ERROR";
-      setError(mapCheckoutError(raw === "NOT_AVAILABLE" ? "Dev bypass niedostępny." : raw));
-    } finally {
-      setDevBusy(false);
-    }
-  }
-
   async function handleLogout() {
     setLoggingOut(true);
     try {
@@ -135,7 +115,7 @@ export default function SubskrypcjaPage() {
     }
   }
 
-  const actionBusy = busy || devBusy || loggingOut;
+  const actionBusy = busy || loggingOut;
 
   if (loading) {
     return (
@@ -246,19 +226,6 @@ export default function SubskrypcjaPage() {
                 {loggingOut ? "Wylogowywanie…" : "Wyloguj się"}
               </button>
             </div>
-
-            {DEV_BYPASS_UI_ENABLED ? (
-              <div className="pt-2 border-t border-white/10">
-                <button
-                  type="button"
-                  disabled={actionBusy}
-                  onClick={() => void handleDevActivate()}
-                  className="w-full min-h-[40px] rounded-lg border border-dashed border-white/20 bg-white/[0.03] text-xs font-medium text-slate-400 hover:text-slate-200 hover:border-white/30 transition-colors disabled:opacity-60"
-                >
-                  {devBusy ? "Aktywowanie…" : "Dev: aktywuj lokalnie"}
-                </button>
-              </div>
-            ) : null}
           </div>
         </div>
       </div>
