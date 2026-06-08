@@ -9,6 +9,8 @@ import {
   resolveStripeCustomerId,
 } from "@/lib/server/billing/map-stripe-status";
 import { getStripeClient } from "@/lib/server/billing/stripe-client";
+import { getIncludedSeats } from "@/lib/server/billing/stripe-price-config";
+import { buildSubscriptionItemUpdates } from "@/lib/server/billing/subscription-item-sync";
 import {
   normalizeSubscriptionStatus,
   statusAllowsAccess,
@@ -370,6 +372,34 @@ export async function assertUserCanCreateCompany(userId: string): Promise<void> 
   }
 }
 
+export async function countBillableSeatsForEmployer(userId: string): Promise<number> {
+  const ownedCompanies = await prisma.companyMember.findMany({
+    where: { userId, role: "owner", isActive: true },
+    select: { companyId: true },
+  });
+
+  if (ownedCompanies.length === 0) {
+    return 0;
+  }
+
+  return prisma.companyMember.count({
+    where: {
+      companyId: { in: ownedCompanies.map((row) => row.companyId) },
+      isActive: true,
+    },
+  });
+}
+
+/** Resolves the employer account that owns billing for a company (for future member triggers). */
+export async function resolveBillingOwnerUserId(companyId: string): Promise<string | null> {
+  const owner = await prisma.companyMember.findFirst({
+    where: { companyId, role: "owner", isActive: true },
+    select: { userId: true },
+  });
+
+  return owner?.userId ?? null;
+}
+
 export async function syncSubscriptionQuantities(userId: string): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -389,34 +419,13 @@ export async function syncSubscriptionQuantities(userId: string): Promise<void> 
     throw new Error("MISSING_STRIPE_IDS");
   }
 
-  const ownedCount = await prisma.companyMember.count({
-    where: { userId, role: "owner", isActive: true },
-  });
+  const activeMembers = await countBillableSeatsForEmployer(userId);
+  const includedSeats = getIncludedSeats();
+  const extraSeatQty = Math.max(0, activeMembers - includedSeats);
 
-  const addonQty = Math.max(0, ownedCount - 1);
   const stripe = getStripeClient();
-  const sub = await stripe.subscriptions.retrieve(subscriptionId);
-
-  const basePriceId = process.env.STRIPE_PRICE_BASE_400!;
-  const addonPriceId = process.env.STRIPE_PRICE_ADDON_250!;
-
-  const baseItem = sub.items.data.find((it) => it.price.id === basePriceId) || null;
-  const addonItem = sub.items.data.find((it) => it.price.id === addonPriceId) || null;
-
-  const items: Stripe.SubscriptionUpdateParams.Item[] = [];
-
-  if (baseItem) {
-    items.push({ id: baseItem.id, quantity: 1 });
-  } else {
-    items.push({ price: basePriceId, quantity: 1 });
-  }
-
-  if (addonQty > 0) {
-    if (addonItem) items.push({ id: addonItem.id, quantity: addonQty });
-    else items.push({ price: addonPriceId, quantity: addonQty });
-  } else if (addonItem) {
-    items.push({ id: addonItem.id, deleted: true } as Stripe.SubscriptionUpdateParams.Item);
-  }
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const items = buildSubscriptionItemUpdates(subscription, extraSeatQty);
 
   await stripe.subscriptions.update(subscriptionId, {
     items,
@@ -432,5 +441,7 @@ export const BillingService = {
   handleWebhookEvent,
   assertCompanyAccessAllowed,
   assertUserCanCreateCompany,
+  countBillableSeatsForEmployer,
+  resolveBillingOwnerUserId,
   syncSubscriptionQuantities,
 };

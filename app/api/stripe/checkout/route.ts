@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import type Stripe from "stripe";
+
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10" as any,
-});
+import { handleSessionRouteErrorOr } from "@/lib/server/auth/handle-session-route-error";
+import { BillingService } from "@/lib/server/billing/billing-service";
+import { getStripeBillingPrices } from "@/lib/server/billing/stripe-price-config";
+import { getStripeClient } from "@/lib/server/billing/stripe-client";
 
 function appUrl() {
   return (
@@ -18,16 +19,35 @@ function appUrl() {
 export async function POST() {
   try {
     const sessionUser = await requireSessionUser();
-    const user = await prisma.user.findUnique({ where: { id: sessionUser.id } });
+    const user = await prisma.user.findUnique({
+      where: { id: sessionUser.id },
+      select: {
+        id: true,
+        email: true,
+        accountRole: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        subscriptionStatus: true,
+        subscriptionEndsAt: true,
+        subscriptionCancelAtPeriodEnd: true,
+      },
+    });
+
     if (!user || user.accountRole !== "employer") {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
+    const effective = BillingService.deriveEffectiveStatus(user);
+    if (user.stripeSubscriptionId && effective.allowsAccess) {
+      return NextResponse.json({ error: "SUBSCRIPTION_ALREADY_ACTIVE" }, { status: 409 });
+    }
+
+    const { basePriceId, introCouponId } = getStripeBillingPrices();
     const existingCustomerId = user.stripeCustomerId ?? undefined;
 
-    const checkoutSession = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
-      line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
+      line_items: [{ price: basePriceId, quantity: 1 }],
       success_url: `${appUrl()}/settings?checkout=success`,
       cancel_url: `${appUrl()}/settings?checkout=cancel`,
       customer: existingCustomerId,
@@ -36,14 +56,23 @@ export async function POST() {
       subscription_data: {
         metadata: { userId: user.id },
       },
-    });
+    };
+
+    if (introCouponId) {
+      sessionParams.discounts = [{ coupon: introCouponId }];
+    }
+
+    const checkoutSession = await getStripeClient().checkout.sessions.create(sessionParams);
+
+    if (!checkoutSession.url) {
+      return NextResponse.json({ error: "NO_CHECKOUT_URL" }, { status: 500 });
+    }
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (e: unknown) {
-    if (e instanceof Error && e.message === "MISSING_AUTH") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    console.error(e);
-    return NextResponse.json({ error: "STRIPE_ERROR" }, { status: 500 });
+    return handleSessionRouteErrorOr(e, (msg) => {
+      if (msg === "SUBSCRIPTION_ALREADY_ACTIVE") return 409;
+      return null;
+    });
   }
 }
