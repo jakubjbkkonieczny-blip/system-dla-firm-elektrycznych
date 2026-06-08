@@ -38,6 +38,11 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
   const todayDisplay = formatSessionDateDisplay(todayIso);
 
   const load = useCallback(async () => {
+    if (!companyId) {
+      setSessionLoading(false);
+      return;
+    }
+
     setErr(null);
     try {
       const data = await apiFetch(`/api/companies/${companyId}/attendance/me`);
@@ -54,6 +59,8 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
   }, [load]);
 
   async function runAction(action: AttendanceAction) {
+    if (!companyId) return;
+
     const previous = session;
     setBusy(true);
     setErr(null);

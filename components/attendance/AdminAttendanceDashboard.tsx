@@ -50,6 +50,8 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
   } | null>(null);
 
   const load = useCallback(async () => {
+    if (!companyId) return;
+
     setBusy(true);
     setErr(null);
     try {

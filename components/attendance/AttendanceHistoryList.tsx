@@ -33,6 +33,8 @@ export function AttendanceHistoryList({
 
   const fetchPage = useCallback(
     async (cursor?: string, append = false) => {
+      if (!companyId) return;
+
       const qs = new URLSearchParams();
       qs.set("limit", String(PAGE_LIMIT));
       if (userId) qs.set("userId", userId);

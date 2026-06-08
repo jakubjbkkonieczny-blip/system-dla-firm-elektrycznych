@@ -26,6 +26,11 @@ export function AttendanceHoursModal({
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!companyId || !userId) {
+      setBusy(false);
+      return;
+    }
+
     let cancelled = false;
     (async () => {
       setBusy(true);
