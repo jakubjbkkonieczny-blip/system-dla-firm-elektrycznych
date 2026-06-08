@@ -30,6 +30,7 @@ model User {
   googleRefreshToken   String?  @db.Text
   pushSubscription     Json?
   isActive    Boolean  @default(true)
+  pendingDeletionAt    DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -49,6 +50,7 @@ model User {
   budgetLaborAssigned JobBudgetLaborItem[]    @relation("BudgetLaborUser")
   budgetLaborCreated  JobBudgetLaborItem[]    @relation("BudgetLaborCreatedBy")
 
+  @@index([pendingDeletionAt])
 }
 
 model Company {

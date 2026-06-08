@@ -7,6 +7,7 @@ import {
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
+import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
 
 type Ctx = { params: Promise<{ companyId: string; memberUid: string }> };
 
@@ -42,6 +43,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       data: { isActive: active },
     });
 
+    await syncWorkerOrphanState(memberUid);
+
     void syncSubscriptionForCompany(companyId).catch((err) =>
       console.error("syncSubscriptionForCompany", err)
     );
@@ -75,6 +78,8 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     await prisma.companyMember.delete({
       where: { companyId_userId: { companyId, userId: memberUid } },
     });
+
+    await syncWorkerOrphanState(memberUid);
 
     void syncSubscriptionForCompany(companyId).catch((err) =>
       console.error("syncSubscriptionForCompany", err)

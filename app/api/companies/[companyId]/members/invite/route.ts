@@ -7,6 +7,7 @@ import {
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
+import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
 
 type Body = {
   email: string;
@@ -70,6 +71,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
         },
       });
     }
+
+    await syncWorkerOrphanState(invited.id);
 
     void syncSubscriptionForCompany(companyId).catch((err) =>
       console.error("syncSubscriptionForCompany", err)
