@@ -38,6 +38,13 @@ model User {
   createdJobs         Job[]               @relation("JobCreatedBy")
   jobAssignments      JobAssignment[]
   completedStages     JobStage[]              @relation("StageCompletedBy")
+  supervisedStages    JobStage[]              @relation("StageSupervisor")
+  stageSubmissions    JobStage[]              @relation("StageSubmittedBy")
+  stageApprovals      JobStage[]              @relation("StageApprovedBy")
+  stageRejections     JobStage[]              @relation("StageRejectedBy")
+  stageSupervisorAssignments JobStage[]       @relation("StageSupervisorAssignedBy")
+  stageHistoryEvents  JobStageHistory[]       @relation("StageHistoryActor")
+  stageHistoryTargets JobStageHistory[]       @relation("StageHistoryTarget")
   stageNoteEdits      JobStageNoteHistory[]   @relation("StageNoteEditedBy")
   statusChanges       JobStatusHistory[]  @relation("StatusChangedBy")
   auditLogs           AuditLog[]
@@ -70,6 +77,7 @@ model Company {
   jobAssignments       JobAssignment[]
   jobStages            JobStage[]
   jobStageNoteHistory  JobStageNoteHistory[]
+  jobStageHistory      JobStageHistory[]
   jobStagePhotos       JobStagePhoto[]
   jobStatusHistory     JobStatusHistory[]
   auditLogs            AuditLog[]
@@ -130,6 +138,7 @@ model Job {
   assignments       JobAssignment[]
   stages            JobStage[]
   stageNoteHistory  JobStageNoteHistory[]
+  stageHistory      JobStageHistory[]
   statusHistory     JobStatusHistory[]
   budget            JobBudget?
   budgetItems       JobBudgetItem[]
@@ -171,11 +180,23 @@ model JobStage {
   name               String
   description        String?
   plannedDate        DateTime?
-  status             String   // todo, done
+  status             String   // todo, in_progress, pending_approval, needs_changes, done
   completedAt        DateTime?
   completedByUserId  String?
   workerNote         String?
   sortOrder          Int      @default(0)
+
+  supervisorUserId             String?
+  supervisorCanCreateStages    Boolean  @default(false)
+  supervisorAssignedAt         DateTime?
+  supervisorAssignedByUserId   String?
+  submittedForApprovalAt       DateTime?
+  submittedByUserId            String?
+  approvedAt                   DateTime?
+  approvedByUserId             String?
+  rejectedAt                   DateTime?
+  rejectedByUserId             String?
+  rejectionComment             String?
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -184,8 +205,14 @@ model JobStage {
   company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   job                Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   completedBy        User?    @relation("StageCompletedBy", fields: [completedByUserId], references: [id], onDelete: SetNull)
+  supervisor         User?    @relation("StageSupervisor", fields: [supervisorUserId], references: [id], onDelete: SetNull)
+  submittedBy        User?    @relation("StageSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  approvedBy         User?    @relation("StageApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  rejectedBy         User?    @relation("StageRejectedBy", fields: [rejectedByUserId], references: [id], onDelete: SetNull)
+  supervisorAssignedBy User?  @relation("StageSupervisorAssignedBy", fields: [supervisorAssignedByUserId], references: [id], onDelete: SetNull)
   photos             JobStagePhoto[]
   noteHistory        JobStageNoteHistory[]
+  history            JobStageHistory[]
 
   @@index([companyId])
   @@index([jobId])
@@ -193,6 +220,30 @@ model JobStage {
   @@index([companyId, plannedDate])
   @@index([companyId, status])
   @@index([jobId, sortOrder])
+  @@index([supervisorUserId])
+}
+
+model JobStageHistory {
+  id             String   @id @default(cuid())
+  companyId      String
+  jobId          String
+  stageId        String
+  eventType      String   // supervisor_assigned, submitted_for_approval, approved, rejected, reopened
+  actorUserId    String
+  targetUserId   String?
+  comment        String?
+  metadata       String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job            Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  stage          JobStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  actor          User     @relation("StageHistoryActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+  target         User?    @relation("StageHistoryTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, jobId, stageId, createdAt])
+  @@index([stageId, createdAt])
+  @@index([actorUserId])
 }
 
 model JobStageNoteHistory {

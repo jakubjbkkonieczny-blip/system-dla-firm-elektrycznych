@@ -48,10 +48,13 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     await prisma.jobStage.update({
       where: { id: stageId },
       data: {
-        status: "done",
-        completedAt: new Date(`${todayYyyyMmDd()}T12:00:00.000Z`),
-        completedByUserId: userId,
+        status: "pending_approval",
         workerNote: notatka_pracownika,
+        submittedForApprovalAt: new Date(),
+        submittedByUserId: userId,
+        rejectedAt: null,
+        rejectedByUserId: null,
+        rejectionComment: null,
       },
     });
 

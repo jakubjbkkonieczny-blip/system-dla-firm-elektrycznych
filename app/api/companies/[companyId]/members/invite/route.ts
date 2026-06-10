@@ -11,8 +11,6 @@ import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
 
 type Body = {
   email: string;
-  role?: "owner" | "admin" | "staff";
-  scope?: "all" | "assigned";
 };
 
 type Ctx = { params: Promise<{ companyId: string }> };
@@ -31,19 +29,15 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const body = (await req.json()) as Body;
     const email = (body.email || "").trim().toLowerCase();
 
-    if (body.role === "owner") {
-      return NextResponse.json({ error: "OWNER_ROLE_NOT_ASSIGNABLE" }, { status: 400 });
-    }
-
-    const role = body.role === "admin" ? "admin" : "staff";
-    const scope = body.scope === "assigned" ? "assigned_only" : "all";
-
     if (!email) return NextResponse.json({ error: "MISSING_EMAIL" }, { status: 400 });
 
     const invited = await prisma.user.findUnique({ where: { email } });
     if (!invited) {
       return NextResponse.json({ error: "USER_NOT_FOUND" }, { status: 404 });
     }
+
+    const role = "staff";
+    const scope = "assigned_only";
 
     const existing = await prisma.companyMember.findUnique({
       where: { companyId_userId: { companyId, userId: invited.id } },
@@ -61,10 +55,13 @@ export async function POST(req: NextRequest, { params }: Ctx) {
         },
       });
     } else {
+      if (existing.role === "owner") {
+        return NextResponse.json({ error: "CANNOT_MODIFY_OWNER" }, { status: 400 });
+      }
       await prisma.companyMember.update({
         where: { companyId_userId: { companyId, userId: invited.id } },
         data: {
-          role,
+          role: "staff",
           scope,
           isActive: true,
           invitedById: actorId,

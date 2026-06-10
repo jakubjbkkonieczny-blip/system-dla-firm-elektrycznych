@@ -53,8 +53,25 @@ export async function POST(
 
     const member = await requireActiveMember(companyId, userId);
     const role = (member.role || "staff") as "owner" | "admin" | "staff";
+
     if (!(role === "owner" || role === "admin")) {
-      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      const assigned = await prisma.jobAssignment.findFirst({
+        where: { companyId, jobId, userId },
+      });
+      if (!assigned) {
+        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      }
+      const supervisedStage = await prisma.jobStage.findFirst({
+        where: {
+          companyId,
+          jobId,
+          supervisorUserId: userId,
+          supervisorCanCreateStages: true,
+        },
+      });
+      if (!supervisedStage) {
+        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      }
     }
 
     const body = (await req.json()) as CreateStageBody;

@@ -9,11 +9,11 @@ import { requireActiveMember } from "@/app/api/_lib/membership";
 import { recordStageHistory } from "@/lib/server/jobs/stage-history";
 import {
   buildStageAccessContext,
-  canReopenStage,
+  canRejectStage,
 } from "@/lib/server/jobs/stage-permissions";
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ companyId: string; jobId: string; stageId: string }> }
 ) {
   try {
@@ -24,10 +24,11 @@ export async function POST(
     const member = await requireActiveMember(companyId, userId);
     const role = (member.role || "staff") as "owner" | "admin" | "staff";
 
-    const job = await prisma.job.findFirst({
-      where: { id: jobId, companyId, deletedAt: null },
-    });
-    if (!job) return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
+    const body = (await req.json()) as { komentarz?: string };
+    const comment = String(body.komentarz ?? "").trim();
+    if (!comment) {
+      return NextResponse.json({ error: "MISSING_REJECTION_COMMENT" }, { status: 400 });
+    }
 
     const stage = await prisma.jobStage.findFirst({
       where: { id: stageId, companyId, jobId },
@@ -42,23 +43,25 @@ export async function POST(
       stage,
     });
 
-    if (!canReopenStage(ctx)) {
+    if (!canRejectStage(ctx)) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
+
+    const now = new Date();
 
     await prisma.jobStage.update({
       where: { id: stageId },
       data: {
-        status: "in_progress",
-        completedAt: null,
-        completedByUserId: null,
+        status: "needs_changes",
+        rejectedAt: now,
+        rejectedByUserId: userId,
+        rejectionComment: comment,
         submittedForApprovalAt: null,
         submittedByUserId: null,
+        completedAt: null,
+        completedByUserId: null,
         approvedAt: null,
         approvedByUserId: null,
-        rejectedAt: null,
-        rejectedByUserId: null,
-        rejectionComment: null,
       },
     });
 
@@ -66,8 +69,9 @@ export async function POST(
       companyId,
       jobId,
       stageId,
-      eventType: "reopened",
+      eventType: "rejected",
       actorUserId: userId,
+      comment,
     });
 
     return NextResponse.json({ ok: true }, { status: 200 });

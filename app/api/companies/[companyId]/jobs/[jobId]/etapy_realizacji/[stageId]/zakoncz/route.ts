@@ -6,17 +6,18 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
+import { canSubmitStageForApproval } from "@/lib/jobs/stage-status";
+import { stageDbToPl } from "@/lib/jobs/stage-status";
+import { recordStageHistory } from "@/lib/server/jobs/stage-history";
+import {
+  buildStageAccessContext,
+  canSubmitStage,
+} from "@/lib/server/jobs/stage-permissions";
 
 type Body = {
   notatka_pracownika?: string;
   lista_zdjec?: string[];
 };
-
-function todayYyyyMmDd() {
-  const d = new Date();
-  return d.toISOString().slice(0, 10);
-}
 
 export async function POST(
   req: NextRequest,
@@ -40,23 +41,47 @@ export async function POST(
     });
     if (!stage) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    const isAssigned =
-      role === "staff" ? await isUserAssignedToJob(jobId, userId, companyId) : false;
-    const can = role === "owner" || role === "admin" || isAssigned;
+    const ctx = await buildStageAccessContext({
+      role,
+      userId,
+      companyId,
+      jobId,
+      stage,
+    });
 
-    if (!can) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    if (!canSubmitStage(ctx)) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    }
+
+    const pl = stageDbToPl(stage.status);
+    if (!canSubmitStageForApproval(pl)) {
+      return NextResponse.json({ error: "INVALID_STAGE_STATUS" }, { status: 400 });
+    }
 
     const body = (await req.json()) as Body;
     const note = String(body.notatka_pracownika || "");
 
+    const now = new Date();
     await prisma.jobStage.update({
       where: { id: stageId },
       data: {
-        status: "done",
-        completedAt: new Date(`${todayYyyyMmDd()}T12:00:00.000Z`),
-        completedByUserId: userId,
+        status: "pending_approval",
         workerNote: note,
+        submittedForApprovalAt: now,
+        submittedByUserId: userId,
+        rejectedAt: null,
+        rejectedByUserId: null,
+        rejectionComment: null,
       },
+    });
+
+    await recordStageHistory({
+      companyId,
+      jobId,
+      stageId,
+      eventType: "submitted_for_approval",
+      actorUserId: userId,
+      comment: note || null,
     });
 
     return NextResponse.json({ ok: true }, { status: 200 });

@@ -25,6 +25,13 @@ import { JobDateRangeEditor } from "@/components/jobs/JobDateRangeEditor";
 import { JobDateRangeView } from "@/components/jobs/JobDateRangeView";
 import { JobPriorityBadge, JobPrioritySelect } from "@/lib/jobs/job-priority";
 import { JobStageNoteHistoryModal } from "@/components/jobs/JobStageNoteHistoryModal";
+import { JobStageEventHistoryModal } from "@/components/jobs/JobStageEventHistoryModal";
+import { JobStageCard, type JobStageCardData } from "@/components/jobs/JobStageCard";
+import { type StagePlStatus } from "@/lib/jobs/stage-status";
+import {
+  canCreateJobStageClient,
+  computeStagePermissions,
+} from "@/lib/jobs/stage-permissions-client";
 
 
 
@@ -44,15 +51,21 @@ opis_etapu?: string;
 
 planowana_data?: string; // YYYY-MM-DD lub ""
 
-status: "do_wykonania" | "zakonczony";
+status: StagePlStatus;
 
-data_zakonczenia?: string | null; // YYYY-MM-DD
+data_zakonczenia?: string | null;
 
 zakonczone_przez?: { displayName: string; email: string | null } | null;
 
 notatka_pracownika?: string;
 
 lista_zdjec?: string[];
+
+kierownik_etapu?: { uid: string; displayName: string; email: string | null } | null;
+
+kierownik_moze_tworzyc_etapy?: boolean;
+
+odrzucenie_komentarz?: string;
 
 };
 
@@ -243,6 +256,18 @@ const [noteHistoryStage, setNoteHistoryStage] = useState<{
   name: string;
 } | null>(null);
 
+const [eventHistoryStage, setEventHistoryStage] = useState<{
+  id: string;
+  name: string;
+} | null>(null);
+
+const [supervisorStageId, setSupervisorStageId] = useState<string | null>(null);
+const [supervisorUid, setSupervisorUid] = useState("");
+const [supervisorCanCreate, setSupervisorCanCreate] = useState(false);
+
+const [rejectStageId, setRejectStageId] = useState<string | null>(null);
+const [rejectComment, setRejectComment] = useState("");
+
 
 
 const [members, setMembers] = useState<CompanyMemberOption[]>([]);
@@ -327,9 +352,16 @@ return saved.some((id, i) => id !== draft[i]);
 
 // staff może pracować tylko jak przypisane
 
-const canStaffWork = role === "staff" ? isAssignedToMe : true;
-
-const canMarkDone = isOwnerOrAdmin || (role === "staff" && isAssignedToMe);
+const canCreateStage = useMemo(
+  () =>
+    canCreateJobStageClient({
+      role,
+      userId: user?.uid ?? "",
+      isAssignedToJob: isAssignedToMe,
+      stages,
+    }),
+  [role, user?.uid, isAssignedToMe, stages]
+);
 
 
 
@@ -874,15 +906,17 @@ setBusy(false);
 // ---------- NOTATKA: ZAWSZE EDYTOWALNA ----------
 
 function openNoteEdit(s: Stage) {
-
-// staff: tylko jeśli przypisane do niego
-
-if (role === "staff" && !isAssignedToMe) {
-
-setStagesErr("Jako pracownik możesz edytować notatki tylko, gdy zlecenie jest przypisane do Ciebie.");
-
+const perms = computeStagePermissions({
+  role,
+  userId: user?.uid ?? "",
+  isAssignedToJob: isAssignedToMe,
+  stageStatus: s.status,
+  supervisorUid: s.kierownik_etapu?.uid ?? null,
+  supervisorCanCreateStages: Boolean(s.kierownik_moze_tworzyc_etapy),
+});
+if (!perms.canEditNote) {
+setStagesErr("Brak uprawnień do edycji notatki na tym etapie.");
 return;
-
 }
 
 setStagesErr(null);
@@ -959,8 +993,6 @@ setBusy(false);
 
 function openFinish(stageId: string) {
 
-if (!canMarkDone) return;
-
 setFinishId(stageId);
 
 setFinishNote("");
@@ -1019,18 +1051,6 @@ if (!companyId || !finishId) return;
 
 
 
-// staff: tylko jeśli przypisane do niego
-
-if (role === "staff" && !isAssignedToMe) {
-
-setStagesErr("Nie możesz zakończyć etapu, jeśli zlecenie nie jest przypisane do Ciebie.");
-
-return;
-
-}
-
-
-
 setBusy(true);
 
 setStagesErr(null);
@@ -1044,8 +1064,6 @@ try {
 const urls: string[] = [];
 
 
-
-// wysyłamy po kolei (stabilniej w MVP)
 
 for (let i = 0; i < finishFiles.length; i++) {
 
@@ -1097,23 +1115,98 @@ setUploadPct(0);
 
 
 
-async function reopenStage(stageId: string) {
-
-if (!companyId) return;
-
-
-
-// staff: tylko jeśli przypisane do niego
-
-if (role === "staff" && !isAssignedToMe) {
-
-setStagesErr("Nie możesz cofnąć zakończenia, jeśli zlecenie nie jest przypisane do Ciebie.");
-
-return;
-
+async function approveStage(stageId: string) {
+  if (!companyId) return;
+  setBusy(true);
+  setStagesErr(null);
+  try {
+    await apiFetch(
+      `/api/companies/${companyId}/jobs/${jobId}/etapy_realizacji/${stageId}/akceptuj`,
+      { method: "POST" }
+    );
+    await loadStages();
+  } catch (e: any) {
+    setStagesErr(e?.message ?? "APPROVE_STAGE_ERROR");
+  } finally {
+    setBusy(false);
+  }
 }
 
+function openReject(stageId: string) {
+  setRejectStageId(stageId);
+  setRejectComment("");
+  setStagesErr(null);
+}
 
+function closeReject() {
+  setRejectStageId(null);
+  setRejectComment("");
+}
+
+async function rejectStage() {
+  if (!companyId || !rejectStageId) return;
+  if (!rejectComment.trim()) {
+    setStagesErr("Podaj komentarz przy odrzuceniu.");
+    return;
+  }
+  setBusy(true);
+  setStagesErr(null);
+  try {
+    await apiFetch(
+      `/api/companies/${companyId}/jobs/${jobId}/etapy_realizacji/${rejectStageId}/odrzuc`,
+      {
+        method: "POST",
+        body: JSON.stringify({ komentarz: rejectComment.trim() }),
+      }
+    );
+    closeReject();
+    await loadStages();
+  } catch (e: any) {
+    setStagesErr(e?.message ?? "REJECT_STAGE_ERROR");
+  } finally {
+    setBusy(false);
+  }
+}
+
+function openSupervisor(stage: Stage) {
+  setSupervisorStageId(stage.id);
+  setSupervisorUid(stage.kierownik_etapu?.uid ?? "");
+  setSupervisorCanCreate(Boolean(stage.kierownik_moze_tworzyc_etapy));
+  setStagesErr(null);
+}
+
+function closeSupervisor() {
+  setSupervisorStageId(null);
+  setSupervisorUid("");
+  setSupervisorCanCreate(false);
+}
+
+async function saveSupervisor() {
+  if (!companyId || !supervisorStageId) return;
+  setBusy(true);
+  setStagesErr(null);
+  try {
+    await apiFetch(
+      `/api/companies/${companyId}/jobs/${jobId}/etapy_realizacji/${supervisorStageId}/kierownik`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          kierownik_uid: supervisorUid || null,
+          moze_tworzyc_etapy: supervisorCanCreate,
+        }),
+      }
+    );
+    closeSupervisor();
+    await loadStages();
+  } catch (e: any) {
+    setStagesErr(e?.message ?? "SUPERVISOR_ERROR");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function reopenStage(stageId: string) {
+if (!companyId) return;
 
 if (!confirm("Cofnąć zakończenie etapu?")) return;
 
@@ -1694,7 +1787,7 @@ Jako pracownik możesz edytować notatki / kończyć etapy tylko, gdy zlecenie j
 
 
 
-{isOwnerOrAdmin ? (
+{canCreateStage ? (
 
 <button
 
@@ -1735,302 +1828,32 @@ Dodaj etap
 <div className="space-y-3">
 
 {stages.map((s) => {
-
-const done = s.status === "zakonczony";
-
-const photos = Array.isArray(s.lista_zdjec) ? s.lista_zdjec : [];
-
-
-
+const perms = computeStagePermissions({
+  role,
+  userId: user?.uid ?? "",
+  isAssignedToJob: isAssignedToMe,
+  stageStatus: s.status,
+  supervisorUid: s.kierownik_etapu?.uid ?? null,
+  supervisorCanCreateStages: Boolean(s.kierownik_moze_tworzyc_etapy),
+});
 return (
-
-<div key={s.id} className="border border-border rounded-xl p-3 bg-bg-secondary">
-
-<div className="flex items-start justify-between gap-3">
-
-<div className="min-w-0">
-
-<div className="font-semibold truncate">{s.nazwa_etapu}</div>
-
-
-
-<div className="text-sm text-text mt-1 space-y-1">
-
-{s.opis_etapu ? <div>{s.opis_etapu}</div> : null}
-
-
-
-<div>
-
-<span className="text-text-muted">Planowana data:</span>{" "}
-
-<b>{s.planowana_data ? s.planowana_data : "(brak)"}</b>
-
-</div>
-
-
-
-<div>
-
-<span className="text-text-muted">Status:</span>{" "}
-
-<b className={done ? "text-success" : "text-warning"}>
-
-{done ? "Zakończony" : "Do wykonania"}
-
-</b>
-
-{done ? (
-
-<span className="text-text-muted">
-
-{" "}
-
-• {s.data_zakonczenia || "(brak daty)"} • przez:{" "}
-{s.zakonczone_przez ? (
-  <span className="text-text">
-    {s.zakonczone_przez.displayName}
-    {s.zakonczone_przez.email &&
-    s.zakonczone_przez.displayName !== s.zakonczone_przez.email ? (
-      <>
-        <span className="hidden sm:inline text-text-muted">
-          {" "}
-          ({s.zakonczone_przez.email})
-        </span>
-        <span className="sm:hidden block text-xs text-text-muted">
-          {s.zakonczone_przez.email}
-        </span>
-      </>
-    ) : null}
-  </span>
-) : (
-  "(brak)"
-)}
-
-</span>
-
-) : null}
-
-</div>
-
-
-
-{/* NOTATKA (widok) */}
-
-<div className="pt-1 space-y-1">
-
-{s.notatka_pracownika ? (
-
-<div>
-
-<span className="text-text-muted">Notatka:</span> {s.notatka_pracownika}
-
-</div>
-
-) : (
-
-<div className="text-text-muted text-xs">Notatka: (brak)</div>
-
-)}
-
-<button
-
-type="button"
-
-className="min-h-[44px] px-2 py-1 rounded-lg border border-border bg-card hover:bg-card-hover text-xs font-medium text-text disabled:opacity-60"
-
-disabled={busy || (role === "staff" && !isAssignedToMe)}
-
-onClick={() => setNoteHistoryStage({ id: s.id, name: s.nazwa_etapu })}
-
-title={role === "staff" && !isAssignedToMe ? "Zlecenie nie jest przypisane do Ciebie" : "Historia notatki"}
-
->
-
-Historia notatki
-
-</button>
-
-</div>
-
-</div>
-
-
-
-{/* ZDJĘCIA - MINIATURY */}
-
-{photos.length ? (
-
-<div className="mt-3">
-
-<div className="text-xs text-text-muted mb-2">Zdjęcia:</div>
-
-<div className="flex gap-2 flex-wrap">
-
-{photos.map((url, idx) => (
-
-<a
-
-key={idx}
-
-href={url}
-
-target="_blank"
-
-rel="noreferrer"
-
-className="block"
-
-title="Otwórz zdjęcie"
-
->
-
-<img
-
-src={url}
-
-alt={`Zdjęcie ${idx + 1}`}
-
-className="w-20 h-20 object-cover rounded-lg border border-border bg-card"
-
+<JobStageCard
+  key={s.id}
+  stage={s as JobStageCardData}
+  busy={busy}
+  permissions={perms}
+  onEditMeta={() => openEdit(s)}
+  onDelete={() => deleteStage(s.id)}
+  onAssignSupervisor={() => openSupervisor(s)}
+  onEditNote={() => openNoteEdit(s)}
+  onNoteHistory={() => setNoteHistoryStage({ id: s.id, name: s.nazwa_etapu })}
+  onEventHistory={() => setEventHistoryStage({ id: s.id, name: s.nazwa_etapu })}
+  onSubmit={() => openFinish(s.id)}
+  onApprove={() => approveStage(s.id)}
+  onReject={() => openReject(s.id)}
+  onReopen={() => reopenStage(s.id)}
 />
-
-</a>
-
-))}
-
-</div>
-
-</div>
-
-) : null}
-
-</div>
-
-
-
-{/* PRZYCISKI */}
-
-<div className="shrink-0 flex flex-col gap-2">
-
-{/* owner/admin: edycja/usuwanie */}
-
-{isOwnerOrAdmin ? (
-
-<>
-
-<button
-
-type="button"
-
-className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
-
-disabled={busy}
-
-onClick={() => openEdit(s)}
-
->
-
-Edytuj etap
-
-</button>
-
-<button
-
-type="button"
-
-className="px-3 py-2 rounded-lg border border-danger-border bg-danger-bg text-danger hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
-
-disabled={busy}
-
-onClick={() => deleteStage(s.id)}
-
->
-
-Usuń etap
-
-</button>
-
-</>
-
-) : null}
-
-
-
-{/* NOTATKA: edycja zawsze (owner/admin zawsze; staff tylko jeśli przypisane) */}
-
-<button
-
-type="button"
-
-className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
-
-disabled={busy || (role === "staff" && !isAssignedToMe)}
-
-onClick={() => openNoteEdit(s)}
-
-title={role === "staff" && !isAssignedToMe ? "Zlecenie nie jest przypisane do Ciebie" : "Edytuj notatkę"}
-
->
-
-Edytuj notatkę
-
-</button>
-
-
-
-{/* zakończ / cofnij */}
-
-{canMarkDone && canStaffWork ? (
-
-done ? (
-
-<button
-
-type="button"
-
-className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
-
-disabled={busy}
-
-onClick={() => reopenStage(s.id)}
-
->
-
-Cofnij zakończenie
-
-</button>
-
-) : (
-
-<button
-
-type="button"
-
-className="px-3 py-2 rounded-lg bg-primary text-primary-fg text-sm min-h-[44px] disabled:opacity-60"
-
-disabled={busy}
-
-onClick={() => openFinish(s.id)}
-
->
-
-Oznacz jako zakończony
-
-</button>
-
-)
-
-) : null}
-
-</div>
-
-</div>
-
-</div>
-
 );
-
 })}
 
 </div>
@@ -2255,6 +2078,72 @@ onClose={() => setNoteHistoryStage(null)}
 
 ) : null}
 
+{eventHistoryStage && companyId ? (
+<JobStageEventHistoryModal
+companyId={companyId}
+jobId={jobId}
+stageId={eventHistoryStage.id}
+stageName={eventHistoryStage.name}
+onClose={() => setEventHistoryStage(null)}
+/>
+) : null}
+
+{supervisorStageId ? (
+<div className="fixed inset-0 bg-overlay flex items-center justify-center p-4 sm:p-6 z-50">
+<div className="w-full max-w-lg theme-glass bg-card border border-border rounded-2xl p-4 space-y-3">
+<h3 className="font-semibold text-lg text-text">Przypisz kierownika etapu</h3>
+<select
+className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text"
+value={supervisorUid}
+onChange={(e) => setSupervisorUid(e.target.value)}
+>
+<option value="">— brak kierownika —</option>
+{(Array.isArray(job?.assignedToUids) ? job.assignedToUids : []).map((uid: string) => {
+const m = members.find((x) => x.uid === uid);
+return (
+<option key={uid} value={uid}>
+{m?.label ?? uid}
+</option>
+);
+})}
+</select>
+<label className="flex items-center gap-2 text-sm text-text min-h-[44px]">
+<input
+type="checkbox"
+checked={supervisorCanCreate}
+onChange={(e) => setSupervisorCanCreate(e.target.checked)}
+disabled={!supervisorUid}
+/>
+Może tworzyć nowe etapy
+</label>
+<div className="flex justify-end gap-2">
+<button type="button" className="min-h-[44px] px-3 py-2 rounded-lg border border-border" onClick={closeSupervisor} disabled={busy}>Anuluj</button>
+<button type="button" className="min-h-[44px] px-3 py-2 rounded-lg bg-primary text-primary-fg" onClick={saveSupervisor} disabled={busy}>Zapisz</button>
+</div>
+</div>
+</div>
+) : null}
+
+{rejectStageId ? (
+<div className="fixed inset-0 bg-overlay flex items-center justify-center p-4 sm:p-6 z-50">
+<div className="w-full max-w-lg theme-glass bg-card border border-border rounded-2xl p-4 space-y-3">
+<h3 className="font-semibold text-lg text-text">Odrzuć wykonanie etapu</h3>
+<p className="text-sm text-text-muted">Komentarz jest wymagany i trafi do historii etapu.</p>
+<textarea
+className="w-full min-h-[120px] border border-border rounded-lg px-3 py-2 bg-input text-text"
+rows={4}
+value={rejectComment}
+onChange={(e) => setRejectComment(e.target.value)}
+placeholder="Co należy poprawić?"
+/>
+<div className="flex justify-end gap-2">
+<button type="button" className="min-h-[44px] px-3 py-2 rounded-lg border border-border" onClick={closeReject} disabled={busy}>Anuluj</button>
+<button type="button" className="min-h-[44px] px-3 py-2 rounded-lg bg-danger text-white" onClick={rejectStage} disabled={busy || !rejectComment.trim()}>Odrzuć</button>
+</div>
+</div>
+</div>
+) : null}
+
 
 
 {/* MODAL: EDYTUJ NOTATKĘ */}
@@ -2337,7 +2226,7 @@ Zapisz notatkę
 
 <div className="flex items-center justify-between">
 
-<h3 className="font-semibold text-lg">Oznacz etap jako zakończony</h3>
+<h3 className="font-semibold text-lg">Oznacz etap jako wykonany</h3>
 
 <button className="text-sm px-2 py-1" onClick={closeFinish}>
 

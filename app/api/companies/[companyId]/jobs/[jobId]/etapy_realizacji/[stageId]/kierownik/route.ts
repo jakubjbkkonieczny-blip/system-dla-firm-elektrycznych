@@ -6,14 +6,20 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
+import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
 import { recordStageHistory } from "@/lib/server/jobs/stage-history";
 import {
   buildStageAccessContext,
-  canReopenStage,
+  canAssignStageSupervisor,
 } from "@/lib/server/jobs/stage-permissions";
 
-export async function POST(
-  _req: NextRequest,
+type Body = {
+  kierownik_uid?: string | null;
+  moze_tworzyc_etapy?: boolean;
+};
+
+export async function PATCH(
+  req: NextRequest,
   { params }: { params: Promise<{ companyId: string; jobId: string; stageId: string }> }
 ) {
   try {
@@ -23,11 +29,6 @@ export async function POST(
 
     const member = await requireActiveMember(companyId, userId);
     const role = (member.role || "staff") as "owner" | "admin" | "staff";
-
-    const job = await prisma.job.findFirst({
-      where: { id: jobId, companyId, deletedAt: null },
-    });
-    if (!job) return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
 
     const stage = await prisma.jobStage.findFirst({
       where: { id: stageId, companyId, jobId },
@@ -42,23 +43,30 @@ export async function POST(
       stage,
     });
 
-    if (!canReopenStage(ctx)) {
+    if (!canAssignStageSupervisor(ctx)) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
+
+    const body = (await req.json()) as Body;
+    const supervisorUid = body.kierownik_uid === null ? null : String(body.kierownik_uid ?? "").trim();
+    const canCreateStages = Boolean(body.moze_tworzyc_etapy);
+
+    if (supervisorUid) {
+      const assigned = await isUserAssignedToJob(jobId, supervisorUid, companyId);
+      if (!assigned) {
+        return NextResponse.json({ error: "SUPERVISOR_NOT_ASSIGNED_TO_JOB" }, { status: 400 });
+      }
+    }
+
+    const now = new Date();
 
     await prisma.jobStage.update({
       where: { id: stageId },
       data: {
-        status: "in_progress",
-        completedAt: null,
-        completedByUserId: null,
-        submittedForApprovalAt: null,
-        submittedByUserId: null,
-        approvedAt: null,
-        approvedByUserId: null,
-        rejectedAt: null,
-        rejectedByUserId: null,
-        rejectionComment: null,
+        supervisorUserId: supervisorUid || null,
+        supervisorCanCreateStages: supervisorUid ? canCreateStages : false,
+        supervisorAssignedAt: supervisorUid ? now : null,
+        supervisorAssignedByUserId: supervisorUid ? userId : null,
       },
     });
 
@@ -66,8 +74,14 @@ export async function POST(
       companyId,
       jobId,
       stageId,
-      eventType: "reopened",
+      eventType: supervisorUid ? "supervisor_assigned" : "supervisor_cleared",
       actorUserId: userId,
+      targetUserId: supervisorUid || null,
+      metadata: supervisorUid
+        ? {
+            supervisorCanCreateStages: canCreateStages,
+          }
+        : null,
     });
 
     return NextResponse.json({ ok: true }, { status: 200 });

@@ -9,8 +9,12 @@ import { requireActiveMember } from "@/app/api/_lib/membership";
 import { recordStageHistory } from "@/lib/server/jobs/stage-history";
 import {
   buildStageAccessContext,
-  canReopenStage,
+  canApproveStage,
 } from "@/lib/server/jobs/stage-permissions";
+
+function todayYyyyMmDd() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export async function POST(
   _req: NextRequest,
@@ -23,11 +27,6 @@ export async function POST(
 
     const member = await requireActiveMember(companyId, userId);
     const role = (member.role || "staff") as "owner" | "admin" | "staff";
-
-    const job = await prisma.job.findFirst({
-      where: { id: jobId, companyId, deletedAt: null },
-    });
-    if (!job) return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
 
     const stage = await prisma.jobStage.findFirst({
       where: { id: stageId, companyId, jobId },
@@ -42,20 +41,21 @@ export async function POST(
       stage,
     });
 
-    if (!canReopenStage(ctx)) {
+    if (!canApproveStage(ctx)) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
+
+    const now = new Date();
+    const completedAt = new Date(`${todayYyyyMmDd()}T12:00:00.000Z`);
 
     await prisma.jobStage.update({
       where: { id: stageId },
       data: {
-        status: "in_progress",
-        completedAt: null,
-        completedByUserId: null,
-        submittedForApprovalAt: null,
-        submittedByUserId: null,
-        approvedAt: null,
-        approvedByUserId: null,
+        status: "done",
+        completedAt,
+        completedByUserId: stage.submittedByUserId ?? userId,
+        approvedAt: now,
+        approvedByUserId: userId,
         rejectedAt: null,
         rejectedByUserId: null,
         rejectionComment: null,
@@ -66,7 +66,7 @@ export async function POST(
       companyId,
       jobId,
       stageId,
-      eventType: "reopened",
+      eventType: "approved",
       actorUserId: userId,
     });
 

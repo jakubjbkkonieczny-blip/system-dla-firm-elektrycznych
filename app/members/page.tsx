@@ -33,8 +33,6 @@ export default function MembersPage() {
   const [err, setErr] = useState<string | null>(null);
 
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "staff">("staff");
-  const [scope, setScope] = useState<Member["scope"]>("all");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteUid, setDeleteUid] = useState<string | null>(null);
@@ -69,11 +67,9 @@ export default function MembersPage() {
     try {
       await apiFetch(`/api/companies/${companyId}/members/invite`, {
         method: "POST",
-        body: JSON.stringify({ email, role, scope }),
+        body: JSON.stringify({ email }),
       });
       setEmail("");
-      setRole("staff");
-      setScope("all");
       await load();
     } catch (e: any) {
       setErr(e?.message ?? "INVITE_ERROR");
@@ -189,34 +185,14 @@ export default function MembersPage() {
         <section className="theme-glass bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-4">
           <div className="font-semibold text-text">Dodaj pracownika</div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <input
-              className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="email@firma.pl"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              autoComplete="email"
-            />
-
-            <select
-              className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
-              value={role}
-              onChange={(e) => setRole(e.target.value as "admin" | "staff")}
-            >
-              <option value="admin">Kierownik</option>
-              <option value="staff">Pracownik</option>
-            </select>
-
-            <select
-              className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
-              value={scope}
-              onChange={(e) => setScope(e.target.value as Member["scope"])}
-            >
-              <option value="all">Wszystkie zlecenia</option>
-              <option value="assigned">Tylko przypisane zlecenia</option>
-            </select>
-          </div>
+          <input
+            className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+            placeholder="email@firma.pl"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            autoComplete="email"
+          />
 
           <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
             <button

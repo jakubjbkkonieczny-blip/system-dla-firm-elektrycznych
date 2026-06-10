@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
 import { updateStageWorkerNoteWithHistory } from "@/lib/server/jobs/stage-note-history";
 import {
   companyRouteErrorStatus,
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
+import {
+  buildStageAccessContext,
+  canEditStageMeta,
+  canEditStageNote,
+  isOwnerOrAdmin,
+} from "@/lib/server/jobs/stage-permissions";
 
 function isYyyyMmDd(s: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(s);
@@ -37,62 +42,63 @@ export async function PATCH(
     });
     if (!stage) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
 
-    if (role === "owner" || role === "admin") {
-      const data: Record<string, unknown> = {};
-      if (body.nazwa_etapu !== undefined) {
-        data.name = String(body.nazwa_etapu || "").trim();
-      }
-      if (body.opis_etapu !== undefined) {
-        data.description = String(body.opis_etapu || "").trim() || null;
-      }
-      if (body.planowana_data !== undefined) {
-        const v = String(body.planowana_data || "").trim();
-        if (v && !isYyyyMmDd(v)) {
-          return NextResponse.json({ error: "BAD_DATE_FORMAT" }, { status: 400 });
-        }
-        data.plannedDate = v ? new Date(`${v}T00:00:00.000Z`) : null;
-      }
-      if (body.notatka_pracownika !== undefined) {
-        await updateStageWorkerNoteWithHistory({
-          companyId,
-          jobId,
-          stageId,
-          userId,
-          newNote: String(body.notatka_pracownika || ""),
-        });
-      }
-      if (Object.keys(data).length > 0) {
-        await prisma.jobStage.update({
-          where: { id: stageId },
-          data: data as object,
-        });
-      }
-      return NextResponse.json({ ok: true }, { status: 200 });
+    const ctx = await buildStageAccessContext({
+      role,
+      userId,
+      companyId,
+      jobId,
+      stage,
+    });
+
+    const data: Record<string, unknown> = {};
+    const metaKeys = ["nazwa_etapu", "opis_etapu", "planowana_data"];
+    const hasMeta = metaKeys.some((k) => body[k] !== undefined);
+
+    if (hasMeta && !canEditStageMeta(ctx)) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
-    if (role === "staff") {
-      const isAssigned = await isUserAssignedToJob(jobId, userId, companyId);
-      if (!isAssigned) {
-        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    if (body.nazwa_etapu !== undefined && canEditStageMeta(ctx)) {
+      data.name = String(body.nazwa_etapu || "").trim();
+    }
+    if (body.opis_etapu !== undefined && canEditStageMeta(ctx)) {
+      data.description = String(body.opis_etapu || "").trim() || null;
+    }
+    if (body.planowana_data !== undefined && canEditStageMeta(ctx)) {
+      const v = String(body.planowana_data || "").trim();
+      if (v && !isYyyyMmDd(v)) {
+        return NextResponse.json({ error: "BAD_DATE_FORMAT" }, { status: 400 });
       }
-      const keys = Object.keys(body || {});
-      const allowedKeys = ["notatka_pracownika", "lista_zdjec"];
-      if (keys.some((k) => !allowedKeys.includes(k))) {
-        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
-      }
-      if (body.notatka_pracownika !== undefined) {
-        await updateStageWorkerNoteWithHistory({
-          companyId,
-          jobId,
-          stageId,
-          userId,
-          newNote: String(body.notatka_pracownika || ""),
-        });
-      }
-      return NextResponse.json({ ok: true }, { status: 200 });
+      data.plannedDate = v ? new Date(`${v}T00:00:00.000Z`) : null;
     }
 
-    return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    if (body.notatka_pracownika !== undefined) {
+      if (!canEditStageNote(ctx)) {
+        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      }
+      await updateStageWorkerNoteWithHistory({
+        companyId,
+        jobId,
+        stageId,
+        userId,
+        newNote: String(body.notatka_pracownika || ""),
+      });
+    }
+
+    const keys = Object.keys(body || {});
+    const allowedStaffKeys = ["notatka_pracownika", "lista_zdjec"];
+    if (!isOwnerOrAdmin(role) && keys.some((k) => !allowedStaffKeys.includes(k))) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    }
+
+    if (Object.keys(data).length > 0) {
+      await prisma.jobStage.update({
+        where: { id: stageId },
+        data: data as object,
+      });
+    }
+
+    return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, (msg) => {
       if (msg === "STAGE_NOT_FOUND") return 404;
