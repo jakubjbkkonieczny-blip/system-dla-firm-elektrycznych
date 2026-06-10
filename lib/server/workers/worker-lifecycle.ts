@@ -3,6 +3,18 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
+import {
+  deriveWorkerMembershipState,
+  resolvePendingDeletionAt,
+  shouldTombstonePendingWorker,
+} from "@/lib/server/workers/worker-membership-state";
+
+export type { WorkerMembershipState } from "@/lib/server/workers/worker-membership-state";
+export {
+  deriveWorkerMembershipState,
+  resolvePendingDeletionAt,
+  shouldTombstonePendingWorker,
+} from "@/lib/server/workers/worker-membership-state";
 
 /** ORPHAN grace period before tombstone (soft-delete). */
 const ORPHAN_CLEANUP_MS = 24 * 60 * 60 * 1000;
@@ -28,9 +40,17 @@ export async function countActiveCompanyMemberships(userId: string): Promise<num
   });
 }
 
+/** All CompanyMember rows for a user (any isActive, any company.isActive). */
+export async function countCompanyMemberships(userId: string): Promise<number> {
+  return prisma.companyMember.count({
+    where: { userId },
+  });
+}
+
 /**
- * ORPHAN: worker with no active company membership.
- * Sets pendingDeletionAt = now(); clears it when membership is restored.
+ * ORPHAN: worker removed from all companies (zero CompanyMember rows).
+ * SUSPENDED: still belongs to a company but has no active access — not orphaned.
+ * Sets pendingDeletionAt only for ORPHAN; clears it for ACTIVE and SUSPENDED.
  */
 export async function syncWorkerOrphanState(userId: string): Promise<void> {
   const user = await prisma.user.findUnique({
@@ -42,13 +62,14 @@ export async function syncWorkerOrphanState(userId: string): Promise<void> {
     return;
   }
 
-  const activeMemberships = await countActiveCompanyMemberships(userId);
+  const activeCount = await countActiveCompanyMemberships(userId);
+  const totalCount = await countCompanyMemberships(userId);
+  const state = deriveWorkerMembershipState(activeCount, totalCount);
+  const pendingDeletionAt = resolvePendingDeletionAt(state);
 
   await prisma.user.update({
     where: { id: userId },
-    data: {
-      pendingDeletionAt: activeMemberships > 0 ? null : new Date(),
-    },
+    data: { pendingDeletionAt },
   });
 }
 
@@ -92,7 +113,7 @@ export type WorkerOrphanCleanupResult = {
 };
 
 /**
- * Tombstones ORPHAN workers (pendingDeletionAt > 24h, no active membership).
+ * Tombstones true ORPHAN workers (pendingDeletionAt > 24h, zero CompanyMember rows).
  * Processes in batches for safe scale (4000+ users).
  */
 export async function cleanupPendingWorkers(): Promise<WorkerOrphanCleanupResult> {
@@ -120,8 +141,9 @@ export async function cleanupPendingWorkers(): Promise<WorkerOrphanCleanupResult
     scanned += candidates.length;
 
     for (const candidate of candidates) {
-      const activeMemberships = await countActiveCompanyMemberships(candidate.id);
-      if (activeMemberships > 0) {
+      const totalCount = await countCompanyMemberships(candidate.id);
+
+      if (!shouldTombstonePendingWorker(totalCount)) {
         await prisma.user.update({
           where: { id: candidate.id },
           data: { pendingDeletionAt: null },
