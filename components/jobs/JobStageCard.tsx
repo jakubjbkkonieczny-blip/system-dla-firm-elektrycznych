@@ -2,6 +2,7 @@
 
 import { STAGE_STATUS_LABELS, type StagePlStatus } from "@/lib/jobs/stage-status";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export type JobStageCardData = {
   id: string;
@@ -76,11 +77,19 @@ export function JobStageCard({
   onReopen,
 }: Props) {
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const photos = Array.isArray(stage.lista_zdjec) ? stage.lista_zdjec : [];
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!actionsOpen) return;
+    const mq = window.matchMedia("(min-width: 768px)");
+    if (!mq.matches) return;
+
     function onDocClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setActionsOpen(false);
@@ -91,8 +100,8 @@ export function JobStageCard({
   }, [actionsOpen]);
 
   function runAction(item: { label: string; onClick: () => void }) {
-    setActionsOpen(false);
     item.onClick();
+    setActionsOpen(false);
   }
 
   const actionButtonClass = (variant?: "danger") =>
@@ -115,6 +124,56 @@ export function JobStageCard({
   if (permissions.canReject)
     actionItems.push({ label: "Odrzuć wykonanie", onClick: onReject, variant: "danger" });
   if (permissions.canReopen) actionItems.push({ label: "Cofnij zakończenie", onClick: onReopen });
+
+  const mobileActionsSheet =
+    actionsOpen && actionItems.length > 0 ? (
+      <div
+        className="md:hidden fixed inset-0 z-50 flex items-end justify-center bg-overlay p-0"
+        onClick={() => setActionsOpen(false)}
+        role="presentation"
+      >
+        <div
+          className="w-full max-h-[85vh] flex flex-col bg-bg-secondary border border-border border-b-0 rounded-t-2xl shadow-xl pb-[env(safe-area-inset-bottom)]"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={`stage-actions-title-${stage.id}`}
+        >
+          <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-4 shrink-0 bg-bg-secondary">
+            <div className="min-w-0">
+              <h2
+                id={`stage-actions-title-${stage.id}`}
+                className="text-lg font-semibold text-text"
+              >
+                Akcje
+              </h2>
+              <p className="text-sm text-text-muted mt-0.5 truncate">{stage.nazwa_etapu}</p>
+            </div>
+            <button
+              type="button"
+              className="min-h-[44px] min-w-[44px] rounded-lg border border-border bg-bg-secondary text-text-muted hover:bg-card-hover shrink-0"
+              onClick={() => setActionsOpen(false)}
+              aria-label="Zamknij"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="overflow-y-auto overscroll-contain py-1 bg-bg-secondary">
+            {actionItems.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                disabled={busy}
+                onClick={() => runAction(item)}
+                className={actionButtonClass(item.variant)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    ) : null;
 
   return (
     <article className="theme-glass border border-border rounded-xl p-4 bg-card space-y-3 min-w-0">
@@ -206,54 +265,7 @@ export function JobStageCard({
         ) : null}
       </div>
 
-      {actionsOpen && actionItems.length > 0 ? (
-        <div
-          className="md:hidden fixed inset-0 z-50 flex items-end justify-center bg-overlay p-0"
-          onClick={() => setActionsOpen(false)}
-          role="presentation"
-        >
-          <div
-            className="w-full max-h-[85vh] flex flex-col bg-card border border-border border-b-0 rounded-t-2xl shadow-xl pb-[env(safe-area-inset-bottom)]"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={`stage-actions-title-${stage.id}`}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-4 shrink-0">
-              <div className="min-w-0">
-                <h2
-                  id={`stage-actions-title-${stage.id}`}
-                  className="text-lg font-semibold text-text"
-                >
-                  Akcje
-                </h2>
-                <p className="text-sm text-text-muted mt-0.5 truncate">{stage.nazwa_etapu}</p>
-              </div>
-              <button
-                type="button"
-                className="min-h-[44px] min-w-[44px] rounded-lg border border-border bg-card text-text-muted hover:bg-card-hover shrink-0"
-                onClick={() => setActionsOpen(false)}
-                aria-label="Zamknij"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="overflow-y-auto overscroll-contain py-1">
-              {actionItems.map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  disabled={busy}
-                  onClick={() => runAction(item)}
-                  className={actionButtonClass(item.variant)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {mounted && mobileActionsSheet ? createPortal(mobileActionsSheet, document.body) : null}
 
       <div className="flex flex-wrap gap-2 border-t border-border pt-3">
         <button
