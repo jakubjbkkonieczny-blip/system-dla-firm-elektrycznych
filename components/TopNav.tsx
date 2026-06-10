@@ -56,7 +56,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/start") ||
     pathname.startsWith("/platnosc") ||
-    pathname.startsWith("/oczekiwanie");
+    pathname.startsWith("/oczekiwanie") ||
+    pathname.startsWith("/wstrzymane");
 
   const isAuthed = !!user && !loading;
 

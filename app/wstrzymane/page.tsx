@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import OczekiwanieClient from "@/components/OczekiwanieClient";
+import WorkerSuspendedClient from "@/components/WorkerSuspendedClient";
 import { getUserFromSession } from "@/lib/server/auth/getUserFromSession";
 import { getWorkerMembershipState } from "@/lib/server/me/get-worker-membership-state";
 
-export default async function OczekiwaniePage() {
+export default async function WstrzymanePage() {
   const user = await getUserFromSession();
   if (!user) {
     redirect("/login");
@@ -14,20 +14,15 @@ export default async function OczekiwaniePage() {
     if (state === "ACTIVE") {
       redirect("/dashboard");
     }
-    if (state === "SUSPENDED") {
-      redirect("/wstrzymane");
+    if (state === "ORPHAN") {
+      redirect("/oczekiwanie");
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "UNKNOWN_ERROR";
     if (message !== "MISSING_AUTH") {
-      console.error("[oczekiwanie/page] getWorkerMembershipState failed:", error);
+      console.error("[wstrzymane/page] getWorkerMembershipState failed:", error);
     }
   }
 
-  return (
-    <OczekiwanieClient
-      createdAt={user.createdAt.toISOString()}
-      displayName={user.displayName}
-    />
-  );
+  return <WorkerSuspendedClient displayName={user.displayName} />;
 }

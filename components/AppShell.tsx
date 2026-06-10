@@ -144,6 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/start") ||
     pathname.startsWith("/platnosc") ||
     pathname.startsWith("/oczekiwanie") ||
+    pathname.startsWith("/wstrzymane") ||
     pathname.startsWith("/subskrypcja");
 
   const isAuthed = !!user && !loading;
