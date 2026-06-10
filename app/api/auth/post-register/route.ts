@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { prisma } from "@/lib/db/prisma";
 import { handleSessionRouteErrorOr } from "@/lib/server/auth/handle-session-route-error";
+import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
 
 type Role = "worker" | "employer";
 
@@ -55,6 +56,10 @@ export async function POST(req: NextRequest) {
         }
       }
     });
+
+    if (finalRole === "worker") {
+      await syncWorkerOrphanState(userId);
+    }
 
     return NextResponse.json({ ok: true, role: finalRole, created }, { status: 200 });
   } catch (e: unknown) {

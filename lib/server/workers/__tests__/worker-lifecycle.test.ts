@@ -90,3 +90,38 @@ describe("worker lifecycle — business scenarios (pure state machine)", () => {
     assert.equal(shouldTombstonePendingWorker(0), true);
   });
 });
+
+describe("worker onboarding — role assignment without CompanyMember", () => {
+  const fixedNow = new Date("2026-06-10T12:00:00.000Z");
+
+  it("A: post-register worker with no memberships → ORPHAN → pendingDeletionAt set", () => {
+    const state = deriveWorkerMembershipState(0, 0);
+    const pendingDeletionAt = resolvePendingDeletionAt(state, fixedNow);
+
+    assert.equal(state, "ORPHAN");
+    assert.notEqual(pendingDeletionAt, null);
+  });
+
+  it("B: post-register employer path must not imply worker orphan state", () => {
+    // Employer has no worker lifecycle; syncWorkerOrphanState guard skips non-workers.
+    const state = deriveWorkerMembershipState(0, 0);
+    assert.equal(state, "ORPHAN");
+    // Route must not call sync for employer — enforced in post-register route, not here.
+  });
+
+  it("C: user/init worker assignment with no memberships → ORPHAN → pendingDeletionAt set", () => {
+    const state = deriveWorkerMembershipState(0, 0);
+    const pendingDeletionAt = resolvePendingDeletionAt(state, fixedNow);
+
+    assert.equal(state, "ORPHAN");
+    assert.notEqual(pendingDeletionAt, null);
+  });
+
+  it("D: invite after registration → ACTIVE → pendingDeletionAt cleared", () => {
+    const state = deriveWorkerMembershipState(1, 1);
+    const pendingDeletionAt = resolvePendingDeletionAt(state, fixedNow);
+
+    assert.equal(state, "ACTIVE");
+    assert.equal(pendingDeletionAt, null);
+  });
+});

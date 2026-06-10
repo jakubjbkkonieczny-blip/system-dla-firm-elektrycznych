@@ -55,7 +55,7 @@ export async function countCompanyMemberships(userId: string): Promise<number> {
 export async function syncWorkerOrphanState(userId: string): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { accountRole: true, isActive: true },
+    select: { accountRole: true, isActive: true, pendingDeletionAt: true },
   });
 
   if (!user || user.accountRole !== "worker" || !user.isActive) {
@@ -65,7 +65,12 @@ export async function syncWorkerOrphanState(userId: string): Promise<void> {
   const activeCount = await countActiveCompanyMemberships(userId);
   const totalCount = await countCompanyMemberships(userId);
   const state = deriveWorkerMembershipState(activeCount, totalCount);
-  const pendingDeletionAt = resolvePendingDeletionAt(state);
+  let pendingDeletionAt = resolvePendingDeletionAt(state);
+
+  // Idempotent ORPHAN countdown — do not reset an already-running 24h timer.
+  if (state === "ORPHAN" && user.pendingDeletionAt !== null) {
+    pendingDeletionAt = user.pendingDeletionAt;
+  }
 
   await prisma.user.update({
     where: { id: userId },

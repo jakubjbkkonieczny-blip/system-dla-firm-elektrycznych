@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { handleSessionRouteErrorOr } from "@/lib/server/auth/handle-session-route-error";
+import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
 
 type Role = "worker" | "employer";
 
@@ -16,6 +17,8 @@ export async function POST(req: NextRequest) {
     if (desiredRole !== "worker" && desiredRole !== "employer") {
       return NextResponse.json({ error: "ROLE_REQUIRED" }, { status: 400 });
     }
+
+    let roleNewlyAssigned = false;
 
     const result = await prisma.$transaction(async (tx) => {
       const u = await tx.user.findUnique({ where: { id: userId } });
@@ -33,8 +36,13 @@ export async function POST(req: NextRequest) {
         data: { accountRole: desiredRole },
       });
 
+      roleNewlyAssigned = true;
       return { role: desiredRole };
     });
+
+    if (roleNewlyAssigned && result.role === "worker") {
+      await syncWorkerOrphanState(userId);
+    }
 
     return NextResponse.json(result, { status: 200 });
   } catch (e: unknown) {
