@@ -12,28 +12,28 @@ export const ATTENDANCE_STATUS_COLORS: Record<
   { bg: string; text: string; border: string; card: string }
 > = {
   working: {
-    bg: "bg-green-50",
-    text: "text-green-800",
-    border: "border-green-200",
-    card: "border-green-200 bg-green-50",
+    bg: "bg-success-bg",
+    text: "text-success",
+    border: "border-success-border",
+    card: "border-success-border bg-success-bg",
   },
   break: {
-    bg: "bg-amber-50",
-    text: "text-amber-900",
-    border: "border-amber-200",
-    card: "border-amber-200 bg-amber-50",
+    bg: "bg-warning-bg",
+    text: "text-warning",
+    border: "border-warning-border",
+    card: "border-warning-border bg-warning-bg",
   },
   finished: {
-    bg: "bg-slate-50",
-    text: "text-slate-800",
-    border: "border-slate-200",
-    card: "border-slate-200 bg-slate-50",
+    bg: "bg-bg-secondary",
+    text: "text-text",
+    border: "border-border",
+    card: "border-border bg-bg-secondary",
   },
   absent: {
-    bg: "bg-red-50",
-    text: "text-red-800",
-    border: "border-red-200",
-    card: "border-red-200 bg-red-50",
+    bg: "bg-danger-bg",
+    text: "text-danger",
+    border: "border-danger-border",
+    card: "border-danger-border bg-danger-bg",
   },
 };
 

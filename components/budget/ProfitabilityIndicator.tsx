@@ -3,10 +3,10 @@ import { formatPlnFromCents } from "@/lib/jobs/budget/money";
 import type { JobBudgetSummary } from "@/lib/jobs/budget/types";
 
 const LEVEL_STYLES = {
-  high: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  moderate: "bg-amber-50 text-amber-900 border-amber-200",
-  low: "bg-red-50 text-red-800 border-red-200",
-  none: "bg-gray-50 text-gray-600 border-gray-200",
+  high: "bg-success-bg text-success border-success-border",
+  moderate: "bg-warning-bg text-warning border-warning-border",
+  low: "bg-danger-bg text-danger border-danger-border",
+  none: "bg-bg-secondary text-text-muted border-border",
 } as const;
 
 export function ProfitabilityIndicator({ summary }: { summary: JobBudgetSummary }) {
@@ -17,11 +17,11 @@ export function ProfitabilityIndicator({ summary }: { summary: JobBudgetSummary 
       : "—";
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <div className="rounded-xl border border-border theme-glass bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">Rentowność projektu</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <h3 className="text-sm font-semibold text-text">Rentowność projektu</h3>
+          <p className="text-xs text-text-muted mt-0.5">
             Budżet − koszty brutto − koszty zatrudnienia
           </p>
         </div>
@@ -36,14 +36,14 @@ export function ProfitabilityIndicator({ summary }: { summary: JobBudgetSummary 
       </div>
       <div className="mt-3 flex flex-wrap gap-6">
         <div>
-          <div className="text-2xl font-bold text-gray-900">{percentLabel}</div>
-          <div className="text-xs text-gray-500">Marża %</div>
+          <div className="text-2xl font-bold text-text">{percentLabel}</div>
+          <div className="text-xs text-text-muted">Marża %</div>
         </div>
         <div>
-          <div className="text-2xl font-bold text-gray-900">
+          <div className="text-2xl font-bold text-text">
             {formatPlnFromCents(summary.profitCents)}
           </div>
-          <div className="text-xs text-gray-500">Szacowana marża</div>
+          <div className="text-xs text-text-muted">Szacowana marża</div>
         </div>
       </div>
     </div>

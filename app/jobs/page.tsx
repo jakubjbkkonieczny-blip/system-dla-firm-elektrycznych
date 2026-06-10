@@ -24,6 +24,15 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "Anulowane",
 };
 
+const STATUS_CHIP_ITEMS = [
+  { key: "all", label: "Wszystkie" },
+  { key: "new", label: "Nowe" },
+  { key: "scheduled", label: "Zaplanowane" },
+  { key: "in_progress", label: "W trakcie" },
+  { key: "done", label: "Zakończone" },
+  { key: "cancelled", label: "Anulowane" },
+] as const;
+
 function getStatusLabel(status: string) {
   return STATUS_LABELS[status] || status;
 }
@@ -38,12 +47,9 @@ function formatTimeAgo(dateValue?: any) {
 
   let date: Date | null = null;
 
-  // Handle Firestore Timestamp
   if (typeof dateValue === "object" && dateValue?.seconds) {
     date = new Date(dateValue.seconds * 1000);
-  }
-  // Handle ISO string / normal date
-  else if (typeof dateValue === "string" || typeof dateValue === "number") {
+  } else if (typeof dateValue === "string" || typeof dateValue === "number") {
     const parsed = new Date(dateValue);
     if (!isNaN(parsed.getTime())) {
       date = parsed;
@@ -79,39 +85,35 @@ function StatusBadge({ status }: { status: string }) {
 
   const cls =
     status === "done"
-      ? "bg-green-50 text-green-800 border-green-200"
+      ? "bg-success-bg text-success border-success-border"
       : status === "in_progress"
-      ? "bg-yellow-50 text-yellow-900 border-yellow-200"
-      : status === "scheduled"
-      ? "bg-blue-50 text-blue-800 border-blue-200"
-      : status === "new"
-      ? "bg-gray-50 text-gray-800 border-gray-200"
-      : status === "cancelled"
-      ? "bg-red-50 text-red-800 border-red-200"
-      : "bg-gray-50 text-gray-800 border-gray-200";
+        ? "bg-warning-bg text-warning border-warning-border"
+        : status === "scheduled"
+          ? "bg-card text-accent border-border"
+          : status === "cancelled"
+            ? "bg-danger-bg text-danger border-danger-border"
+            : "bg-bg-secondary text-text-muted border-border";
 
   const dot =
     status === "done"
-      ? "bg-green-600"
+      ? "bg-success"
       : status === "in_progress"
-      ? "bg-yellow-500"
-      : status === "scheduled"
-      ? "bg-blue-600"
-      : status === "new"
-      ? "bg-gray-500"
-      : status === "cancelled"
-      ? "bg-red-600"
-      : "bg-gray-500";
+        ? "bg-warning"
+        : status === "scheduled"
+          ? "bg-accent"
+          : status === "cancelled"
+            ? "bg-danger"
+            : "bg-text-muted";
 
   return (
     <span
       className={[
-        "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold whitespace-nowrap",
+        "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold",
         cls,
       ].join(" ")}
       title={label}
     >
-      <span className={["w-2 h-2 rounded-full", dot].join(" ")} />
+      <span className={["w-2 h-2 rounded-full shrink-0", dot].join(" ")} />
       {label}
     </span>
   );
@@ -135,10 +137,6 @@ export default function JobsPage() {
   const [role, setRole] = useState<Role>("staff");
   const [roleLoading, setRoleLoading] = useState(true);
 
-  // 🔥 NOWE — billing
-  const [billingStatus, setBillingStatus] = useState<string | null>(null);
-  const [subscriptionEndsAt, setSubscriptionEndsAt] = useState<string | null>(null);
-
   const isOwnerOrAdmin = useMemo(() => role === "owner" || role === "admin", [role]);
 
   const stats = {
@@ -150,20 +148,16 @@ export default function JobsPage() {
     cancelled: allJobs.filter((j) => j.status === "cancelled").length,
   };
 
-
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  // 🔥 NOWE — blokada subskrypcji
   useEffect(() => {
     if (!user) return;
 
     (async () => {
       try {
         const me = await apiFetch("/api/me");
-        setBillingStatus(me?.billingStatus ?? null);
-        setSubscriptionEndsAt(me?.billing?.subscriptionEndsAt ?? null);
 
         if (me?.role === "employer" && !me?.billingAllowsAccess) {
           router.replace("/settings?expired=1");
@@ -231,87 +225,79 @@ export default function JobsPage() {
     if (user && companyId) load(true);
   }, [user, companyId, status]);
 
-  if (loading) return <div className="p-6">Ładowanie...</div>;
+  if (loading) return <div className="text-text-muted">Ładowanie...</div>;
   if (!user) return null;
 
   if (!companyId) {
     return (
-      <div className="p-6">
+      <div className="text-text">
         Najpierw wybierz aktywną firmę w{" "}
-        <Link className="underline" href="/dashboard">
+        <Link className="underline text-accent" href="/dashboard">
           Panelu głównym
-        </Link>.
+        </Link>
+        .
       </div>
     );
   }
 
   return (
-    <div className="p-8 bg-gray-50">
-      <div className="max-w-5xl mx-auto space-y-8">
-
-        <div className="flex items-center justify-between gap-6">
-          <div className="shrink-0">
-            <h1 className="text-3xl font-semibold text-gray-900">
-              Zlecenia
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Zarządzaj zleceniami firmy
-            </p>
-          </div>
-
-          <div className="flex-1 flex justify-center">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {[
-                { key: "all", label: "Wszystkie", count: stats.all, color: "text-gray-700 border-gray-300 bg-gray-50 hover:bg-gray-100" },
-                { key: "new", label: "Nowe", count: stats.new, color: "text-gray-700 border-gray-300 bg-gray-50 hover:bg-gray-100" },
-                { key: "scheduled", label: "Zaplanowane", count: stats.scheduled, color: "text-blue-700 border-blue-300 bg-blue-50 hover:bg-blue-100" },
-                { key: "in_progress", label: "W trakcie", count: stats.in_progress, color: "text-yellow-800 border-yellow-300 bg-yellow-50 hover:bg-yellow-100" },
-                { key: "done", label: "Zakończone", count: stats.done, color: "text-green-700 border-green-300 bg-green-50 hover:bg-green-100" },
-                { key: "cancelled", label: "Anulowane", count: stats.cancelled, color: "text-red-700 border-red-300 bg-red-50 hover:bg-red-100" },
-              ].map((item) => {
-                const isActive = (item.key === "all" && status === "") || status === item.key;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => setStatus(item.key === "all" ? "" : item.key)}
-                    className={[
-                      "px-4 py-2 rounded-xl border text-sm flex items-center gap-2 transition",
-                      isActive ? "bg-black text-white border-black" : item.color,
-                    ].join(" ")}
-                  >
-                    <span>{item.label}</span>
-                    <span className="font-semibold">{item.count}</span>
-                  </button>
-                );
-              })}
+    <div className="w-full max-w-full min-w-0">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+        {/* Mobile-first header */}
+        <div className="space-y-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-text">Zlecenia</h1>
+              <p className="text-sm text-text-muted mt-1">Zarządzaj zleceniami firmy</p>
             </div>
-          </div>
 
-          <div className="shrink-0 min-w-[144px] flex justify-end">
             {!roleLoading && isOwnerOrAdmin && (
               <Link
                 href="/jobs/new"
-                className="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90 transition"
+                className="w-full lg:w-auto shrink-0 inline-flex items-center justify-center min-h-[48px] px-5 py-2.5 rounded-xl bg-primary text-primary-fg font-medium hover:opacity-90 transition"
               >
                 Dodaj zlecenie
               </Link>
             )}
           </div>
+
+          {/* Status chips — 2 columns on mobile */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-2">
+            {STATUS_CHIP_ITEMS.map((item) => {
+              const isActive =
+                (item.key === "all" && status === "") || status === item.key;
+              const count = stats[item.key as keyof typeof stats];
+
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setStatus(item.key === "all" ? "" : item.key)}
+                  className={[
+                    "status-chip flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-sm transition",
+                    isActive ? "status-chip-active" : "status-chip-idle",
+                  ].join(" ")}
+                >
+                  <span className="truncate">{item.label}</span>
+                  <span className="font-semibold tabular-nums shrink-0">{count}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {err && (
-          <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-4 rounded-xl">
+          <div className="text-sm text-danger border border-danger-border bg-danger-bg p-4 rounded-xl">
             {err}
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
-          <label className="text-sm text-gray-600">
-            Status:
-          </label>
+        {/* Filter card */}
+        <div className="theme-glass bg-card rounded-2xl border border-border p-4 space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+          <label className="text-sm text-text-muted block sm:inline">Status:</label>
 
           <select
-            className="border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full sm:w-auto min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
@@ -324,7 +310,8 @@ export default function JobsPage() {
           </select>
 
           <button
-            className="px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition"
+            type="button"
+            className="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-lg border border-border bg-card text-text hover:bg-card-hover transition disabled:opacity-50"
             disabled={busy}
             onClick={() => load(true)}
           >
@@ -333,59 +320,55 @@ export default function JobsPage() {
         </div>
 
         {jobs.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-sm text-gray-500">
+          <div className="theme-glass bg-card rounded-2xl border border-border p-6 text-sm text-text-muted">
             Brak zleceń
           </div>
         ) : (
-          <div className="space-y-4">
-
+          <div className="space-y-3">
             {jobs.map((j) => (
               <Link
                 key={j.id}
                 href={`/jobs/${j.id}`}
-                className="block bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition"
+                className="block theme-glass bg-card rounded-2xl border border-border p-4 sm:p-5 hover:bg-card-hover transition min-w-0"
               >
-                <div className="flex justify-between gap-6">
-
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-6">
                   <div className="min-w-0 space-y-1">
-                    <div className="font-semibold text-gray-900 truncate">
+                    <div className="font-semibold text-text truncate">
                       {j.customerName} • {j.customerPhone}
                     </div>
 
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-text-muted">
                       {j.addressCity}, {j.addressStreet}
                     </div>
 
-                    <div className="text-sm text-gray-600 mt-1">
-                      {j.description}
-                    </div>
+                    {j.description ? (
+                      <div className="text-sm text-text-muted mt-1 line-clamp-2">
+                        {j.description}
+                      </div>
+                    ) : null}
                   </div>
 
-                  <div className="text-right space-y-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-end sm:gap-2 shrink-0">
                     <StatusBadge status={j.status} />
-
                     <JobPriorityBadge priority={j.priority} />
-
-                    <div className="text-xs text-gray-500">
-                      Przypisani: <b>{assignedCount(j)}</b>
+                    <div className="text-xs text-text-muted w-full sm:text-right">
+                      Przypisani: <b className="text-text">{assignedCount(j)}</b>
                     </div>
-
-                    <div className="text-[11px] text-gray-400">
+                    <div className="text-[11px] text-text-muted w-full sm:text-right">
                       🕒 {formatTimeAgo(j.statusUpdatedAt || j.updatedAt) || "brak daty"}
                     </div>
                   </div>
-
                 </div>
               </Link>
             ))}
-
           </div>
         )}
 
         {nextCursor && (
-          <div className="flex justify-center">
+          <div className="flex justify-center pt-2">
             <button
-              className="px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition"
+              type="button"
+              className="min-h-[44px] px-5 py-2 rounded-lg border border-border bg-card text-text hover:bg-card-hover transition disabled:opacity-50"
               disabled={busy}
               onClick={() => load(false)}
             >
@@ -393,7 +376,6 @@ export default function JobsPage() {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );

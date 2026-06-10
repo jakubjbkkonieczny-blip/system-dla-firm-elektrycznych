@@ -91,21 +91,21 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
   return (
     <div className="p-4 sm:p-6 max-w-lg mx-auto space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">Moja obecność</h1>
+        <h1 className="text-xl font-semibold text-text">Moja obecność</h1>
       </div>
 
       {success && (
-        <div className="text-sm text-green-800 border border-green-200 bg-green-50 rounded-lg p-3">
+        <div className="text-sm text-success border border-success-border bg-success-bg rounded-lg p-3">
           {success}
         </div>
       )}
       {err && (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 rounded-lg p-3">
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg rounded-lg p-3">
           {err}
         </div>
       )}
 
-      <div className="border rounded-xl bg-gray-900 text-white p-4 space-y-1">
+      <div className="border border-border rounded-xl bg-primary text-primary-fg p-4 space-y-1">
         <div className="text-sm font-medium opacity-90">Dzisiejsza obecność</div>
         <div className="text-lg font-semibold">Data: {todayDisplay}</div>
         {!sessionLoading && (
@@ -113,13 +113,13 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
         )}
       </div>
 
-      <div className="border rounded-xl bg-white p-4 space-y-3">
+      <div className="border border-border rounded-xl bg-card p-4 space-y-3">
         {sessionLoading ? (
-          <div className="text-sm text-gray-500">Ładowanie statusu...</div>
+          <div className="text-sm text-text-muted">Ładowanie statusu...</div>
         ) : (
           <>
             {session?.startedAt && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-muted">
                 Start: <b>{formatTimeHm(session.startedAt)}</b>
                 {session.endedAt && (
                   <>
@@ -130,13 +130,13 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
               </div>
             )}
             {(session?.totalWorkedMinutes != null || (session?.totalBreakMinutes ?? 0) > 0) && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-muted">
                 Praca: <b>{formatMinutes(session?.totalWorkedMinutes ?? 0)}</b> · Przerwy:{" "}
                 <b>{formatMinutes(session?.totalBreakMinutes ?? 0)}</b>
               </div>
             )}
             {state === "finished" && (
-              <p className="text-sm text-gray-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+              <p className="text-sm text-text bg-bg-secondary border border-border rounded-lg px-3 py-2">
                 Praca na dziś została zakończona. Aby rozpocząć nowy dzień, wróć jutro.
               </p>
             )}
@@ -161,10 +161,10 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
               disabled={busy}
               onClick={() => runAction(action)}
               className={[
-                "w-full py-4 rounded-xl text-base font-semibold border disabled:opacity-60",
+                "w-full min-h-[44px] py-4 rounded-xl text-base font-semibold border disabled:opacity-60",
                 action === "finish_work"
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-900 border-gray-300 hover:bg-gray-50",
+                  ? "bg-primary text-primary-fg border-primary"
+                  : "bg-card text-text border-border hover:bg-card-hover",
               ].join(" ")}
             >
               {ACTION_LABELS[action]}
@@ -173,17 +173,17 @@ export function EmployeeAttendancePanel({ companyId }: { companyId: string }) {
         </div>
       )}
 
-      <div className="border rounded-xl bg-white overflow-hidden">
+      <div className="border border-border rounded-xl bg-card overflow-hidden">
         <button
           type="button"
-          className="w-full px-4 py-3 flex items-center justify-between text-left text-sm font-medium text-gray-900 hover:bg-gray-50"
+          className="w-full min-h-[44px] px-4 py-3 flex items-center justify-between text-left text-sm font-medium text-text hover:bg-card-hover"
           onClick={() => setHistoryOpen((v) => !v)}
         >
           Historia godzin pracy
-          <span className="text-gray-500">{historyOpen ? "▲" : "▼"}</span>
+          <span className="text-text-muted">{historyOpen ? "▲" : "▼"}</span>
         </button>
         {historyOpen && (
-          <div className="px-4 pb-4 border-t">
+          <div className="px-4 pb-4 border-t border-border">
             <AttendanceHistoryList companyId={companyId} />
           </div>
         )}

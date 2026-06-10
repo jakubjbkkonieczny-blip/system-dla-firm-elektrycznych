@@ -21,10 +21,10 @@ const STATUS_FILTERS = [
 ];
 
 const UTILIZATION_DOT = (percent: number | null) => {
-  if (percent == null) return "bg-gray-300";
-  if (percent >= 95) return "bg-red-500";
-  if (percent >= 80) return "bg-orange-500";
-  return "bg-emerald-500";
+  if (percent == null) return "bg-text-muted";
+  if (percent >= 95) return "bg-danger";
+  if (percent >= 80) return "bg-warning";
+  return "bg-success";
 };
 
 type Props = {
@@ -73,18 +73,18 @@ export function ProjectListSidebar({
         ))}
       </select>
 
-      <div className="border rounded-xl bg-white overflow-hidden flex flex-col">
-        <div className="px-3 py-2 border-b text-xs font-medium text-gray-500 uppercase tracking-wide">
+      <div className="border border-border rounded-xl theme-glass bg-card overflow-hidden flex flex-col">
+        <div className="px-3 py-2 border-b border-border text-xs font-medium text-text-muted uppercase tracking-wide">
           Projekty / zlecenia
-          {meta ? <span className="ml-1 text-gray-400">({meta.total})</span> : null}
+          {meta ? <span className="ml-1 text-text-muted">({meta.total})</span> : null}
         </div>
         <div>
           {busy && jobs.length === 0 ? (
-            <div className="p-4 text-sm text-gray-500">Ładowanie listy...</div>
+            <div className="p-4 text-sm text-text-muted">Ładowanie listy...</div>
           ) : jobs.length === 0 ? (
-            <div className="p-4 text-sm text-gray-500">Brak zleceń.</div>
+            <div className="p-4 text-sm text-text-muted">Brak zleceń.</div>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y divide-border">
               {jobs.map((job) => {
                 const active = job.id === selectedJobId;
                 return (
@@ -94,7 +94,7 @@ export function ProjectListSidebar({
                       onClick={() => onSelectJob(job.id)}
                       className={[
                         "w-full text-left px-3 py-3 min-h-[52px] transition",
-                        active ? "bg-gray-900 text-white" : "hover:bg-gray-50",
+                        active ? "bg-primary text-primary-fg" : "hover:bg-card-hover",
                       ].join(" ")}
                     >
                       <div className="flex items-center gap-2">
@@ -106,11 +106,11 @@ export function ProjectListSidebar({
                           #{job.jobNumber} · {job.customerName}
                         </span>
                       </div>
-                      <div className={["text-xs mt-0.5 truncate pl-4", active ? "text-gray-300" : "text-gray-500"].join(" ")}>
+                      <div className={["text-xs mt-0.5 truncate pl-4", active ? "text-primary-fg/80" : "text-text-muted"].join(" ")}>
                         {job.addressCity} · {STATUS_LABELS[job.status] ?? job.status}
                       </div>
                       {job.totalBudgetCents != null && job.totalBudgetCents > 0 ? (
-                        <div className={["text-xs mt-1 pl-4", active ? "text-gray-200" : "text-gray-600"].join(" ")}>
+                        <div className={["text-xs mt-1 pl-4", active ? "text-primary-fg/90" : "text-text-muted"].join(" ")}>
                           Budżet: {formatPlnFromCents(job.totalBudgetCents)}
                           {job.remainingCents != null ? (
                             <span> · Pozostało: {formatPlnFromCents(job.remainingCents)}</span>
@@ -126,19 +126,19 @@ export function ProjectListSidebar({
         </div>
 
         {meta && meta.totalPages > 1 ? (
-          <div className="border-t px-3 py-2 flex items-center justify-between gap-2">
+          <div className="border-t border-border px-3 py-2 flex items-center justify-between gap-2">
             <button
               type="button"
-              className="text-xs px-2 py-1.5 min-h-[36px] rounded border hover:bg-gray-50 disabled:opacity-50"
+              className="text-xs px-2 py-1.5 min-h-[44px] rounded border border-border hover:bg-card-hover disabled:opacity-50"
               disabled={meta.page <= 1 || busy}
               onClick={() => onPageChange(meta.page - 1)}
             >
               ←
             </button>
-            <span className="text-xs text-gray-500">{meta.page}/{meta.totalPages}</span>
+            <span className="text-xs text-text-muted">{meta.page}/{meta.totalPages}</span>
             <button
               type="button"
-              className="text-xs px-2 py-1.5 min-h-[36px] rounded border hover:bg-gray-50 disabled:opacity-50"
+              className="text-xs px-2 py-1.5 min-h-[44px] rounded border border-border hover:bg-card-hover disabled:opacity-50"
               disabled={!meta.hasMore || busy}
               onClick={() => onPageChange(meta.page + 1)}
             >

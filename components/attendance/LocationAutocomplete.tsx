@@ -190,9 +190,9 @@ export function LocationAutocomplete({
   return (
     <div ref={rootRef} className="space-y-2">
       <label className="block text-sm">
-        <span className="text-gray-600">Lokalizacja (opcjonalnie)</span>
+        <span className="text-text-muted">Lokalizacja (opcjonalnie)</span>
         <div className="relative mt-1">
-          <LocationPinIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <LocationPinIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
             ref={inputRef}
             type="text"
@@ -203,7 +203,7 @@ export function LocationAutocomplete({
             aria-activedescendant={activeOptionId}
             aria-autocomplete="list"
             disabled={disabled}
-            className="w-full border rounded-lg pl-9 pr-3 py-2 disabled:opacity-60 disabled:bg-gray-50"
+            className="w-full min-h-[44px] border border-border rounded-lg pl-9 pr-3 py-2 bg-input text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-60"
             placeholder="np. Warszawa, ul. Kopernika 6"
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -213,7 +213,7 @@ export function LocationAutocomplete({
             onKeyDown={onKeyDown}
           />
           {loading && (
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted">
               …
             </span>
           )}
@@ -224,7 +224,7 @@ export function LocationAutocomplete({
         <ul
           id={listId}
           role="listbox"
-          className="border rounded-lg bg-white shadow-sm overflow-hidden divide-y divide-gray-100"
+          className="border border-border rounded-lg bg-card shadow-sm overflow-hidden divide-y divide-border"
         >
           {suggestions.map((label, index) => (
             <li key={`${label}-${index}`} role="option" id={`${listId}-option-${index}`}>
@@ -232,8 +232,8 @@ export function LocationAutocomplete({
                 type="button"
                 aria-selected={index === activeIndex}
                 className={[
-                  "w-full text-left px-3 py-2.5 text-sm text-gray-800 hover:bg-gray-50",
-                  index === activeIndex ? "bg-gray-50" : "",
+                  "w-full text-left px-3 py-2.5 text-sm text-text hover:bg-card-hover",
+                  index === activeIndex ? "bg-card-hover" : "",
                 ].join(" ")}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => selectSuggestion(label)}
@@ -249,14 +249,14 @@ export function LocationAutocomplete({
         type="button"
         disabled={disabled || locating}
         onClick={() => void useMyLocation()}
-        className="text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 w-full hover:bg-gray-50 disabled:opacity-60"
+        className="min-h-[44px] text-sm text-text border border-border rounded-lg px-3 py-2 w-full bg-card hover:bg-card-hover disabled:opacity-60"
       >
         {locating ? "Ustalanie lokalizacji…" : "Użyj mojej lokalizacji"}
       </button>
 
-      {hint && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{hint}</p>}
+      {hint && <p className="text-xs text-warning bg-warning-bg border border-warning-border rounded-lg px-3 py-2">{hint}</p>}
       {!hint && value.trim().length > 0 && value.trim().length < MIN_QUERY_LEN && (
-        <p className="text-xs text-gray-500">Wpisz co najmniej 3 znaki, aby zobaczyć podpowiedzi.</p>
+        <p className="text-xs text-text-muted">Wpisz co najmniej 3 znaki, aby zobaczyć podpowiedzi.</p>
       )}
     </div>
   );

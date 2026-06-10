@@ -58,15 +58,15 @@ export default function VacationsPage() {
   const waitingForRole = !!user && !!companyId && (!roleLoaded || role === null);
 
   if (loading || !companyStorageReady || waitingForRole) {
-    return <div className="p-6">Ładowanie...</div>;
+    return <div className="text-text-muted">Ładowanie...</div>;
   }
   if (!user) return null;
 
   if (!companyId) {
     return (
-      <div className="p-6">
+      <div className="text-text">
         Najpierw wybierz aktywną firmę w{" "}
-        <Link className="underline" href="/dashboard">
+        <Link className="underline text-accent" href="/dashboard">
           Dashboard
         </Link>
         .

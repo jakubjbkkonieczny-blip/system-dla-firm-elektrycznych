@@ -121,7 +121,7 @@ export function LaborTab({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-text-muted">
           Planowana robocizna z szacunkiem kosztów zatrudnienia. Nie stanowi porady prawnej ani księgowej.
         </p>
         <button type="button" className={BUDGET_BTN_PRIMARY} onClick={() => openForm()} disabled={busy}>
@@ -130,18 +130,18 @@ export function LaborTab({
       </div>
 
       {formOpen ? (
-        <div className="border rounded-xl p-4 bg-gray-50 space-y-3">
+        <div className="border border-border rounded-xl p-4 bg-bg-secondary space-y-3">
           <h4 className="font-medium">{editingId ? "Edytuj robociznę" : "Nowa robocizna"}</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="block space-y-1">
-              <span className="text-sm text-gray-700">Pracownik</span>
+              <span className="text-sm text-text">Pracownik</span>
               <select className={BUDGET_INPUT_CLASS} value={form.userId} onChange={(e) => setForm((f) => ({ ...f, userId: e.target.value }))}>
                 <option value="">— brak —</option>
                 {members.map((m) => <option key={m.uid} value={m.uid}>{m.label}</option>)}
               </select>
             </label>
             <label className="block space-y-1">
-              <span className="text-sm text-gray-700">Typ współpracy *</span>
+              <span className="text-sm text-text">Typ współpracy *</span>
               <select className={BUDGET_INPUT_CLASS} value={form.employmentType} onChange={(e) => setForm((f) => ({ ...f, employmentType: e.target.value }))}>
                 {EMPLOYMENT_TYPE_DEFINITIONS.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -149,26 +149,26 @@ export function LaborTab({
               </select>
             </label>
             <label className="block space-y-1">
-              <span className="text-sm text-gray-700">Planowane godziny *</span>
+              <span className="text-sm text-text">Planowane godziny *</span>
               <input className={BUDGET_INPUT_CLASS} inputMode="decimal" value={form.plannedHours} onChange={(e) => setForm((f) => ({ ...f, plannedHours: e.target.value }))} />
             </label>
             <label className="block space-y-1">
-              <span className="text-sm text-gray-700">Stawka/h (PLN) *</span>
+              <span className="text-sm text-text">Stawka/h (PLN) *</span>
               <input className={BUDGET_INPUT_CLASS} inputMode="decimal" value={form.hourlyRatePln} onChange={(e) => setForm((f) => ({ ...f, hourlyRatePln: e.target.value }))} />
             </label>
             <label className="block space-y-1">
-              <span className="text-sm text-gray-700">Data</span>
+              <span className="text-sm text-text">Data</span>
               <input type="date" className={BUDGET_INPUT_CLASS} value={form.plannedDate} onChange={(e) => setForm((f) => ({ ...f, plannedDate: e.target.value }))} />
             </label>
             {preview ? (
-              <div className="md:col-span-2 text-sm bg-white border rounded-lg p-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="md:col-span-2 text-sm bg-card border border-border rounded-lg p-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div>Koszt podstawowy: <b>{formatPlnFromCents(preview.baseLaborCostCents)}</b></div>
                 <div>Szac. zatrudnienie: <b>{formatPlnFromCents(preview.employerLaborCostCents)}</b></div>
                 <div>Mnożnik: <b>×{(preview.multiplierBasisPoints / 10000).toFixed(2)}</b></div>
               </div>
             ) : null}
             <label className="block space-y-1 md:col-span-2">
-              <span className="text-sm text-gray-700">Notatka</span>
+              <span className="text-sm text-text">Notatka</span>
               <textarea className={`${BUDGET_INPUT_CLASS} min-h-[72px]`} value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} />
             </label>
           </div>
@@ -180,14 +180,14 @@ export function LaborTab({
       ) : null}
 
       {loading && laborItems.length === 0 ? (
-        <div className="text-sm text-gray-500 py-8 text-center">Ładowanie robocizny...</div>
+        <div className="text-sm text-text-muted py-8 text-center">Ładowanie robocizny...</div>
       ) : laborItems.length === 0 ? (
-        <div className="text-sm text-gray-500 py-8 text-center border rounded-xl bg-gray-50">Brak wpisów robocizny.</div>
+        <div className="text-sm text-text-muted py-8 text-center border border-border rounded-xl bg-bg-secondary">Brak wpisów robocizny.</div>
       ) : (
         <div className="overflow-x-auto -mx-1 px-1">
           <table className="w-full min-w-[720px] text-sm border-collapse">
             <thead>
-              <tr className="border-b text-left text-xs uppercase tracking-wide text-gray-500">
+              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
                 <th className="py-2 pr-3 font-medium">Pracownik</th>
                 <th className="py-2 pr-3 font-medium">Typ współpracy</th>
                 <th className="py-2 pr-3 font-medium text-right">Stawka</th>
@@ -198,9 +198,9 @@ export function LaborTab({
                 <th className="py-2 font-medium" />
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border">
               {laborItems.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
+                <tr key={item.id} className="hover:bg-card-hover">
                   <td className="py-3 pr-3 font-medium">{item.userLabel ?? "—"}</td>
                   <td className="py-3 pr-3">
                     <EmploymentTypeBadge type={item.employmentType} label={item.employmentTypeLabel} />
@@ -209,11 +209,11 @@ export function LaborTab({
                   <td className="py-3 pr-3 text-right">{minutesToHoursLabel(item.plannedMinutes)} h</td>
                   <td className="py-3 pr-3 text-right">{formatPlnFromCents(item.baseLaborCostCents)}</td>
                   <td className="py-3 pr-3 text-right font-medium">{formatPlnFromCents(item.employerLaborCostCents)}</td>
-                  <td className="py-3 pr-3 text-gray-600">{item.plannedDate?.slice(0, 10) ?? "—"}</td>
+                  <td className="py-3 pr-3 text-text-muted">{item.plannedDate?.slice(0, 10) ?? "—"}</td>
                   <td className="py-3">
                     <div className="flex gap-1">
-                      <button type="button" className="text-xs px-2 py-1 rounded border hover:bg-gray-50 min-h-[36px]" onClick={() => openForm(item)} disabled={busy}>Edytuj</button>
-                      <button type="button" className="text-xs px-2 py-1 rounded border hover:bg-gray-50 min-h-[36px] text-red-700" onClick={() => remove(item.id)} disabled={busy}>Usuń</button>
+                      <button type="button" className="text-xs px-2 py-1 rounded border border-border hover:bg-card-hover min-h-[44px]" onClick={() => openForm(item)} disabled={busy}>Edytuj</button>
+                      <button type="button" className="text-xs px-2 py-1 rounded border border-border hover:bg-card-hover min-h-[44px] text-danger" onClick={() => remove(item.id)} disabled={busy}>Usuń</button>
                     </div>
                   </td>
                 </tr>
@@ -226,7 +226,7 @@ export function LaborTab({
       {meta && meta.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-2 pt-2">
           <button type="button" className={BUDGET_BTN_SECONDARY} disabled={meta.page <= 1 || busy} onClick={() => onPageChange(meta.page - 1)}>← Poprzednia</button>
-          <span className="text-sm text-gray-500">Strona {meta.page} / {meta.totalPages}</span>
+          <span className="text-sm text-text-muted">Strona {meta.page} / {meta.totalPages}</span>
           <button type="button" className={BUDGET_BTN_SECONDARY} disabled={!meta.hasMore || busy} onClick={() => onPageChange(meta.page + 1)}>Następna →</button>
         </div>
       ) : null}

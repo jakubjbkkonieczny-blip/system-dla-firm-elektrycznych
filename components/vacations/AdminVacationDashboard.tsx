@@ -39,32 +39,32 @@ const SUMMARY_CARDS = [
     label: "Oczekujące",
     helper: "Wnioski do rozpatrzenia",
     icon: "⏳",
-    card: "border-amber-200 bg-amber-50",
-    text: "text-amber-900",
+    card: "border-warning-border bg-warning-bg",
+    text: "text-warning",
   },
   {
     key: "approved" as const,
     label: "Zaakceptowane",
     helper: "Zatwierdzone urlopy",
     icon: "✅",
-    card: "border-emerald-200 bg-emerald-50",
-    text: "text-emerald-900",
+    card: "border-success-border bg-success-bg",
+    text: "text-success",
   },
   {
     key: "rejected" as const,
     label: "Odrzucone",
     helper: "Odrzucone wnioski",
     icon: "✕",
-    card: "border-red-200 bg-red-50",
-    text: "text-red-900",
+    card: "border-danger-border bg-danger-bg",
+    text: "text-danger",
   },
   {
     key: "absentToday" as const,
     label: "Dzisiaj nieobecni",
     helper: "Na urlopie dziś",
     icon: "🏖️",
-    card: "border-sky-200 bg-sky-50",
-    text: "text-sky-900",
+    card: "border-border bg-bg-secondary",
+    text: "text-accent",
   },
 ];
 
@@ -114,24 +114,24 @@ function VacationRequestDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-overlay p-0 sm:p-4"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="w-full sm:max-w-[680px] max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border bg-white p-5 sm:p-6 shadow-xl"
+        className="w-full sm:max-w-[680px] max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-border theme-glass bg-card p-5 sm:p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="vacation-details-title"
       >
         <div className="flex items-start justify-between gap-4">
-          <h2 id="vacation-details-title" className="text-lg font-semibold text-gray-900">
+          <h2 id="vacation-details-title" className="text-lg font-semibold text-text">
             Szczegóły wniosku urlopowego
           </h2>
           <button
             type="button"
-            className="min-h-[44px] min-w-[44px] rounded-lg border bg-white text-gray-600 hover:bg-gray-50"
+            className="min-h-[44px] min-w-[44px] rounded-lg border border-border bg-card text-text-muted hover:bg-card-hover"
             onClick={onClose}
             aria-label="Zamknij"
           >
@@ -141,15 +141,15 @@ function VacationRequestDetailsModal({
 
         <dl className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
-            <dt className="text-xs font-medium text-gray-500">Pracownik</dt>
-            <dd className="mt-1 font-medium text-gray-900">{request.displayName}</dd>
+            <dt className="text-xs font-medium text-text-muted">Pracownik</dt>
+            <dd className="mt-1 font-medium text-text">{request.displayName}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Typ urlopu</dt>
-            <dd className="mt-1 text-gray-900">{VACATION_TYPE_LABELS[request.type]}</dd>
+            <dt className="text-xs font-medium text-text-muted">Typ urlopu</dt>
+            <dd className="mt-1 text-text">{VACATION_TYPE_LABELS[request.type]}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Status</dt>
+            <dt className="text-xs font-medium text-text-muted">Status</dt>
             <dd className="mt-1">
               <span
                 className={`inline-flex px-2 py-1 rounded-full border text-xs font-medium ${getVacationStatusBadgeClass(request.status)}`}
@@ -159,26 +159,26 @@ function VacationRequestDetailsModal({
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Data utworzenia</dt>
-            <dd className="mt-1 text-gray-900">{formatCreatedAt(request.createdAt)}</dd>
+            <dt className="text-xs font-medium text-text-muted">Data utworzenia</dt>
+            <dd className="mt-1 text-text">{formatCreatedAt(request.createdAt)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Data od</dt>
-            <dd className="mt-1 text-gray-900">{formatDateShort(request.startDate)}</dd>
+            <dt className="text-xs font-medium text-text-muted">Data od</dt>
+            <dd className="mt-1 text-text">{formatDateShort(request.startDate)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Data do</dt>
-            <dd className="mt-1 text-gray-900">{formatDateShort(request.endDate)}</dd>
+            <dt className="text-xs font-medium text-text-muted">Data do</dt>
+            <dd className="mt-1 text-text">{formatDateShort(request.endDate)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Liczba dni</dt>
-            <dd className="mt-1 text-gray-900">{request.totalDays}</dd>
+            <dt className="text-xs font-medium text-text-muted">Liczba dni</dt>
+            <dd className="mt-1 text-text">{request.totalDays}</dd>
           </div>
         </dl>
 
         <div className="mt-5">
-          <div className="text-xs font-medium text-gray-500">Uwagi</div>
-          <div className="mt-2 rounded-lg border bg-gray-50 px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap break-words">
+          <div className="text-xs font-medium text-text-muted">Uwagi</div>
+          <div className="mt-2 rounded-lg border border-border bg-bg-secondary px-4 py-3 text-sm text-text whitespace-pre-wrap break-words">
             {notes ? notes : "Brak uwag"}
           </div>
         </div>
@@ -187,7 +187,7 @@ function VacationRequestDetailsModal({
           <div className="mt-6 flex flex-col sm:flex-row gap-2">
             <button
               type="button"
-              className="min-h-[44px] flex-1 px-4 py-2 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800 text-sm font-medium disabled:opacity-60"
+              className="min-h-[44px] flex-1 px-4 py-2 rounded-lg border border-success-border bg-success-bg text-success text-sm font-medium disabled:opacity-60"
               disabled={busy}
               onClick={() => onDecision(request.id, "approve")}
             >
@@ -195,7 +195,7 @@ function VacationRequestDetailsModal({
             </button>
             <button
               type="button"
-              className="min-h-[44px] flex-1 px-4 py-2 rounded-lg border border-red-300 bg-red-50 text-red-800 text-sm font-medium disabled:opacity-60"
+              className="min-h-[44px] flex-1 px-4 py-2 rounded-lg border border-danger-border bg-danger-bg text-danger text-sm font-medium disabled:opacity-60"
               disabled={busy}
               onClick={() => onDecision(request.id, "reject")}
             >
@@ -245,16 +245,16 @@ function AddVacationModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-2xl border bg-white p-5 sm:p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-gray-900">Dodaj wniosek urlopowy</h2>
-        <p className="text-sm text-gray-600 mt-1">Utwórz wniosek w imieniu pracownika.</p>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-overlay p-4">
+      <div className="w-full max-w-lg rounded-2xl border border-border theme-glass bg-card p-5 sm:p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-text">Dodaj wniosek urlopowy</h2>
+        <p className="text-sm text-text-muted mt-1">Utwórz wniosek w imieniu pracownika.</p>
 
         <div className="mt-5 space-y-4">
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-gray-600">Pracownik</span>
+            <span className="text-text-muted">Pracownik</span>
             <select
-              className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+              className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
             >
@@ -267,9 +267,9 @@ function AddVacationModal({
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-gray-600">Typ urlopu</span>
+            <span className="text-text-muted">Typ urlopu</span>
             <select
-              className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+              className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
@@ -283,19 +283,19 @@ function AddVacationModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-sm">
-              <span className="text-gray-600">Od</span>
+              <span className="text-text-muted">Od</span>
               <input
                 type="date"
-                className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+                className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
-              <span className="text-gray-600">Do</span>
+              <span className="text-text-muted">Do</span>
               <input
                 type="date"
-                className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+                className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
@@ -303,9 +303,9 @@ function AddVacationModal({
           </div>
 
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-gray-600">Uwagi (opcjonalnie)</span>
+            <span className="text-text-muted">Uwagi (opcjonalnie)</span>
             <textarea
-              className="border rounded-lg px-3 py-2.5 bg-white min-h-[88px]"
+              className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[88px] focus:outline-none focus:ring-2 focus:ring-accent"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
@@ -315,7 +315,7 @@ function AddVacationModal({
         <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
           <button
             type="button"
-            className="min-h-[44px] px-4 py-2 rounded-lg border bg-white text-sm"
+            className="min-h-[44px] px-4 py-2 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover"
             onClick={onClose}
             disabled={busy}
           >
@@ -323,7 +323,7 @@ function AddVacationModal({
           </button>
           <button
             type="button"
-            className="min-h-[44px] px-4 py-2 rounded-lg bg-gray-900 text-white text-sm disabled:opacity-60"
+            className="min-h-[44px] px-4 py-2 rounded-lg bg-primary text-primary-fg text-sm disabled:opacity-60"
             disabled={busy || !userId}
             onClick={() =>
               onSubmit({ userId, type, startDate, endDate, reason })
@@ -358,15 +358,15 @@ function VacationUtilizationCard({
     byType: VacationUtilization["month"]["byType"]
   ) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
-        <ul className="mt-3 space-y-2 text-sm text-gray-700">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <h4 className="text-sm font-semibold text-text">{title}</h4>
+        <ul className="mt-3 space-y-2 text-sm text-text">
           {typeRows.map((row) => {
             const usage = byType[row.key];
             return (
               <li key={row.key} className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-                <span className="text-gray-600">{row.label}</span>
-                <span className="font-medium text-gray-900 shrink-0">
+                <span className="text-text-muted">{row.label}</span>
+                <span className="font-medium text-text shrink-0">
                   {usage.days} {usage.days === 1 ? "dzień" : "dni"} ({usage.hours}h)
                 </span>
               </li>
@@ -378,8 +378,8 @@ function VacationUtilizationCard({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 sm:p-5 space-y-4">
-      <h3 className="text-base font-semibold text-gray-900">{utilization.displayName}</h3>
+    <div className="rounded-xl border border-border bg-bg-secondary p-4 sm:p-5 space-y-4">
+      <h3 className="text-base font-semibold text-text">{utilization.displayName}</h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {renderSection(`Miesiąc: ${monthLabel}`, utilization.month.byType)}
         {renderSection(`Rok: ${year}`, utilization.year.byType)}
@@ -457,17 +457,17 @@ function AbsencePlanSection({
   }
 
   return (
-    <section className="border rounded-xl bg-white p-4 sm:p-5 space-y-4">
+    <section className="border border-border rounded-xl bg-card p-4 sm:p-5 space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Plan nieobecności pracowników</h2>
-          <p className="text-sm text-gray-600 mt-1">Widok miesiąca — przewiń w poziomie na mobile.</p>
+          <h2 className="text-lg font-semibold text-text">Plan nieobecności pracowników</h2>
+          <p className="text-sm text-text-muted mt-1">Widok miesiąca — przewiń w poziomie na mobile.</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
           <label className="flex flex-col gap-1 text-sm min-w-[7rem] flex-1 sm:flex-none">
-            <span className="text-gray-600">Rok</span>
+            <span className="text-text-muted">Rok</span>
             <select
-              className="min-h-[44px] border rounded-lg px-3 py-2 bg-white"
+              className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
               value={year}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
             >
@@ -479,9 +479,9 @@ function AbsencePlanSection({
             </select>
           </label>
           <label className="flex flex-col gap-1 text-sm min-w-[10rem] flex-1 sm:flex-none">
-            <span className="text-gray-600">Miesiąc</span>
+            <span className="text-text-muted">Miesiąc</span>
             <select
-              className="min-h-[44px] border rounded-lg px-3 py-2 bg-white"
+              className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
               value={monthNum}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
             >
@@ -495,14 +495,14 @@ function AbsencePlanSection({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="min-h-[44px] px-3 py-2 rounded-lg border bg-white text-sm"
+              className="min-h-[44px] px-3 py-2 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover"
               onClick={goToday}
             >
               Dzisiaj
             </button>
             <button
               type="button"
-              className="min-h-[44px] w-11 rounded-lg border bg-white text-sm"
+              className="min-h-[44px] w-11 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover"
               onClick={goPrev}
               aria-label="Poprzedni miesiąc"
             >
@@ -510,7 +510,7 @@ function AbsencePlanSection({
             </button>
             <button
               type="button"
-              className="min-h-[44px] w-11 rounded-lg border bg-white text-sm"
+              className="min-h-[44px] w-11 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover"
               onClick={goNext}
               aria-label="Następny miesiąc"
             >
@@ -528,34 +528,34 @@ function AbsencePlanSection({
         />
       )}
 
-      <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+      <div className="flex flex-wrap gap-3 text-xs text-text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-sky-200 border border-sky-300" /> Urlop wypoczynkowy
+          <span className="w-3 h-3 rounded bg-success-bg border border-success-border" /> Urlop wypoczynkowy
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-amber-200 border border-amber-300" /> Urlop na żądanie
+          <span className="w-3 h-3 rounded bg-warning-bg border border-warning-border" /> Urlop na żądanie
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-slate-200 border border-slate-300" /> Urlop bezpłatny
+          <span className="w-3 h-3 rounded bg-bg-secondary border border-border" /> Urlop bezpłatny
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-violet-200 border border-violet-300" /> Chorobowy
+          <span className="w-3 h-3 rounded bg-input border border-border" /> Chorobowy
         </span>
       </div>
 
       {err && (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg">{err}</div>
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg">{err}</div>
       )}
 
-      <div className="overflow-x-auto border rounded-lg">
+      <div className="overflow-x-auto border border-border rounded-lg">
         <table className="min-w-[720px] w-full text-xs">
-          <thead className="bg-gray-50">
+          <thead className="bg-bg-secondary">
             <tr>
-              <th className="text-left px-3 py-2 font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 min-w-[140px]">
+              <th className="text-left px-3 py-2 font-medium text-text-muted sticky left-0 bg-bg-secondary z-10 min-w-[140px]">
                 Pracownik
               </th>
               {dayHeaders.map((day) => (
-                <th key={day} className="px-1 py-2 font-medium text-gray-500 w-7 text-center">
+                <th key={day} className="px-1 py-2 font-medium text-text-muted w-7 text-center">
                   {day}
                 </th>
               ))}
@@ -563,14 +563,14 @@ function AbsencePlanSection({
           </thead>
           <tbody>
             {(plan?.rows ?? []).map((row) => (
-              <tr key={row.userId} className="border-t">
-                <td className="px-3 py-2 font-medium text-gray-900 sticky left-0 bg-white z-10">
+              <tr key={row.userId} className="border-t border-border">
+                <td className="px-3 py-2 font-medium text-text sticky left-0 bg-card z-10">
                   {row.displayName}
                 </td>
                 <td colSpan={dayHeaders.length} className="p-0 relative h-10">
                   <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${dayHeaders.length}, minmax(1.75rem, 1fr))` }}>
                     {dayHeaders.map((day) => (
-                      <div key={day} className="border-l border-gray-100 h-full" />
+                      <div key={day} className="border-l border-border h-full" />
                     ))}
                   </div>
                   <div className="absolute inset-y-1 inset-x-0">
@@ -591,7 +591,7 @@ function AbsencePlanSection({
             ))}
             {!busy && (plan?.rows.length ?? 0) === 0 && (
               <tr>
-                <td colSpan={dayHeaders.length + 1} className="px-3 py-6 text-center text-sm text-gray-500">
+                <td colSpan={dayHeaders.length + 1} className="px-3 py-6 text-center text-sm text-text-muted">
                   Brak pracowników do wyświetlenia.
                 </td>
               </tr>
@@ -601,13 +601,13 @@ function AbsencePlanSection({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-text-muted">
           Pokazano {plan?.rows.length ?? 0} z {plan?.totalEmployees ?? 0} pracowników
         </p>
         <div className="flex gap-2">
           <button
             type="button"
-            className="min-h-[44px] px-3 py-2 rounded-lg border bg-white text-sm disabled:opacity-50"
+            className="min-h-[44px] px-3 py-2 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover disabled:opacity-50"
             disabled={page <= 1 || busy}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
@@ -615,7 +615,7 @@ function AbsencePlanSection({
           </button>
           <button
             type="button"
-            className="min-h-[44px] px-3 py-2 rounded-lg border bg-white text-sm disabled:opacity-50"
+            className="min-h-[44px] px-3 py-2 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover disabled:opacity-50"
             disabled={!plan?.hasMore || busy}
             onClick={() => setPage((p) => p + 1)}
           >
@@ -720,14 +720,14 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
     <div className="p-6 space-y-6 max-w-7xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Urlopy</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="text-xl font-semibold text-text">Urlopy</h1>
+          <p className="text-sm text-text-muted mt-1">
             Zarządzaj wnioskami urlopowymi pracowników i planuj nieobecności w firmie.
           </p>
         </div>
         <button
           type="button"
-          className="min-h-[44px] px-4 py-2 rounded-lg bg-gray-900 text-white text-sm disabled:opacity-60"
+          className="min-h-[44px] px-4 py-2 rounded-lg bg-primary text-primary-fg text-sm disabled:opacity-60"
           onClick={() => setModalOpen(true)}
           disabled={busy}
         >
@@ -736,7 +736,7 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
       </div>
 
       {err && (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg">{err}</div>
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg">{err}</div>
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -745,20 +745,20 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
           return (
             <div key={card.key} className={`rounded-xl border p-4 ${card.card}`}>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-medium text-gray-600">{card.label}</span>
+                <span className="text-xs font-medium text-text-muted">{card.label}</span>
                 <span aria-hidden>{card.icon}</span>
               </div>
               <div className={`text-2xl font-semibold mt-1 ${card.text}`}>{count}</div>
-              <p className="text-xs text-gray-600 mt-1">{card.helper}</p>
+              <p className="text-xs text-text-muted mt-1">{card.helper}</p>
             </div>
           );
         })}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
-        <section className="border rounded-xl bg-white overflow-hidden">
-          <div className="p-4 sm:p-5 border-b space-y-3">
-            <h2 className="text-lg font-semibold text-gray-900">{requestsSectionTitle}</h2>
+        <section className="border border-border rounded-xl bg-card overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-border space-y-3">
+            <h2 className="text-lg font-semibold text-text">{requestsSectionTitle}</h2>
             <div className="flex flex-wrap gap-2">
               {STATUS_TABS.map((tab) => (
                 <button
@@ -767,8 +767,8 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
                   className={[
                     "min-h-[44px] px-3 py-2 rounded-lg border text-sm",
                     statusFilter === tab.value
-                      ? "bg-gray-900 text-white border-gray-900"
-                      : "bg-white text-gray-700 hover:bg-gray-50",
+                      ? "bg-primary text-primary-fg border-primary"
+                      : "bg-card text-text border-border hover:bg-card-hover",
                   ].join(" ")}
                   onClick={() => setStatusFilter(tab.value)}
                 >
@@ -777,9 +777,9 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
               ))}
             </div>
             <label className="flex flex-col gap-1 text-sm max-w-xs">
-              <span className="text-gray-600">Pracownik</span>
+              <span className="text-text-muted">Pracownik</span>
               <select
-                className="min-h-[44px] border rounded-lg px-3 py-2 bg-white"
+                className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 value={requestUserId}
                 onChange={(e) => setRequestUserId(e.target.value)}
               >
@@ -794,32 +794,32 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
           </div>
 
           <div
-            className="hidden md:block overflow-y-auto scroll-smooth overscroll-contain border-t"
+            className="hidden md:block overflow-y-auto scroll-smooth overscroll-contain border-t border-border"
             style={{ maxHeight: REQUESTS_TABLE_MAX_HEIGHT }}
           >
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 sticky top-0 z-10 shadow-[0_1px_0_0_rgb(229_231_235)]">
+              <thead className="bg-bg-secondary sticky top-0 z-10 border-b border-border">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Pracownik</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Typ urlopu</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Od</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Do</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Dni</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Pracownik</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Typ urlopu</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Od</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Do</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Dni</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {(data?.requests ?? []).map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t hover:bg-gray-50/80 cursor-pointer"
+                    className="border-t border-border hover:bg-card-hover cursor-pointer"
                     onClick={() => setDetailsRequest(row)}
                   >
-                    <td className="px-4 py-3 font-medium text-gray-900">{row.displayName}</td>
-                    <td className="px-4 py-3 text-gray-700">{VACATION_TYPE_LABELS[row.type]}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDateShort(row.startDate)}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDateShort(row.endDate)}</td>
-                    <td className="px-4 py-3 text-gray-700">{row.totalDays}</td>
+                    <td className="px-4 py-3 font-medium text-text">{row.displayName}</td>
+                    <td className="px-4 py-3 text-text">{VACATION_TYPE_LABELS[row.type]}</td>
+                    <td className="px-4 py-3 text-text">{formatDateShort(row.startDate)}</td>
+                    <td className="px-4 py-3 text-text">{formatDateShort(row.endDate)}</td>
+                    <td className="px-4 py-3 text-text">{row.totalDays}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex px-2 py-1 rounded-full border text-xs font-medium ${getVacationStatusBadgeClass(row.status)}`}
@@ -831,7 +831,7 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
                 ))}
                 {!busy && (data?.requests.length ?? 0) === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={6} className="px-4 py-8 text-center text-text-muted">
                       Brak wniosków urlopowych.
                     </td>
                   </tr>
@@ -841,7 +841,7 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
           </div>
 
           <div
-            className="md:hidden overflow-y-auto scroll-smooth overscroll-contain divide-y border-t"
+            className="md:hidden overflow-y-auto scroll-smooth overscroll-contain divide-y divide-border border-t border-border"
             style={{ maxHeight: REQUESTS_MOBILE_MAX_HEIGHT }}
           >
             {(data?.requests ?? []).map((row) => (
@@ -860,8 +860,8 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="font-medium text-gray-900">{row.displayName}</div>
-                    <div className="text-sm text-gray-600">{VACATION_TYPE_LABELS[row.type]}</div>
+                    <div className="font-medium text-text">{row.displayName}</div>
+                    <div className="text-sm text-text-muted">{VACATION_TYPE_LABELS[row.type]}</div>
                   </div>
                   <span
                     className={`inline-flex px-2 py-1 rounded-full border text-xs font-medium ${getVacationStatusBadgeClass(row.status)}`}
@@ -869,12 +869,12 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
                     {VACATION_STATUS_LABELS[row.status]}
                   </span>
                 </div>
-                <div className="text-sm text-gray-700">
+                <div className="text-sm text-text">
                   {formatDateShort(row.startDate)} – {formatDateShort(row.endDate)} · {row.totalDays} dni
                 </div>
                 <button
                   type="button"
-                  className="min-h-[44px] w-full px-3 py-2 rounded-lg border bg-white text-sm font-medium text-gray-900"
+                  className="min-h-[44px] w-full px-3 py-2 rounded-lg border border-border bg-card text-sm font-medium text-text hover:bg-card-hover"
                   onClick={(e) => {
                     e.stopPropagation();
                     setDetailsRequest(row);
@@ -887,17 +887,17 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
           </div>
         </section>
 
-        <aside className="border rounded-xl bg-white p-4 sm:p-5">
-          <h2 className="text-lg font-semibold text-gray-900">Dzisiejsze nieobecności</h2>
+        <aside className="border border-border rounded-xl bg-card p-4 sm:p-5">
+          <h2 className="text-lg font-semibold text-text">Dzisiejsze nieobecności</h2>
           <div className="mt-4 space-y-3">
             {todayList.length === 0 ? (
-              <p className="text-sm text-gray-600">Dzisiaj wszyscy pracują</p>
+              <p className="text-sm text-text-muted">Dzisiaj wszyscy pracują</p>
             ) : (
               todayList.map((item) => (
-                <div key={item.id} className="rounded-lg border bg-gray-50 p-3">
-                  <div className="font-medium text-gray-900">{item.displayName}</div>
-                  <div className="text-sm text-gray-600 mt-0.5">{VACATION_TYPE_LABELS[item.type]}</div>
-                  <div className="text-xs text-gray-500 mt-1">
+                <div key={item.id} className="rounded-lg border border-border bg-bg-secondary p-3">
+                  <div className="font-medium text-text">{item.displayName}</div>
+                  <div className="text-sm text-text-muted mt-0.5">{VACATION_TYPE_LABELS[item.type]}</div>
+                  <div className="text-xs text-text-muted mt-1">
                     {formatDateShort(item.startDate)} – {formatDateShort(item.endDate)}
                   </div>
                 </div>
@@ -907,7 +907,7 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
           {(data?.todayAbsences.length ?? 0) > 5 && (
             <button
               type="button"
-              className="mt-4 min-h-[44px] text-sm font-medium text-gray-900 underline"
+              className="mt-4 min-h-[44px] text-sm font-medium text-text underline"
               onClick={() => setShowAllAbsences((v) => !v)}
             >
               {showAllAbsences ? "Pokaż mniej" : "Zobacz pełną listę"}
@@ -916,11 +916,11 @@ export function AdminVacationDashboard({ companyId }: { companyId: string }) {
         </aside>
       </div>
 
-      <div className="border rounded-lg bg-white p-4 flex flex-wrap gap-3 items-end">
+      <div className="border border-border rounded-lg bg-card p-4 flex flex-wrap gap-3 items-end">
         <label className="flex flex-col gap-1 text-sm min-w-[180px]">
-          <span className="text-gray-600">Filtr pracownika (plan)</span>
+          <span className="text-text-muted">Filtr pracownika (plan)</span>
           <select
-            className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+            className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
             value={planUserId}
             onChange={(e) => setPlanUserId(e.target.value)}
           >

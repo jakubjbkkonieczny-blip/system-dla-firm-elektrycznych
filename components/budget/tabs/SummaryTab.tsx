@@ -7,9 +7,9 @@ import type { JobBudgetSummary } from "@/lib/jobs/budget/types";
 
 function SummaryRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={["flex justify-between gap-4 py-3 border-b border-gray-100", highlight ? "font-semibold" : ""].join(" ")}>
-      <span className="text-gray-600">{label}</span>
-      <span className="text-gray-900 text-right">{value}</span>
+    <div className={["flex justify-between gap-4 py-3 border-b border-border", highlight ? "font-semibold" : ""].join(" ")}>
+      <span className="text-text-muted">{label}</span>
+      <span className="text-text text-right">{value}</span>
     </div>
   );
 }
@@ -17,12 +17,12 @@ function SummaryRow({ label, value, highlight }: { label: string; value: string;
 export function SummaryTab({ summary }: { summary: JobBudgetSummary }) {
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">Podsumowanie księgowe projektu z wskaźnikami rentowności.</p>
+      <p className="text-sm text-text-muted">Podsumowanie księgowe projektu z wskaźnikami rentowności.</p>
 
       <ProfitabilityIndicator summary={summary} />
 
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
-        <h4 className="text-sm font-semibold text-gray-900 mb-2">Zestawienie kosztów</h4>
+      <div className="rounded-xl border border-border theme-glass bg-card p-4">
+        <h4 className="text-sm font-semibold text-text mb-2">Zestawienie kosztów</h4>
         <SummaryRow label="Koszty netto (materiały)" value={formatPlnFromCents(summary.plannedCostsNetCents)} />
         <SummaryRow label="VAT / podatek" value={formatPlnFromCents(summary.estimatedTaxCents)} />
         <SummaryRow label="Koszty brutto (materiały)" value={formatPlnFromCents(summary.plannedCostsGrossCents)} />

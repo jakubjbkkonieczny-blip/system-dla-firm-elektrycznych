@@ -37,8 +37,8 @@ function formatHistoryDateTime(iso: string): string {
 function noteBlock(label: string, text: string) {
   return (
     <div>
-      <div className="text-xs font-medium text-gray-500">{label}</div>
-      <div className="mt-1 text-sm text-gray-800 whitespace-pre-wrap break-words rounded-lg border bg-white px-3 py-2">
+      <div className="text-xs font-medium text-text-muted">{label}</div>
+      <div className="mt-1 text-sm text-text whitespace-pre-wrap break-words rounded-lg border border-border bg-card px-3 py-2">
         {text}
       </div>
     </div>
@@ -122,30 +122,30 @@ export function JobStageNoteHistoryModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-overlay p-0 sm:p-4"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="w-full sm:max-w-[700px] max-h-[92vh] flex flex-col rounded-t-2xl sm:rounded-2xl border bg-white shadow-xl"
+        className="w-full sm:max-w-[700px] max-h-[92vh] flex flex-col theme-glass bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="stage-note-history-title"
       >
-        <div className="flex items-start justify-between gap-3 border-b px-4 sm:px-5 py-4 shrink-0">
+        <div className="flex items-start justify-between gap-3 border-b border-border px-4 sm:px-5 py-4 shrink-0">
           <div className="min-w-0">
             <h2
               id="stage-note-history-title"
-              className="text-lg font-semibold text-gray-900"
+              className="text-lg font-semibold text-text"
             >
               Historia notatki
             </h2>
-            <p className="text-sm text-gray-600 mt-0.5 truncate">{titleStageName}</p>
+            <p className="text-sm text-text-muted mt-0.5 truncate">{titleStageName}</p>
           </div>
           <button
             type="button"
-            className="min-h-[44px] min-w-[44px] rounded-lg border bg-white text-gray-600 hover:bg-gray-50 shrink-0"
+            className="min-h-[44px] min-w-[44px] rounded-lg border border-border bg-card text-text-muted hover:bg-card-hover shrink-0"
             onClick={onClose}
             aria-label="Zamknij"
           >
@@ -155,36 +155,36 @@ export function JobStageNoteHistoryModal({
 
         <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
           {err && (
-            <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg">
+            <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg">
               {err}
             </div>
           )}
 
           {loading ? (
-            <p className="text-sm text-gray-500">Ładowanie historii…</p>
+            <p className="text-sm text-text-muted">Ładowanie historii…</p>
           ) : items.length === 0 ? (
-            <p className="text-sm text-gray-600">Brak zapisanych zmian notatki.</p>
+            <p className="text-sm text-text-muted">Brak zapisanych zmian notatki.</p>
           ) : (
             items.map((item) => (
               <article
                 key={item.id}
-                className="rounded-xl border border-gray-200 bg-gray-50 p-3 sm:p-4 space-y-3"
+                className="rounded-xl border border-border bg-bg-secondary p-3 sm:p-4 space-y-3"
               >
                 <div className="min-w-0">
-                  <div className="font-medium text-gray-900 break-words">
+                  <div className="font-medium text-text break-words">
                     {item.editedBy.displayName}
                   </div>
                   {item.editedBy.email ? (
-                    <div className="text-sm text-gray-600 break-all">
+                    <div className="text-sm text-text-muted break-all">
                       {item.editedBy.email}
                     </div>
                   ) : null}
                   {item.editedBy.roleLabel ? (
-                    <div className="text-xs text-gray-500 mt-0.5">
+                    <div className="text-xs text-text-muted mt-0.5">
                       {item.editedBy.roleLabel}
                     </div>
                   ) : null}
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-text-muted mt-1">
                     {formatHistoryDateTime(item.createdAt)}
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export function JobStageNoteHistoryModal({
           {nextCursor && !loading ? (
             <button
               type="button"
-              className="w-full min-h-[44px] px-4 py-2 rounded-lg border bg-white text-sm font-medium text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+              className="w-full min-h-[44px] px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium text-text hover:bg-card-hover disabled:opacity-60"
               disabled={loadingMore}
               onClick={loadMore}
             >

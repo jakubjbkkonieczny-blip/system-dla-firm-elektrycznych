@@ -135,14 +135,14 @@ export default function MembersPage() {
     return { total: list.length, active, inactive };
   }, [members]);
 
-  if (loading) return <div className="p-6">Ładowanie...</div>;
+  if (loading) return <div className="text-text-muted">Ładowanie...</div>;
   if (!user) return null;
 
   if (!companyId) {
     return (
-      <div className="p-6">
+      <div className="text-text">
         Najpierw wybierz aktywną firmę w{" "}
-        <Link className="underline" href="/dashboard">
+        <Link className="underline text-accent" href="/dashboard">
           Dashboard
         </Link>
         .
@@ -152,9 +152,9 @@ export default function MembersPage() {
 
   if (err === "FORBIDDEN") {
     return (
-      <div className="p-6 space-y-2">
-        <h1 className="text-xl font-semibold">Pracownicy</h1>
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded">
+      <div className="space-y-2">
+        <h1 className="text-xl font-semibold text-text">Pracownicy</h1>
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-xl">
           Brak dostępu. Tylko właściciel lub administrator może zarządzać pracownikami.
         </div>
       </div>
@@ -162,87 +162,16 @@ export default function MembersPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Pracownicy</h1>
-        <button type="button" className="px-3 py-2 rounded border" disabled={busy} onClick={load}>
-          Odśwież
-        </button>
-      </div>
-
-      {err && err !== "FORBIDDEN" && (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded">
-          {err}
-        </div>
-      )}
-
-      <div className="border rounded-lg p-4 bg-white space-y-3">
-        <div className="font-semibold">Dodaj pracownika</div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <input
-            className="border rounded px-3 py-2 bg-white"
-            placeholder="email@firma.pl"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <select
-            className="border rounded px-3 py-2 bg-white"
-            value={role}
-            onChange={(e) => setRole(e.target.value as any)}
-          >
-            <option value="admin">Kierownik</option>
-            <option value="staff">Pracownik</option>
-          </select>
-
-          <select
-            className="border rounded px-3 py-2 bg-white"
-            value={scope}
-            onChange={(e) => setScope(e.target.value as any)}
-          >
-            <option value="all">Wszystkie zlecenia</option>
-            <option value="assigned">Tylko przypisane zlecenia</option>
-          </select>
-        </div>
-
-        <div className="flex justify-end">
-          <button
-            type="button"
-            className="px-3 py-2 rounded bg-gray-900 text-white disabled:opacity-60"
-            disabled={busy || email.trim().length === 0}
-            onClick={invite}
-          >
-            {busy ? "..." : "Dodaj"}
-          </button>
-        </div>
-
-        <div className="text-xs text-gray-600">
-          MVP: użytkownik musi już istnieć w Auth (mieć konto).
-        </div>
-      </div>
-
-      <div className="border rounded-lg bg-white overflow-hidden">
-        <div className="p-4 border-b flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="font-semibold">Lista pracowników</div>
-
-            <div className="flex items-center gap-2 text-sm">
-              <span className="px-2 py-1 rounded-full border bg-white">
-                Aktywni: <b className="text-green-700">{stats.active}</b>
-              </span>
-              <span className="px-2 py-1 rounded-full border bg-white">
-                Nieaktywni: <b className="text-red-700">{stats.inactive}</b>
-              </span>
-              <span className="px-2 py-1 rounded-full border bg-white text-gray-700">
-                Razem: <b>{stats.total}</b>
-              </span>
-            </div>
+    <div className="w-full max-w-full min-w-0">
+      <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-text">Pracownicy</h1>
+            <p className="text-sm text-text-muted mt-1">Zarządzaj zespołem firmy</p>
           </div>
-
           <button
             type="button"
-            className="px-3 py-2 rounded border disabled:opacity-60"
+            className="min-h-[44px] px-4 py-2 rounded-xl border border-border bg-card text-text hover:bg-card-hover transition disabled:opacity-50"
             disabled={busy}
             onClick={load}
           >
@@ -250,107 +179,193 @@ export default function MembersPage() {
           </button>
         </div>
 
-        {members.length === 0 ? (
-          <div className="p-4 text-sm text-gray-600">Brak pracowników.</div>
-        ) : (
-          <div className="divide-y">
-            {members.map((m) => {
-              const isMe = m.uid === user.uid;
-              const isOwner = m.role === "owner";
-              const emailLine = getMemberEmailLine(m);
-
-              return (
-                <div key={m.uid} className="p-4 flex items-center justify-between gap-4">
-                  <div className="min-w-0 space-y-1">
-                    <div className="font-semibold text-gray-900 truncate">
-                      {getMemberDisplayName(m)}
-                    </div>
-                    {emailLine && (
-                      <div className="text-sm text-gray-600 truncate">{emailLine}</div>
-                    )}
-                    <div className="text-sm text-gray-600 pt-1 space-y-0.5">
-                      <div>
-                        Rola:{" "}
-                        <span className="font-medium text-gray-800">{getMemberRoleLabel(m.role)}</span>
-                      </div>
-                      <div>
-                        Zakres:{" "}
-                        <span className="font-medium text-gray-800">
-                          {getMemberScopeLabel(m.scope)}
-                        </span>
-                      </div>
-                      <div>
-                        Status:{" "}
-                        <span
-                          className={`font-medium ${m.active ? "text-green-700" : "text-red-700"}`}
-                        >
-                          {getMemberStatusLabel(m.active)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {!isMe && !isOwner && (
-                    <div className="flex gap-2 shrink-0">
-                      {m.active ? (
-                        <button
-                          type="button"
-                          className="px-3 py-2 rounded border border-red-300 text-red-700 bg-red-50 disabled:opacity-60"
-                          disabled={busy}
-                          onClick={() => setActive(m.uid, false)}
-                        >
-                          Dezaktywuj
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="px-3 py-2 rounded border border-green-300 text-green-800 bg-green-50 disabled:opacity-60"
-                          disabled={busy}
-                          onClick={() => setActive(m.uid, true)}
-                        >
-                          Aktywuj
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        className="px-3 py-2 rounded border border-gray-300 text-gray-800 bg-white disabled:opacity-60"
-                        disabled={busy}
-                        onClick={() => openDelete(m)}
-                        title="Usuń pracownika na stałe"
-                      >
-                        Usuń
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+        {err && err !== "FORBIDDEN" && (
+          <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-xl">
+            {err}
           </div>
         )}
+
+        {/* Invite form */}
+        <section className="theme-glass bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-4">
+          <div className="font-semibold text-text">Dodaj pracownika</div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input
+              className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+              placeholder="email@firma.pl"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              autoComplete="email"
+            />
+
+            <select
+              className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
+              value={role}
+              onChange={(e) => setRole(e.target.value as "admin" | "staff")}
+            >
+              <option value="admin">Kierownik</option>
+              <option value="staff">Pracownik</option>
+            </select>
+
+            <select
+              className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
+              value={scope}
+              onChange={(e) => setScope(e.target.value as Member["scope"])}
+            >
+              <option value="all">Wszystkie zlecenia</option>
+              <option value="assigned">Tylko przypisane zlecenia</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+            <button
+              type="button"
+              className="w-full sm:w-auto min-h-[48px] px-5 py-2 rounded-xl bg-primary text-primary-fg font-medium hover:opacity-90 disabled:opacity-50 transition"
+              disabled={busy || email.trim().length === 0}
+              onClick={invite}
+            >
+              {busy ? "..." : "Dodaj"}
+            </button>
+          </div>
+
+          <div className="text-xs text-text-muted">
+            MVP: użytkownik musi już istnieć w Auth (mieć konto).
+          </div>
+        </section>
+
+        {/* Members list */}
+        <section className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="font-semibold text-text">Lista pracowników</div>
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="px-2.5 py-1 rounded-full border border-border bg-card text-text">
+                Aktywni: <b className="text-success">{stats.active}</b>
+              </span>
+              <span className="px-2.5 py-1 rounded-full border border-border bg-card text-text">
+                Nieaktywni: <b className="text-danger">{stats.inactive}</b>
+              </span>
+              <span className="px-2.5 py-1 rounded-full border border-border bg-card text-text-muted">
+                Razem: <b className="text-text">{stats.total}</b>
+              </span>
+            </div>
+          </div>
+
+          {members.length === 0 ? (
+            <div className="theme-glass bg-card rounded-2xl border border-border p-5 text-sm text-text-muted">
+              Brak pracowników.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+              {members.map((m) => {
+                const isMe = m.uid === user.uid;
+                const isOwner = m.role === "owner";
+                const emailLine = getMemberEmailLine(m);
+
+                return (
+                  <article
+                    key={m.uid}
+                    className="theme-glass bg-card rounded-2xl border border-border p-4 sm:p-5 flex flex-col gap-4 min-w-0"
+                  >
+                    <div className="min-w-0 space-y-1">
+                      <div className="font-semibold text-text truncate">
+                        {getMemberDisplayName(m)}
+                      </div>
+                      {emailLine ? (
+                        <div className="text-sm text-text-muted truncate">{emailLine}</div>
+                      ) : null}
+                    </div>
+
+                    <dl className="grid grid-cols-1 gap-2 text-sm">
+                      <div className="flex justify-between gap-2">
+                        <dt className="text-text-muted">Rola</dt>
+                        <dd className="font-medium text-text text-right">
+                          {getMemberRoleLabel(m.role)}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <dt className="text-text-muted">Zakres</dt>
+                        <dd className="font-medium text-text text-right">
+                          {getMemberScopeLabel(m.scope)}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <dt className="text-text-muted">Status</dt>
+                        <dd
+                          className={`font-medium text-right ${m.active ? "text-success" : "text-danger"}`}
+                        >
+                          {getMemberStatusLabel(m.active)}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    {!isMe && !isOwner && (
+                      <div className="flex flex-col sm:flex-row gap-2 pt-1 border-t border-border">
+                        {m.active ? (
+                          <button
+                            type="button"
+                            className="flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-danger-border text-danger bg-danger-bg hover:opacity-90 disabled:opacity-50 transition"
+                            disabled={busy}
+                            onClick={() => setActive(m.uid, false)}
+                          >
+                            Dezaktywuj
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-success-border text-success bg-success-bg hover:opacity-90 disabled:opacity-50 transition"
+                            disabled={busy}
+                            onClick={() => setActive(m.uid, true)}
+                          >
+                            Aktywuj
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          className="flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-border bg-bg-secondary text-text hover:bg-card-hover disabled:opacity-50 transition"
+                          disabled={busy}
+                          onClick={() => openDelete(m)}
+                          title="Usuń pracownika na stałe"
+                        >
+                          Usuń
+                        </button>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
 
       {deleteOpen && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-6">
-          <div className="w-full max-w-md bg-white border rounded p-4 space-y-3">
-            <h3 className="font-semibold text-lg">Usunąć pracownika na stałe?</h3>
-            <p className="text-sm text-gray-700">
-              Ta akcja <b>trwale usuwa</b> pracownika z firmy i usuwa firmę z jego listy.
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center p-4 sm:p-6 z-50">
+          <div className="w-full max-w-md theme-glass bg-card border border-border rounded-2xl p-5 space-y-4 shadow-lg">
+            <h3 className="font-semibold text-lg text-text">Usunąć pracownika na stałe?</h3>
+            <p className="text-sm text-text-muted">
+              Ta akcja <b className="text-text">trwale usuwa</b> pracownika z firmy i usuwa firmę z
+              jego listy.
               <br />
-              <b>Nie da się tego łatwo cofnąć.</b>
+              <b className="text-text">Nie da się tego łatwo cofnąć.</b>
             </p>
 
-            <div className="text-sm">
+            <div className="text-sm text-text">
               Pracownik: <b>{deleteLabel}</b>
             </div>
 
-            <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border" onClick={closeDelete}>
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+              <button
+                type="button"
+                className="min-h-[44px] px-4 py-2 rounded-xl border border-border bg-card text-text hover:bg-card-hover"
+                onClick={closeDelete}
+              >
                 Anuluj
               </button>
               <button
                 type="button"
-                className="px-3 py-2 rounded bg-red-600 text-white disabled:opacity-60"
+                className="min-h-[44px] px-4 py-2 rounded-xl bg-danger text-white hover:opacity-90 disabled:opacity-50"
                 disabled={busy}
                 onClick={hardDelete}
               >
@@ -362,4 +377,4 @@ export default function MembersPage() {
       )}
     </div>
   );
-}  
+}

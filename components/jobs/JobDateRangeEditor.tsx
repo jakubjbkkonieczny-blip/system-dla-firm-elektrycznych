@@ -46,17 +46,15 @@ export function JobDateRangeEditor({
 
   return (
     <fieldset
-      className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 sm:p-4 space-y-4"
+      className="rounded-xl border border-border bg-bg-secondary p-3 sm:p-4 space-y-4"
       disabled={disabled}
       aria-describedby={clientError ? errorId : undefined}
     >
-      <legend className="text-sm font-semibold text-gray-900 px-1">
-        Preferowany termin
-      </legend>
+      <legend className="text-sm font-semibold text-text px-1">Preferowany termin</legend>
 
       <div className="space-y-4">
         <div>
-          <p className="text-xs font-medium text-gray-500 mb-2">Początek</p>
+          <p className="text-xs font-medium text-text-muted mb-2">Początek</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <DateField
               label="Data rozpoczęcia"
@@ -76,9 +74,8 @@ export function JobDateRangeEditor({
         </div>
 
         <div>
-          <p className="text-xs font-medium text-gray-500 mb-2">
-            Koniec{" "}
-            <span className="font-normal text-gray-400">(opcjonalnie)</span>
+          <p className="text-xs font-medium text-text-muted mb-2">
+            Koniec <span className="font-normal text-text-muted">(opcjonalnie)</span>
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <DateField
@@ -104,7 +101,7 @@ export function JobDateRangeEditor({
         <p
           id={errorId}
           role="alert"
-          className="text-sm text-red-700 border border-red-200 bg-red-50 rounded-lg px-3 py-2"
+          className="text-sm text-danger border border-danger-border bg-danger-bg rounded-lg px-3 py-2"
         >
           {clientError}
         </p>

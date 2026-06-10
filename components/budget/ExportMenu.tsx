@@ -50,14 +50,14 @@ export function ExportMenu({ context }: { context: BudgetExportMenuContext | nul
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 mt-1 z-20 min-w-[180px] rounded-lg border border-gray-200 bg-white shadow-lg py-1"
+          className="absolute right-0 mt-1 z-20 min-w-[180px] rounded-lg border border-border theme-glass bg-card shadow-lg py-1"
         >
           {BUDGET_EXPORT_FORMATS.map((f) => (
             <button
               key={f.id}
               type="button"
               role="menuitem"
-              className="w-full text-left px-4 py-2.5 min-h-[44px] text-sm hover:bg-gray-50 disabled:opacity-60"
+              className="w-full text-left px-4 py-2.5 min-h-[44px] text-sm hover:bg-card-hover disabled:opacity-60"
               onClick={() => handleExport(f.id)}
               disabled={busyFormat != null}
             >
@@ -71,8 +71,8 @@ export function ExportMenu({ context }: { context: BudgetExportMenuContext | nul
           className={[
             "absolute right-0 mt-1 z-10 text-xs border rounded-lg px-3 py-2 max-w-[260px]",
             message.error
-              ? "text-red-700 bg-red-50 border-red-200"
-              : "text-gray-700 bg-gray-50 border-gray-200",
+              ? "text-danger bg-danger-bg border-danger-border"
+              : "text-text bg-bg-secondary border-border",
           ].join(" ")}
         >
           {message.text}

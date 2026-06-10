@@ -127,14 +127,14 @@ export default function KosztorysyPage() {
   }
 
   if (loading || !roleLoaded) {
-    return <div className="text-sm text-gray-600">Ładowanie...</div>;
+    return <div className="text-sm text-text-muted">Ładowanie...</div>;
   }
 
   if (!user) return null;
 
   if (!isOwnerOrAdmin) {
     return (
-      <div className="max-w-lg border rounded-xl p-6 bg-white text-sm text-gray-700">
+      <div className="max-w-lg theme-glass border border-border rounded-xl p-6 bg-card text-sm text-text">
         Brak dostępu. Moduł Kosztorysy jest dostępny tylko dla właściciela lub administratora firmy.
       </div>
     );
@@ -142,7 +142,7 @@ export default function KosztorysyPage() {
 
   if (!companyId) {
     return (
-      <div className="max-w-lg border rounded-xl p-6 bg-white text-sm text-gray-700">
+      <div className="max-w-lg theme-glass border border-border rounded-xl p-6 bg-card text-sm text-text">
         Wybierz firmę w panelu głównym, aby korzystać z kosztorysów.
       </div>
     );
@@ -151,17 +151,19 @@ export default function KosztorysyPage() {
   return (
     <div className="w-full max-w-full min-w-0 overflow-x-hidden flex flex-col gap-4">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold text-gray-900">Kosztorysy</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-semibold text-text">Kosztorysy</h1>
+        <p className="text-sm text-text-muted mt-1">
           Profesjonalny dashboard budżetowy dla właścicieli, administratorów i księgowości.
         </p>
       </div>
 
       {err ? (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg shrink-0">{err}</div>
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg shrink-0">
+          {err}
+        </div>
       ) : null}
 
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 min-w-0">
         <ProjectListSidebar
           jobs={jobs}
           meta={jobsMeta}
@@ -175,7 +177,7 @@ export default function KosztorysyPage() {
           onPageChange={setPage}
         />
 
-        <main className="flex-1 min-w-0 border rounded-xl bg-gray-50 p-4 lg:p-5">
+        <main className="flex-1 min-w-0 theme-glass border border-border rounded-xl bg-bg-secondary p-4 lg:p-5">
           {selectedJob ? (
             <ProjectBudgetDashboard
               companyId={companyId}
@@ -185,8 +187,8 @@ export default function KosztorysyPage() {
               members={members}
             />
           ) : (
-            <div className="flex items-center justify-center min-h-[240px] text-sm text-gray-500 text-center px-4">
-              Wybierz projekt z listy po lewej, aby zobaczyć dashboard kosztorysu.
+            <div className="flex items-center justify-center min-h-[240px] text-sm text-text-muted text-center px-4">
+              Wybierz projekt z listy, aby zobaczyć dashboard kosztorysu.
             </div>
           )}
         </main>

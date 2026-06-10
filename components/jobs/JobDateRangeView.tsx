@@ -16,23 +16,23 @@ function SchedulePoint({
   const timeLabel = formatPreferredTimePl(dateIso);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4 min-w-0">
-      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+    <div className="rounded-xl border border-border bg-card p-3 sm:p-4 min-w-0">
+      <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">
         {title}
       </div>
       {hasDate ? (
         <dl className="mt-2 space-y-1">
           <div>
             <dt className="sr-only">Data</dt>
-            <dd className="text-base font-semibold text-gray-900">{dateLabel}</dd>
+            <dd className="text-base font-semibold text-text">{dateLabel}</dd>
           </div>
           <div>
             <dt className="sr-only">Godzina</dt>
-            <dd className="text-sm text-gray-600">{timeLabel || "—"}</dd>
+            <dd className="text-sm text-text-muted">{timeLabel || "—"}</dd>
           </div>
         </dl>
       ) : (
-        <p className="mt-2 text-sm text-gray-500">Nie ustawiono</p>
+        <p className="mt-2 text-sm text-text-muted">Nie ustawiono</p>
       )}
     </div>
   );
@@ -52,13 +52,10 @@ export function JobDateRangeView({
 
   return (
     <section
-      className="rounded-xl border border-gray-200 bg-gray-50/80 p-3 sm:p-4"
+      className="rounded-xl border border-border bg-bg-secondary p-3 sm:p-4"
       aria-labelledby="preferred-schedule-heading"
     >
-      <h3
-        id="preferred-schedule-heading"
-        className="text-sm font-semibold text-gray-900"
-      >
+      <h3 id="preferred-schedule-heading" className="text-sm font-semibold text-text">
         Preferowany termin
       </h3>
       <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">

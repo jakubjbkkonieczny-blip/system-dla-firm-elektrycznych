@@ -96,12 +96,12 @@ export function ProjectBudgetDashboard({
   }
 
   if (loading) {
-    return <div className="text-sm text-gray-600 p-4">Ładowanie kosztorysu...</div>;
+    return <div className="text-sm text-text-muted p-4">Ładowanie kosztorysu...</div>;
   }
 
   if (!header) {
     return (
-      <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-4 rounded-xl">
+      <div className="text-sm text-danger border border-danger-border bg-danger-bg p-4 rounded-xl">
         {err ?? "Nie udało się wczytać kosztorysu."}
       </div>
     );
@@ -113,8 +113,8 @@ export function ProjectBudgetDashboard({
     <div className="w-full max-w-full min-w-0 flex flex-col gap-4 overflow-x-hidden">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between shrink-0">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">{jobLabel}</h2>
-          <p className="text-xs text-gray-500">Dashboard kosztorysu</p>
+          <h2 className="text-lg font-semibold text-text truncate">{jobLabel}</h2>
+          <p className="text-xs text-text-muted">Dashboard kosztorysu</p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
           <button type="button" className={BUDGET_BTN_SECONDARY} onClick={openBudgetEdit} disabled={busy}>
@@ -125,14 +125,14 @@ export function ProjectBudgetDashboard({
       </div>
 
       {err ? (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg shrink-0">{err}</div>
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg shrink-0">{err}</div>
       ) : null}
 
       {budgetOpen ? (
-        <div className="border rounded-xl p-4 bg-gray-50 space-y-3 shrink-0">
+        <div className="border border-border rounded-xl p-4 bg-bg-secondary space-y-3 shrink-0">
           <h3 className="font-medium">Budżet projektu</h3>
           <label className="block space-y-1">
-            <span className="text-sm text-gray-700">Kwota (PLN)</span>
+            <span className="text-sm text-text">Kwota (PLN)</span>
             <input className={BUDGET_INPUT_CLASS} inputMode="decimal" value={budgetPln} onChange={(e) => setBudgetPln(e.target.value)} />
           </label>
           <div className="flex flex-wrap gap-2">
@@ -161,7 +161,7 @@ export function ProjectBudgetDashboard({
           ))}
         </div>
 
-        <div className="min-h-[400px] border rounded-xl bg-white p-4">
+        <div className="min-h-[400px] border border-border rounded-xl theme-glass bg-card p-4">
           {activeTab === "materials" ? (
             <MaterialCostsTab
               companyId={companyId}

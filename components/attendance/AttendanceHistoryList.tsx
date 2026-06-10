@@ -86,19 +86,19 @@ export function AttendanceHistoryList({
   }
 
   if (busy && items.length === 0) {
-    return <div className="text-sm text-gray-500">Ładowanie historii...</div>;
+    return <div className="text-sm text-text-muted">Ładowanie historii...</div>;
   }
 
   if (err) {
     return (
-      <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-2 rounded">
+      <div className="text-sm text-danger bg-danger-bg border border-danger-border p-2 rounded">
         {err}
       </div>
     );
   }
 
   if (items.length === 0) {
-    return <div className="text-sm text-gray-500">{emptyMessage}</div>;
+    return <div className="text-sm text-text-muted">{emptyMessage}</div>;
   }
 
   return (
@@ -111,7 +111,7 @@ export function AttendanceHistoryList({
       {nextCursor && (
         <button
           type="button"
-          className="w-full py-2 text-sm border rounded-lg bg-white hover:bg-gray-50 disabled:opacity-60"
+          className="w-full min-h-[44px] py-2 text-sm border border-border rounded-lg bg-card text-text hover:bg-card-hover disabled:opacity-60"
           disabled={loadingMore}
           onClick={loadMore}
         >

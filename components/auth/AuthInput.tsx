@@ -13,7 +13,7 @@ export function AuthInput({
       {...props}
       className={[
         "w-full min-h-[44px] rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5",
-        "text-sm text-white placeholder:text-slate-500",
+        "text-base text-white placeholder:text-slate-500",
         "transition-colors focus:outline-none focus:ring-2",
         accent.inputFocus,
         className,

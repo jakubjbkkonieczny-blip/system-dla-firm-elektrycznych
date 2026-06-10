@@ -1157,7 +1157,7 @@ if (!companyId) return <div className="p-6">Wybierz firmę w Panelu głównym.</
 
 
 
-if (err) return <div className="p-6 text-red-600">{err}</div>;
+if (err) return <div className="p-6 text-danger">{err}</div>;
 
 if (!job) return <div className="p-6">Ładowanie zlecenia...</div>;
 
@@ -1177,7 +1177,7 @@ Zlecenie nr {typeof job.jobNumber === "number" ? job.jobNumber : "—"}
 
 {/* DANE KLIENTA */}
 
-<div className="border rounded-xl p-4 bg-white space-y-3">
+<div className="theme-glass border border-border rounded-xl p-4 bg-card space-y-3">
 
 <div className="flex items-start justify-between gap-3">
 
@@ -1189,7 +1189,7 @@ Zlecenie nr {typeof job.jobNumber === "number" ? job.jobNumber : "—"}
 
 type="button"
 
-className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50 shrink-0"
+className="text-sm px-3 py-1.5 rounded-lg border border-border hover:bg-card-hover shrink-0 min-h-[44px]"
 
 onClick={openDetailsEdit}
 
@@ -1205,7 +1205,7 @@ Edytuj dane
 
 {detailsErr ? (
 
-<div className="text-sm text-red-600 border border-red-200 bg-red-50 p-2 rounded">
+<div className="text-sm text-danger border border-danger-border bg-danger-bg p-2 rounded">
 
 {detailsErr}
 
@@ -1221,11 +1221,11 @@ Edytuj dane
 
 <label className="block space-y-1">
 
-<span className="text-xs text-gray-600">Klient</span>
+<span className="text-xs text-text-muted">Klient</span>
 
 <input
 
-className="border rounded-lg px-3 py-2 w-full"
+className="border border-border rounded-lg px-3 py-2 w-full bg-input"
 
 value={detailsDraft.customerName}
 
@@ -1239,11 +1239,11 @@ onChange={(e) => setDetailsField("customerName", e.target.value)}
 
 <label className="block space-y-1">
 
-<span className="text-xs text-gray-600">Telefon</span>
+<span className="text-xs text-text-muted">Telefon</span>
 
 <input
 
-className="border rounded-lg px-3 py-2 w-full"
+className="border border-border rounded-lg px-3 py-2 w-full bg-input"
 
 value={detailsDraft.customerPhone}
 
@@ -1257,11 +1257,11 @@ onChange={(e) => setDetailsField("customerPhone", e.target.value)}
 
 <label className="block space-y-1">
 
-<span className="text-xs text-gray-600">Miasto</span>
+<span className="text-xs text-text-muted">Miasto</span>
 
 <input
 
-className="border rounded-lg px-3 py-2 w-full"
+className="border border-border rounded-lg px-3 py-2 w-full bg-input"
 
 value={detailsDraft.addressCity}
 
@@ -1275,11 +1275,11 @@ onChange={(e) => setDetailsField("addressCity", e.target.value)}
 
 <label className="block space-y-1">
 
-<span className="text-xs text-gray-600">Ulica i nr</span>
+<span className="text-xs text-text-muted">Ulica i nr</span>
 
 <input
 
-className="border rounded-lg px-3 py-2 w-full"
+className="border border-border rounded-lg px-3 py-2 w-full bg-input"
 
 value={detailsDraft.addressStreet}
 
@@ -1293,11 +1293,11 @@ onChange={(e) => setDetailsField("addressStreet", e.target.value)}
 
 <label className="block space-y-1">
 
-<span className="text-xs text-gray-600">Kod pocztowy</span>
+<span className="text-xs text-text-muted">Kod pocztowy</span>
 
 <input
 
-className="border rounded-lg px-3 py-2 w-full"
+className="border border-border rounded-lg px-3 py-2 w-full bg-input"
 
 value={detailsDraft.addressZip}
 
@@ -1311,11 +1311,11 @@ onChange={(e) => setDetailsField("addressZip", e.target.value)}
 
 <label className="block space-y-1">
 
-<span className="text-xs text-gray-600">Uwagi do adresu</span>
+<span className="text-xs text-text-muted">Uwagi do adresu</span>
 
 <input
 
-className="border rounded-lg px-3 py-2 w-full"
+className="border border-border rounded-lg px-3 py-2 w-full bg-input"
 
 value={detailsDraft.addressNotes}
 
@@ -1331,11 +1331,11 @@ onChange={(e) => setDetailsField("addressNotes", e.target.value)}
 
 <label className="block space-y-1">
 
-<span className="text-xs text-gray-600">Opis problemu</span>
+<span className="text-xs text-text-muted">Opis problemu</span>
 
 <textarea
 
-className="border rounded-lg px-3 py-2 w-full"
+className="border border-border rounded-lg px-3 py-2 w-full bg-input"
 
 rows={4}
 
@@ -1376,7 +1376,7 @@ prev ? { ...prev, preferredFrom, preferredTo } : prev
 
 <div className="flex flex-col gap-2">
 
-<span className="text-sm font-medium text-gray-700" id="job-detail-priority-label">
+<span className="text-sm font-medium text-text" id="job-detail-priority-label">
 
 Priorytet
 
@@ -1404,7 +1404,7 @@ aria-labelledby="job-detail-priority-label"
 
 type="button"
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg min-h-[44px] disabled:opacity-60"
 
 disabled={detailsBusy || !detailsCanSave}
 
@@ -1420,7 +1420,7 @@ onClick={saveJobDetails}
 
 type="button"
 
-className="px-3 py-2 rounded-lg border hover:bg-gray-50 disabled:opacity-60"
+className="px-3 py-2 rounded-lg border border-border hover:bg-card-hover min-h-[44px] disabled:opacity-60"
 
 disabled={detailsBusy}
 
@@ -1478,7 +1478,7 @@ preferredTo={job.preferredTo}
 
 <div className="flex items-center gap-2 flex-wrap pt-1">
 
-<span className="text-sm font-medium text-gray-700">Priorytet</span>
+<span className="text-sm font-medium text-text">Priorytet</span>
 
 <JobPriorityBadge priority={job.priority} />
 
@@ -1494,7 +1494,7 @@ preferredTo={job.preferredTo}
 
 {/* STATUS + PRZYPISANIE */}
 
-<div className="border rounded-xl p-4 bg-white space-y-3">
+<div className="theme-glass border border-border rounded-xl p-4 bg-card space-y-3">
 
 <div className="flex items-center gap-2">
 
@@ -1502,7 +1502,7 @@ preferredTo={job.preferredTo}
 
 <select
 
-className="border rounded-lg px-3 py-2"
+className="border border-border rounded-lg px-3 py-2 bg-input"
 
 value={job.status}
 
@@ -1528,7 +1528,7 @@ onChange={(e) => updateJob({ status: e.target.value })}
 
 
 
-<div className="space-y-3 border-t pt-3">
+<div className="space-y-3 border-t border-border pt-3">
 
 <div>
 
@@ -1536,7 +1536,7 @@ onChange={(e) => updateJob({ status: e.target.value })}
 
 {isOwnerOrAdmin ? (
 
-<div className="text-xs text-gray-600 mt-1">
+<div className="text-xs text-text-muted mt-1">
 
 Zaznacz osoby odpowiedzialne za zlecenie i zapisz zmiany.
 
@@ -1548,7 +1548,7 @@ Zaznacz osoby odpowiedzialne za zlecenie i zapisz zmiany.
 
 {assignErr ? (
 
-<div className="text-sm text-red-600 border border-red-200 bg-red-50 p-2 rounded">
+<div className="text-sm text-danger border border-danger-border bg-danger-bg p-2 rounded">
 
 {assignErr}
 
@@ -1562,7 +1562,7 @@ Zaznacz osoby odpowiedzialne za zlecenie i zapisz zmiany.
 
 {assignableMembers.length === 0 ? (
 
-<div className="text-sm text-gray-500">Brak aktywnych pracowników do wyboru.</div>
+<div className="text-sm text-text-muted">Brak aktywnych pracowników do wyboru.</div>
 
 ) : (
 
@@ -1578,7 +1578,7 @@ return (
 
 key={m.uid}
 
-className="flex items-center gap-3 border rounded-lg px-3 py-2 bg-white cursor-pointer"
+className="flex items-center gap-3 border border-border rounded-lg px-3 py-2 bg-card cursor-pointer"
 
 >
 
@@ -1598,7 +1598,7 @@ onChange={() => toggleDraftAssigned(m.uid)}
 
 <div className="text-sm font-medium truncate">{m.label}</div>
 
-<div className="text-xs text-gray-500 truncate">{m.email}</div>
+<div className="text-xs text-text-muted truncate">{m.email}</div>
 
 </div>
 
@@ -1612,7 +1612,7 @@ onChange={() => toggleDraftAssigned(m.uid)}
 
 )}
 
-<div className="text-xs text-gray-700">
+<div className="text-xs text-text">
 
 Wybrano: <b>{draftAssignedPreview.length}</b>
 
@@ -1624,7 +1624,7 @@ Wybrano: <b>{draftAssignedPreview.length}</b>
 
 type="button"
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg min-h-[44px] disabled:opacity-60"
 
 disabled={assignBusy || !assignDirty}
 
@@ -1640,7 +1640,7 @@ onClick={saveAssignments}
 
 ) : (
 
-<div className="text-sm text-gray-700">
+<div className="text-sm text-text">
 
 {assignedLabels.length > 0 ? (
 
@@ -1658,7 +1658,7 @@ return <li key={uid}>{label}</li>;
 
 ) : (
 
-<span className="text-gray-500">(brak przypisanych)</span>
+<span className="text-text-muted">(brak przypisanych)</span>
 
 )}
 
@@ -1670,7 +1670,7 @@ return <li key={uid}>{label}</li>;
 
 {role === "staff" && !isAssignedToMe ? (
 
-<div className="text-xs text-gray-500">
+<div className="text-xs text-text-muted">
 
 Jako pracownik możesz edytować notatki / kończyć etapy tylko, gdy zlecenie jest przypisane do Ciebie.
 
@@ -1686,7 +1686,7 @@ Jako pracownik możesz edytować notatki / kończyć etapy tylko, gdy zlecenie j
 
 {/* ETAPY REALIZACJI */}
 
-<div className="border rounded-xl p-4 bg-white space-y-3">
+<div className="theme-glass border border-border rounded-xl p-4 bg-card space-y-3">
 
 <div className="flex items-center justify-between gap-3">
 
@@ -1702,7 +1702,7 @@ type="button"
 
 onClick={() => setAddOpen(true)}
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg min-h-[44px] disabled:opacity-60"
 
 disabled={busy}
 
@@ -1720,7 +1720,7 @@ Dodaj etap
 
 {stagesErr ? (
 
-<div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg">{stagesErr}</div>
+<div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg">{stagesErr}</div>
 
 ) : null}
 
@@ -1728,7 +1728,7 @@ Dodaj etap
 
 {stages.length === 0 ? (
 
-<div className="text-sm text-gray-600">Brak etapów.</div>
+<div className="text-sm text-text-muted">Brak etapów.</div>
 
 ) : (
 
@@ -1744,7 +1744,7 @@ const photos = Array.isArray(s.lista_zdjec) ? s.lista_zdjec : [];
 
 return (
 
-<div key={s.id} className="border rounded-xl p-3 bg-gray-50">
+<div key={s.id} className="border border-border rounded-xl p-3 bg-bg-secondary">
 
 <div className="flex items-start justify-between gap-3">
 
@@ -1754,7 +1754,7 @@ return (
 
 
 
-<div className="text-sm text-gray-700 mt-1 space-y-1">
+<div className="text-sm text-text mt-1 space-y-1">
 
 {s.opis_etapu ? <div>{s.opis_etapu}</div> : null}
 
@@ -1762,7 +1762,7 @@ return (
 
 <div>
 
-<span className="text-gray-500">Planowana data:</span>{" "}
+<span className="text-text-muted">Planowana data:</span>{" "}
 
 <b>{s.planowana_data ? s.planowana_data : "(brak)"}</b>
 
@@ -1772,9 +1772,9 @@ return (
 
 <div>
 
-<span className="text-gray-500">Status:</span>{" "}
+<span className="text-text-muted">Status:</span>{" "}
 
-<b className={done ? "text-green-700" : "text-amber-700"}>
+<b className={done ? "text-success" : "text-warning"}>
 
 {done ? "Zakończony" : "Do wykonania"}
 
@@ -1782,22 +1782,22 @@ return (
 
 {done ? (
 
-<span className="text-gray-500">
+<span className="text-text-muted">
 
 {" "}
 
 • {s.data_zakonczenia || "(brak daty)"} • przez:{" "}
 {s.zakonczone_przez ? (
-  <span className="text-gray-700">
+  <span className="text-text">
     {s.zakonczone_przez.displayName}
     {s.zakonczone_przez.email &&
     s.zakonczone_przez.displayName !== s.zakonczone_przez.email ? (
       <>
-        <span className="hidden sm:inline text-gray-600">
+        <span className="hidden sm:inline text-text-muted">
           {" "}
           ({s.zakonczone_przez.email})
         </span>
-        <span className="sm:hidden block text-xs text-gray-600">
+        <span className="sm:hidden block text-xs text-text-muted">
           {s.zakonczone_przez.email}
         </span>
       </>
@@ -1823,13 +1823,13 @@ return (
 
 <div>
 
-<span className="text-gray-500">Notatka:</span> {s.notatka_pracownika}
+<span className="text-text-muted">Notatka:</span> {s.notatka_pracownika}
 
 </div>
 
 ) : (
 
-<div className="text-gray-500 text-xs">Notatka: (brak)</div>
+<div className="text-text-muted text-xs">Notatka: (brak)</div>
 
 )}
 
@@ -1837,7 +1837,7 @@ return (
 
 type="button"
 
-className="min-h-[44px] px-2 py-1 rounded-lg border bg-white hover:bg-gray-50 text-xs font-medium text-gray-800 disabled:opacity-60"
+className="min-h-[44px] px-2 py-1 rounded-lg border border-border bg-card hover:bg-card-hover text-xs font-medium text-text disabled:opacity-60"
 
 disabled={busy || (role === "staff" && !isAssignedToMe)}
 
@@ -1863,7 +1863,7 @@ Historia notatki
 
 <div className="mt-3">
 
-<div className="text-xs text-gray-500 mb-2">Zdjęcia:</div>
+<div className="text-xs text-text-muted mb-2">Zdjęcia:</div>
 
 <div className="flex gap-2 flex-wrap">
 
@@ -1891,7 +1891,7 @@ src={url}
 
 alt={`Zdjęcie ${idx + 1}`}
 
-className="w-20 h-20 object-cover rounded-lg border bg-white"
+className="w-20 h-20 object-cover rounded-lg border border-border bg-card"
 
 />
 
@@ -1923,7 +1923,7 @@ className="w-20 h-20 object-cover rounded-lg border bg-white"
 
 type="button"
 
-className="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm disabled:opacity-60"
+className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
 
 disabled={busy}
 
@@ -1939,7 +1939,7 @@ Edytuj etap
 
 type="button"
 
-className="px-3 py-2 rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 text-sm disabled:opacity-60"
+className="px-3 py-2 rounded-lg border border-danger-border bg-danger-bg text-danger hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
 
 disabled={busy}
 
@@ -1963,7 +1963,7 @@ Usuń etap
 
 type="button"
 
-className="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm disabled:opacity-60"
+className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
 
 disabled={busy || (role === "staff" && !isAssignedToMe)}
 
@@ -1989,7 +1989,7 @@ done ? (
 
 type="button"
 
-className="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm disabled:opacity-60"
+className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover text-sm min-h-[44px] disabled:opacity-60"
 
 disabled={busy}
 
@@ -2007,7 +2007,7 @@ Cofnij zakończenie
 
 type="button"
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white text-sm disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg text-sm min-h-[44px] disabled:opacity-60"
 
 disabled={busy}
 
@@ -2045,9 +2045,9 @@ Oznacz jako zakończony
 
 {addOpen ? (
 
-<div className="fixed inset-0 bg-black/30 flex items-center justify-center p-6">
+<div className="fixed inset-0 bg-overlay flex items-center justify-center p-6">
 
-<div className="w-full max-w-lg bg-white border rounded-xl p-4 space-y-3">
+<div className="w-full max-w-lg theme-glass bg-card border border-border rounded-2xl p-4 space-y-3">
 
 <div className="flex items-center justify-between">
 
@@ -2065,7 +2065,7 @@ Oznacz jako zakończony
 
 <input
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 placeholder="Nazwa etapu (wymagane)"
 
@@ -2079,7 +2079,7 @@ onChange={(e) => setNewName(e.target.value)}
 
 <textarea
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 rows={3}
 
@@ -2095,7 +2095,7 @@ onChange={(e) => setNewDesc(e.target.value)}
 
 <input
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 placeholder="Planowana data (YYYY-MM-DD, opcjonalnie)"
 
@@ -2109,7 +2109,7 @@ onChange={(e) => setNewPlanned(e.target.value)}
 
 <div className="flex justify-end gap-2">
 
-<button className="px-3 py-2 rounded-lg border" onClick={() => setAddOpen(false)} disabled={busy}>
+<button className="px-3 py-2 rounded-lg border border-border hover:bg-card-hover min-h-[44px]" onClick={() => setAddOpen(false)} disabled={busy}>
 
 Anuluj
 
@@ -2117,7 +2117,7 @@ Anuluj
 
 <button
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg min-h-[44px] disabled:opacity-60"
 
 onClick={addStage}
 
@@ -2143,9 +2143,9 @@ Dodaj
 
 {editId ? (
 
-<div className="fixed inset-0 bg-black/30 flex items-center justify-center p-6">
+<div className="fixed inset-0 bg-overlay flex items-center justify-center p-6">
 
-<div className="w-full max-w-lg bg-white border rounded-xl p-4 space-y-3">
+<div className="w-full max-w-lg theme-glass bg-card border border-border rounded-2xl p-4 space-y-3">
 
 <div className="flex items-center justify-between">
 
@@ -2163,7 +2163,7 @@ Dodaj
 
 <input
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 placeholder="Nazwa etapu (wymagane)"
 
@@ -2177,7 +2177,7 @@ onChange={(e) => setEditName(e.target.value)}
 
 <textarea
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 rows={3}
 
@@ -2193,7 +2193,7 @@ onChange={(e) => setEditDesc(e.target.value)}
 
 <input
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 placeholder="Planowana data (YYYY-MM-DD, opcjonalnie)"
 
@@ -2207,7 +2207,7 @@ onChange={(e) => setEditPlanned(e.target.value)}
 
 <div className="flex justify-end gap-2">
 
-<button className="px-3 py-2 rounded-lg border" onClick={closeEdit} disabled={busy}>
+<button className="px-3 py-2 rounded-lg border border-border hover:bg-card-hover min-h-[44px]" onClick={closeEdit} disabled={busy}>
 
 Anuluj
 
@@ -2215,7 +2215,7 @@ Anuluj
 
 <button
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg min-h-[44px] disabled:opacity-60"
 
 onClick={saveEdit}
 
@@ -2261,9 +2261,9 @@ onClose={() => setNoteHistoryStage(null)}
 
 {noteId ? (
 
-<div className="fixed inset-0 bg-black/30 flex items-center justify-center p-6">
+<div className="fixed inset-0 bg-overlay flex items-center justify-center p-6">
 
-<div className="w-full max-w-lg bg-white border rounded-xl p-4 space-y-3">
+<div className="w-full max-w-lg theme-glass bg-card border border-border rounded-2xl p-4 space-y-3">
 
 <div className="flex items-center justify-between">
 
@@ -2281,7 +2281,7 @@ onClose={() => setNoteHistoryStage(null)}
 
 <textarea
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 rows={5}
 
@@ -2297,7 +2297,7 @@ onChange={(e) => setNoteValue(e.target.value)}
 
 <div className="flex justify-end gap-2">
 
-<button className="px-3 py-2 rounded-lg border" onClick={closeNoteEdit} disabled={busy}>
+<button className="px-3 py-2 rounded-lg border border-border hover:bg-card-hover min-h-[44px]" onClick={closeNoteEdit} disabled={busy}>
 
 Anuluj
 
@@ -2305,7 +2305,7 @@ Anuluj
 
 <button
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg min-h-[44px] disabled:opacity-60"
 
 onClick={saveNote}
 
@@ -2331,9 +2331,9 @@ Zapisz notatkę
 
 {finishId ? (
 
-<div className="fixed inset-0 bg-black/30 flex items-center justify-center p-6">
+<div className="fixed inset-0 bg-overlay flex items-center justify-center p-6">
 
-<div className="w-full max-w-lg bg-white border rounded-xl p-4 space-y-3">
+<div className="w-full max-w-lg theme-glass bg-card border border-border rounded-2xl p-4 space-y-3">
 
 <div className="flex items-center justify-between">
 
@@ -2351,7 +2351,7 @@ Zapisz notatkę
 
 <textarea
 
-className="w-full border rounded-lg px-3 py-2"
+className="w-full border border-border rounded-lg px-3 py-2 bg-input"
 
 rows={4}
 
@@ -2371,7 +2371,7 @@ onChange={(e) => setFinishNote(e.target.value)}
 
 
 
-<label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 cursor-pointer text-sm w-fit">
+<label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover cursor-pointer text-sm min-h-[44px] w-fit">
 
 📎 Załącz zdjęcia
 
@@ -2395,7 +2395,7 @@ onChange={(e) => setFinishFiles(Array.from(e.target.files || []))}
 
 {finishFiles.length ? (
 
-<div className="text-xs text-gray-600">
+<div className="text-xs text-text-muted">
 
 Wybrano: <b>{finishFiles.length}</b> plik(ów)
 
@@ -2403,7 +2403,7 @@ Wybrano: <b>{finishFiles.length}</b> plik(ów)
 
 ) : (
 
-<div className="text-xs text-gray-500">Możesz dodać jedno lub wiele zdjęć.</div>
+<div className="text-xs text-text-muted">Możesz dodać jedno lub wiele zdjęć.</div>
 
 )}
 
@@ -2411,13 +2411,13 @@ Wybrano: <b>{finishFiles.length}</b> plik(ów)
 
 {uploadPct > 0 ? (
 
-<div className="text-xs text-gray-700">
+<div className="text-xs text-text">
 
 Wysyłanie zdjęcia: <b>{uploadPct}%</b>
 
-<div className="w-full h-2 bg-gray-200 rounded mt-1 overflow-hidden">
+<div className="w-full h-2 bg-border rounded mt-1 overflow-hidden">
 
-<div className="h-2 bg-gray-900" style={{ width: `${uploadPct}%` }} />
+<div className="h-2 bg-primary" style={{ width: `${uploadPct}%` }} />
 
 </div>
 
@@ -2431,7 +2431,7 @@ Wysyłanie zdjęcia: <b>{uploadPct}%</b>
 
 <div className="flex justify-end gap-2">
 
-<button className="px-3 py-2 rounded-lg border" onClick={closeFinish} disabled={busy}>
+<button className="px-3 py-2 rounded-lg border border-border hover:bg-card-hover min-h-[44px]" onClick={closeFinish} disabled={busy}>
 
 Anuluj
 
@@ -2439,7 +2439,7 @@ Anuluj
 
 <button
 
-className="px-3 py-2 rounded-lg bg-gray-900 text-white disabled:opacity-60"
+className="px-3 py-2 rounded-lg bg-primary text-primary-fg min-h-[44px] disabled:opacity-60"
 
 onClick={finishStage}
 
@@ -2455,7 +2455,7 @@ Zapisz
 
 
 
-<div className="text-xs text-gray-500">
+<div className="text-xs text-text-muted">
 
 Po zapisaniu: status = zakończony, data zakończenia = dzisiaj, zakończone przez = Ty.
 

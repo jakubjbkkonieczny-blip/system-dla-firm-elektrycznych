@@ -25,7 +25,6 @@ export default function DashboardPage() {
   const [newCompanyName, setNewCompanyName] = useState("");
   const activeCompanyId = useActiveCompanyId();
 
-
   const [canCreateCompany, setCanCreateCompany] = useState<boolean>(true);
 
   const [meRole, setMeRole] = useState<MeRole>(null);
@@ -136,49 +135,41 @@ export default function DashboardPage() {
     router.refresh();
   }
 
-  
-  
-
-  if (loading) return <div className="p-6">Ładowanie...</div>;
+  if (loading) return <div className="text-text-muted">Ładowanie...</div>;
   if (!user) return null;
 
   return (
     <div className="w-full max-w-full min-w-0">
-      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
-
+      <div className="max-w-5xl mx-auto space-y-5 sm:space-y-8">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-900">
-            Panel główny
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Zalogowany: <b>{user.email}</b>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-text">Panel główny</h1>
+          <p className="text-sm text-text-muted mt-1">
+            Zalogowany: <b className="text-text">{user.email}</b>
           </p>
         </div>
 
         {err && (
-          <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-4 rounded-xl">
+          <div className="text-sm text-danger border border-danger-border bg-danger-bg p-4 rounded-xl">
             {err}
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="theme-glass bg-card rounded-2xl border border-border p-4 sm:p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="text-sm text-gray-500">Typ konta</div>
-            <div className="font-medium text-gray-900">
-              {meRole ?? "..."}
-            </div>
+            <div className="text-sm text-text-muted">Typ konta</div>
+            <div className="font-medium text-text">{meRole ?? "..."}</div>
           </div>
 
           {meRole === "employer" && (
             <div>
-              <div className="text-sm text-gray-500">Subskrypcja</div>
+              <div className="text-sm text-text-muted">Subskrypcja</div>
               <span
-                className={`inline-block mt-1 text-xs px-3 py-1 rounded-full ${
+                className={`inline-block mt-1 text-xs px-3 py-1 rounded-full border ${
                   billingStatus === "active"
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-success-bg text-success border-success-border"
                     : billingStatus === "cancelled"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
+                      ? "bg-warning-bg text-warning border-warning-border"
+                      : "bg-danger-bg text-danger border-danger-border"
                 }`}
               >
                 {billingStatus ?? "..."}
@@ -187,14 +178,13 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="theme-glass bg-card rounded-2xl border border-border p-4 sm:p-6 space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Firmy
-            </h2>
+            <h2 className="text-lg font-semibold text-text">Firmy</h2>
 
             <button
-              className="border border-gray-200 rounded-lg px-4 py-2 text-sm hover:bg-gray-50 transition"
+              type="button"
+              className="min-h-[44px] border border-border rounded-lg px-4 py-2 text-sm bg-card text-text hover:bg-card-hover transition disabled:opacity-50"
               onClick={async () => {
                 setBusy(true);
                 setErr(null);
@@ -217,12 +207,10 @@ export default function DashboardPage() {
           {companies.length > 0 ? (
             <div className="space-y-5">
               <div>
-                <label className="text-sm text-gray-500">
-                  Wybierz aktywną firmę
-                </label>
+                <label className="text-sm text-text-muted">Wybierz aktywną firmę</label>
 
                 <select
-                  className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  className="mt-1 w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                   value={activeCompanyId}
                   onChange={(e) => onSelectCompany(e.target.value)}
                 >
@@ -236,20 +224,16 @@ export default function DashboardPage() {
               </div>
 
               {activeCompany && (
-                <div className="flex items-center justify-between bg-gray-50 rounded-xl p-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Aktywna firma</div>
-                    <div className="font-medium text-gray-900">
-                      {activeCompany.name}
-                    </div>
+                <div className="flex items-center justify-between bg-bg-secondary rounded-xl p-4 border border-border">
+                  <div className="min-w-0">
+                    <div className="text-sm text-text-muted">Aktywna firma</div>
+                    <div className="font-medium text-text truncate">{activeCompany.name}</div>
                   </div>
-
-                 
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-text-muted">
               {meRole === "worker"
                 ? "Nie masz jeszcze przypisanej firmy."
                 : "Nie masz jeszcze firmy. Utwórz pierwszą poniżej."}
@@ -257,21 +241,20 @@ export default function DashboardPage() {
           )}
 
           {showCreateCompany && (
-            <div className="border-t pt-5 space-y-3">
-              <h3 className="font-semibold text-gray-900">
-                Utwórz firmę
-              </h3>
+            <div className="border-t border-border pt-5 space-y-3">
+              <h3 className="font-semibold text-text">Utwórz firmę</h3>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
-                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  className="flex-1 min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                   placeholder="Nazwa firmy"
                   value={newCompanyName}
                   onChange={(e) => setNewCompanyName(e.target.value)}
                 />
 
                 <button
-                  className="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90 disabled:opacity-50 transition"
+                  type="button"
+                  className="min-h-[48px] px-5 py-2 rounded-xl bg-primary text-primary-fg font-medium hover:opacity-90 disabled:opacity-50 transition"
                   disabled={busy || newCompanyName.trim().length === 0}
                   onClick={createCompany}
                 >
@@ -279,19 +262,16 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              <div className="text-xs text-gray-400">
-                Możesz utworzyć tylko jedną firmę.
-              </div>
+              <div className="text-xs text-text-muted">Możesz utworzyć tylko jedną firmę.</div>
             </div>
           )}
 
           {meRole === "employer" && companies.length > 0 && (
-            <div className="border-t pt-4 text-sm text-gray-400">
+            <div className="border-t border-border pt-4 text-sm text-text-muted">
               Masz już utworzoną firmę. System pozwala tylko na jedną firmę.
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

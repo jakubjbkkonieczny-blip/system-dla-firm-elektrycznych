@@ -78,14 +78,14 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
     <div className="p-6 space-y-6 max-w-7xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Obecność</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="text-xl font-semibold text-text">Obecność</h1>
+          <p className="text-sm text-text-muted mt-1">
             Monitorowanie czasu pracy i statusów zespołu
           </p>
         </div>
         <button
           type="button"
-          className="px-3 py-2 rounded-lg border bg-white text-sm disabled:opacity-60"
+          className="min-h-[44px] px-3 py-2 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover disabled:opacity-60"
           disabled={busy}
           onClick={load}
         >
@@ -93,12 +93,12 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
         </button>
       </div>
 
-      <p className="text-xs text-gray-600 border border-gray-200 bg-gray-50 rounded-lg px-3 py-2">
+      <p className="text-xs text-text-muted border border-border bg-bg-secondary rounded-lg px-3 py-2">
         Widok pokazuje wybrany dzień. Historia godzin jest dostępna osobno.
       </p>
 
       {err && (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg">
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg">
           {err}
         </div>
       )}
@@ -108,30 +108,30 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
           const count = data?.summary[item.key] ?? 0;
           const colors = item.status
             ? getAttendanceStatusColors(item.status)
-            : { card: "border-gray-200 bg-white", text: "text-gray-900" };
+            : { card: "border-border bg-card", text: "text-text" };
           return (
             <div key={item.key} className={`rounded-xl border p-4 ${colors.card}`}>
-              <div className="text-xs font-medium text-gray-600">{item.label}</div>
+              <div className="text-xs font-medium text-text-muted">{item.label}</div>
               <div className={`text-2xl font-semibold mt-1 ${colors.text}`}>{count}</div>
             </div>
           );
         })}
       </div>
 
-      <div className="border rounded-lg bg-white p-4 flex flex-wrap gap-3 items-end">
+      <div className="border border-border rounded-lg bg-card p-4 flex flex-wrap gap-3 items-end">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-600">Data</span>
+          <span className="text-text-muted">Data</span>
           <input
             type="date"
-            className="border rounded-lg px-3 py-2 bg-white"
+            className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
         </label>
         <label className="flex flex-col gap-1 text-sm min-w-[180px]">
-          <span className="text-gray-600">Pracownik</span>
+          <span className="text-text-muted">Pracownik</span>
           <select
-            className="border rounded-lg px-3 py-2 bg-white"
+            className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
           >
@@ -144,9 +144,9 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm min-w-[160px]">
-          <span className="text-gray-600">Status</span>
+          <span className="text-text-muted">Status</span>
           <select
-            className="border rounded-lg px-3 py-2 bg-white"
+            className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
@@ -159,7 +159,7 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
         </label>
         <button
           type="button"
-          className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm disabled:opacity-60"
+          className="min-h-[44px] px-4 py-2 rounded-lg bg-primary text-primary-fg text-sm disabled:opacity-60"
           disabled={busy}
           onClick={load}
         >
@@ -167,10 +167,10 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
         </button>
       </div>
 
-      <div className="border rounded-lg bg-white overflow-x-auto">
+      <div className="border border-border rounded-lg bg-card overflow-x-auto">
         <table className="w-full text-sm min-w-[760px]">
           <thead>
-            <tr className="border-b bg-gray-50 text-left text-gray-600">
+            <tr className="border-b border-border bg-bg-secondary text-left text-text-muted">
               <th className="p-3 font-medium">Pracownik</th>
               <th className="p-3 font-medium">Status</th>
               <th className="p-3 font-medium">Start</th>
@@ -184,16 +184,16 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
           <tbody>
             {!data?.rows.length ? (
               <tr>
-                <td colSpan={8} className="p-6 text-center text-gray-500">
+                <td colSpan={8} className="p-6 text-center text-text-muted">
                   {busy ? "Ładowanie..." : "Brak danych obecności dla wybranego dnia."}
                 </td>
               </tr>
             ) : (
               data.rows.map((row) => (
-                <tr key={row.userId} className="border-b last:border-0 hover:bg-gray-50/80">
+                <tr key={row.userId} className="border-b border-border last:border-0 hover:bg-card-hover">
                   <td className="p-3">
-                    <div className="font-medium text-gray-900">{row.displayName}</div>
-                    <div className="text-xs text-gray-500 truncate max-w-[200px]">
+                    <div className="font-medium text-text">{row.displayName}</div>
+                    <div className="text-xs text-text-muted truncate max-w-[200px]">
                       {row.email}
                     </div>
                   </td>
@@ -202,25 +202,25 @@ export function AdminAttendanceDashboard({ companyId }: { companyId: string }) {
                   </td>
                   <td className="p-3">
                     <div className="font-medium">{formatTimeHm(row.startedAt)}</div>
-                    <div className="text-xs text-gray-500">{formatDateShort(row.startedAt)}</div>
+                    <div className="text-xs text-text-muted">{formatDateShort(row.startedAt)}</div>
                   </td>
                   <td className="p-3">
                     <div className="font-medium">{formatTimeHm(row.endedAt)}</div>
-                    <div className="text-xs text-gray-500">{formatDateShort(row.endedAt)}</div>
+                    <div className="text-xs text-text-muted">{formatDateShort(row.endedAt)}</div>
                   </td>
-                  <td className="p-3 font-medium text-gray-800">
+                  <td className="p-3 font-medium text-text">
                     {formatWorkDuration(row.workDurationMs)}
                   </td>
-                  <td className="p-3 text-gray-700">
+                  <td className="p-3 text-text">
                     {formatWorkDuration(row.breakDurationMs)}
                   </td>
-                  <td className="p-3 text-gray-700 max-w-[220px]">
+                  <td className="p-3 text-text max-w-[220px]">
                     {row.locationText || "—"}
                   </td>
                   <td className="p-3 whitespace-nowrap">
                     <button
                       type="button"
-                      className="text-sm px-2 py-1 rounded border bg-white hover:bg-gray-50"
+                      className="min-h-[44px] text-sm px-2 py-1 rounded border border-border bg-card text-text hover:bg-card-hover"
                       onClick={() =>
                         setHoursTarget({
                           userId: row.userId,

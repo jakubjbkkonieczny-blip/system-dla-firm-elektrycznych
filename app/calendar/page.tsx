@@ -14,7 +14,6 @@ export default function CalendarPage() {
       const me = await apiFetch("/api/me");
       setRole(me?.role ?? null);
 
-      // ❌ blokada dla workera
       if (me?.role === "worker") {
         setLoading(false);
         return;
@@ -34,32 +33,27 @@ export default function CalendarPage() {
     load();
   }, []);
 
-  // 🔄 loading
   if (loading) {
-    return <div className="p-6">Ładowanie...</div>;
+    return <div className="text-text-muted">Ładowanie...</div>;
   }
 
-  // 🚫 blokada UI
   if (role === "worker") {
     return (
-      <div className="p-6">
-        <h1 className="text-xl font-semibold">Brak dostępu</h1>
-        <p className="text-gray-500 mt-2">
-          Nie masz dostępu do kalendarza.
-        </p>
+      <div className="w-full max-w-full min-w-0">
+        <h1 className="text-xl font-semibold text-text">Brak dostępu</h1>
+        <p className="text-text-muted mt-2">Nie masz dostępu do kalendarza.</p>
       </div>
     );
   }
 
-  // 🔌 brak połączenia
   if (!connected) {
     return (
-      <div className="p-6">
-        <h1 className="text-xl font-semibold mb-4">Kalendarz</h1>
+      <div className="w-full max-w-full min-w-0 space-y-4">
+        <h1 className="text-xl font-semibold text-text">Kalendarz</h1>
 
         <a
           href="/api/google/connect"
-          className="px-4 py-2 bg-black text-white rounded"
+          className="inline-flex items-center justify-center min-h-[48px] px-5 py-2 rounded-xl bg-primary text-primary-fg font-medium hover:opacity-90 transition"
         >
           Połącz z Google Calendar
         </a>
@@ -67,21 +61,26 @@ export default function CalendarPage() {
     );
   }
 
-  // ✅ normalny widok
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-xl font-semibold">Kalendarz</h1>
+    <div className="w-full max-w-full min-w-0 space-y-4">
+      <div>
+        <h1 className="text-xl font-semibold text-text">Kalendarz</h1>
+        <p className="text-sm text-text-muted mt-1">Wydarzenia z Google Calendar</p>
+      </div>
 
       {events.length === 0 ? (
-        <div>Brak wydarzeń</div>
+        <div className="theme-glass bg-card border border-border rounded-xl p-6 text-text-muted">
+          Brak wydarzeń
+        </div>
       ) : (
         <div className="space-y-2">
           {events.map((e) => (
-            <div key={e.id} className="border p-3 rounded bg-white">
-              <div className="font-semibold">{e.summary}</div>
-              <div className="text-sm text-gray-500">
-                {e.start?.dateTime}
-              </div>
+            <div
+              key={e.id}
+              className="theme-glass border border-border p-4 rounded-xl bg-card min-w-0"
+            >
+              <div className="font-semibold text-text">{e.summary}</div>
+              <div className="text-sm text-text-muted mt-1">{e.start?.dateTime}</div>
             </div>
           ))}
         </div>

@@ -28,8 +28,8 @@ export const JOB_PRIORITY_DEFINITIONS: readonly JobPriorityDefinition[] = [
     label: "Normalny",
     legacyAliases: ["standard", "standardowy", "normalny"],
     badge: {
-      container: "bg-slate-50 text-slate-700 border-slate-200",
-      dot: "bg-slate-400",
+      container: "bg-bg-secondary text-text-muted border-border",
+      dot: "bg-text-muted",
     },
     sortOrder: 0,
   },
@@ -44,8 +44,8 @@ export const JOB_PRIORITY_DEFINITIONS: readonly JobPriorityDefinition[] = [
       "ważny",
     ],
     badge: {
-      container: "bg-orange-50 text-orange-900 border-orange-200",
-      dot: "bg-orange-500",
+      container: "bg-warning-bg text-warning border-warning-border",
+      dot: "bg-warning",
     },
     sortOrder: 1,
   },

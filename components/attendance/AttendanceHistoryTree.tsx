@@ -27,7 +27,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 function PeriodSummaryStats({ totals }: { totals: AttendanceHistoryPeriodTotals }) {
   return (
-    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-600 mt-1">
+    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-text-muted mt-1">
       <span>{formatWorkedHoursSummary(totals.totalWorkedMinutes)}</span>
       <span>{formatBreakHoursSummary(totals.totalBreakMinutes)}</span>
       <span>{formatWorkedDaysSummary(totals.workedDays)}</span>
@@ -44,7 +44,7 @@ function HistoryDayTable({
 }) {
   if (days.length === 0) {
     return (
-      <p className={`text-sm text-gray-500 ${comfortable ? "px-4 py-3" : "px-3 py-2"}`}>
+      <p className={`text-sm text-text-muted ${comfortable ? "px-4 py-3" : "px-3 py-2"}`}>
         Brak wpisów.
       </p>
     );
@@ -56,7 +56,7 @@ function HistoryDayTable({
   return (
     <table className="w-full text-sm table-auto">
       <thead>
-        <tr className="text-xs text-gray-500 border-b bg-gray-50/80">
+        <tr className="text-xs text-text-muted border-b border-border bg-bg-secondary">
           <th className={`text-left font-medium ${headPad}`}>Data</th>
           <th className={`text-left font-medium ${headPad} tabular-nums`}>Start</th>
           <th className={`text-left font-medium ${headPad} tabular-nums`}>Koniec</th>
@@ -69,21 +69,21 @@ function HistoryDayTable({
         {days.map((day) => (
           <tr
             key={day.id}
-            className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50"
+            className="border-b border-border last:border-0 hover:bg-card-hover"
           >
-            <td className={`${cellPad} font-medium text-gray-900 whitespace-nowrap`}>
+            <td className={`${cellPad} font-medium text-text whitespace-nowrap`}>
               {formatDateShort(day.date)}
             </td>
-            <td className={`${cellPad} text-gray-700 tabular-nums whitespace-nowrap`}>
+            <td className={`${cellPad} text-text tabular-nums whitespace-nowrap`}>
               {formatTimeHm(day.startedAt)}
             </td>
-            <td className={`${cellPad} text-gray-700 tabular-nums whitespace-nowrap`}>
+            <td className={`${cellPad} text-text tabular-nums whitespace-nowrap`}>
               {formatTimeHm(day.endedAt)}
             </td>
-            <td className={`${cellPad} text-gray-700 tabular-nums whitespace-nowrap`}>
+            <td className={`${cellPad} text-text tabular-nums whitespace-nowrap`}>
               {formatMinutes(day.totalWorkedMinutes)}
             </td>
-            <td className={`${cellPad} text-gray-700 tabular-nums whitespace-nowrap`}>
+            <td className={`${cellPad} text-text tabular-nums whitespace-nowrap`}>
               {formatMinutes(day.totalBreakMinutes)}
             </td>
             <td className={cellPad}>
@@ -127,28 +127,28 @@ function YearSection({
   }, [group, monthSummaries]);
 
   return (
-    <section className="border rounded-xl bg-white overflow-hidden">
+    <section className="border border-border rounded-xl bg-card overflow-hidden">
       <button
         type="button"
-        className={`w-full ${yearPad} text-left hover:bg-gray-50 transition-colors`}
+        className={`w-full ${yearPad} text-left hover:bg-card-hover transition-colors`}
         onClick={onToggleYear}
         aria-expanded={expanded}
       >
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-base font-semibold text-gray-900">{group.year}</h3>
+            <h3 className="text-base font-semibold text-text">{group.year}</h3>
             <PeriodSummaryStats totals={yearTotals} />
           </div>
-          <span className="text-gray-400 text-sm shrink-0 mt-0.5" aria-hidden>
+          <span className="text-text-muted text-sm shrink-0 mt-0.5" aria-hidden>
             {expanded ? "▲" : "▼"}
           </span>
         </div>
       </button>
 
       {expanded && (
-        <div className={`border-t bg-gray-50/40 ${monthInnerPad} ${monthGap}`}>
+        <div className={`border-t border-border bg-bg-secondary ${monthInnerPad} ${monthGap}`}>
           {group.months.length === 0 ? (
-            <p className="text-sm text-gray-500 px-2 py-2">Brak wpisów.</p>
+            <p className="text-sm text-text-muted px-2 py-2">Brak wpisów.</p>
           ) : (
             group.months.map((monthGroup) => {
               const monthExpanded = expandedMonths.has(monthGroup.key);
@@ -160,29 +160,29 @@ function YearSection({
               return (
                 <div
                   key={monthGroup.key}
-                  className="border rounded-lg bg-white overflow-hidden"
+                  className="border border-border rounded-lg bg-card overflow-hidden"
                 >
                   <button
                     type="button"
-                    className={`w-full ${monthPad} text-left hover:bg-gray-50 transition-colors`}
+                    className={`w-full ${monthPad} text-left hover:bg-card-hover transition-colors`}
                     onClick={() => onToggleMonth(monthGroup.key)}
                     aria-expanded={monthExpanded}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">
+                        <h4 className="text-sm font-semibold text-text">
                           {formatHistoryMonthYearLabel(monthGroup.year, monthGroup.month)}
                         </h4>
                         <PeriodSummaryStats totals={monthTotals} />
                       </div>
-                      <span className="text-gray-400 text-xs shrink-0 mt-0.5" aria-hidden>
+                      <span className="text-text-muted text-xs shrink-0 mt-0.5" aria-hidden>
                         {monthExpanded ? "▲" : "▼"}
                       </span>
                     </div>
                   </button>
 
                   {monthExpanded && (
-                    <div className="border-t">
+                    <div className="border-t border-border">
                       <HistoryDayTable days={monthGroup.days} comfortable={comfortable} />
                     </div>
                   )}

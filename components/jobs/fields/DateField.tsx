@@ -23,10 +23,10 @@ export function DateField({
 
   return (
     <div className="space-y-1">
-      <label htmlFor={id} className="text-xs font-medium text-gray-600">
+      <label htmlFor={id} className="text-xs font-medium text-text-muted">
         {label}
         {required ? (
-          <span className="text-red-600" aria-hidden="true">
+          <span className="text-danger" aria-hidden="true">
             {" "}
             *
           </span>
@@ -35,7 +35,7 @@ export function DateField({
       <input
         id={id}
         type="date"
-        className="min-h-[44px] w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/20 disabled:opacity-60"
+        className="min-h-[44px] w-full border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-60"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}

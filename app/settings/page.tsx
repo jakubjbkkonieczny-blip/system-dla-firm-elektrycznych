@@ -348,7 +348,7 @@ export default function SettingsPage() {
                 Nazwa użytkownika
               </label>
               <input
-                className="w-full border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Imię i nazwisko"
@@ -358,7 +358,7 @@ export default function SettingsPage() {
             <div>
               <label className="text-sm text-text-muted block mb-1">E-mail</label>
               <input
-                className="w-full border border-border rounded-lg px-3 py-2 bg-bg-secondary text-text-muted"
+                className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-bg-secondary text-text-muted"
                 value={user?.email ?? ""}
                 readOnly
                 disabled
@@ -369,7 +369,7 @@ export default function SettingsPage() {
               <button
                 onClick={() => void saveAccount()}
                 disabled={busy}
-                className="px-4 py-2 rounded-lg bg-primary text-primary-fg hover:opacity-90 disabled:opacity-50 transition"
+                className="min-h-[44px] px-4 py-2 rounded-lg bg-primary text-primary-fg hover:opacity-90 disabled:opacity-50 transition"
               >
                 {busy ? "Zapisywanie..." : "Zapisz"}
               </button>
@@ -462,21 +462,21 @@ export default function SettingsPage() {
             <div className="grid gap-3 sm:grid-cols-1">
               <input
                 type="password"
-                className="w-full border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Obecne hasło"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
               />
               <input
                 type="password"
-                className="w-full border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Nowe hasło (min. 8 znaków)"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
               <input
                 type="password"
-                className="w-full border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                className="w-full min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Powtórz nowe hasło"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

@@ -76,7 +76,7 @@ export function JobPrioritySelect({
     <div className={["flex flex-col sm:flex-row sm:items-center gap-2", className].join(" ")}>
       <select
         id={id}
-        className="min-h-[44px] border border-gray-200 rounded-lg px-3 py-2 bg-white max-w-xs w-full sm:w-auto touch-manipulation"
+        className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text max-w-xs w-full sm:w-auto touch-manipulation"
         value={normalized}
         disabled={disabled}
         onChange={(e) => onChange(normalizeJobPriority(e.target.value))}

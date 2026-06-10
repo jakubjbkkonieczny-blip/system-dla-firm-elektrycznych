@@ -1,11 +1,11 @@
 import type { EmploymentType } from "@/lib/jobs/budget/employment-type";
 
 const BADGE_STYLES: Record<EmploymentType, string> = {
-  b2b: "bg-blue-100 text-blue-800 border-blue-200",
-  employment_contract: "bg-purple-100 text-purple-800 border-purple-200",
-  mandate_contract: "bg-orange-100 text-orange-800 border-orange-200",
-  student_under_26: "bg-green-100 text-green-800 border-green-200",
-  subcontractor: "bg-slate-100 text-slate-800 border-slate-200",
+  b2b: "bg-bg-secondary text-accent border-border",
+  employment_contract: "bg-success-bg text-success border-success-border",
+  mandate_contract: "bg-warning-bg text-warning border-warning-border",
+  student_under_26: "bg-success-bg text-success border-success-border",
+  subcontractor: "bg-card text-text-muted border-border",
 };
 
 const SHORT_LABELS: Record<EmploymentType, string> = {

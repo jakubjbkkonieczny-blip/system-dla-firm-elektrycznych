@@ -18,31 +18,31 @@ export function DocumentsTab({ items, loading, meta, onPageChange, busy }: Props
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">Rejestr dokumentów kosztowych powiązanych z projektem.</p>
+      <p className="text-sm text-text-muted">Rejestr dokumentów kosztowych powiązanych z projektem.</p>
 
       {loading && withDocs.length === 0 ? (
-        <div className="text-sm text-gray-500 py-8 text-center">Ładowanie dokumentów...</div>
+        <div className="text-sm text-text-muted py-8 text-center">Ładowanie dokumentów...</div>
       ) : withDocs.length === 0 ? (
-        <div className="text-sm text-gray-500 py-8 text-center border rounded-xl bg-gray-50">
+        <div className="text-sm text-text-muted py-8 text-center border border-border rounded-xl bg-bg-secondary">
           Brak dokumentów. Dodaj koszty z typem dokumentu w zakładce Koszty materiałów.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {withDocs.map((item) => (
-            <div key={item.id} className="border rounded-xl p-4 bg-white space-y-2">
+            <div key={item.id} className="border border-border rounded-xl theme-glass bg-card p-4 space-y-2">
               <div className="flex justify-between gap-2">
-                <span className="font-medium text-gray-900">{normalizeDocumentTypeLabel(item.documentType)}</span>
-                <span className="font-semibold text-gray-900 shrink-0">{formatPlnFromCents(item.grossAmountCents)}</span>
+                <span className="font-medium text-text">{normalizeDocumentTypeLabel(item.documentType)}</span>
+                <span className="font-semibold text-text shrink-0">{formatPlnFromCents(item.grossAmountCents)}</span>
               </div>
               {item.documentNumber ? (
-                <div className="text-sm text-gray-600">Nr: {item.documentNumber}</div>
+                <div className="text-sm text-text-muted">Nr: {item.documentNumber}</div>
               ) : null}
               {item.supplier ? (
-                <div className="text-sm text-gray-600">Dostawca: {item.supplier}</div>
+                <div className="text-sm text-text-muted">Dostawca: {item.supplier}</div>
               ) : null}
-              <div className="text-xs text-gray-500">{item.name}</div>
+              <div className="text-xs text-text-muted">{item.name}</div>
               {item.plannedDate ? (
-                <div className="text-xs text-gray-500">Data: {item.plannedDate.slice(0, 10)}</div>
+                <div className="text-xs text-text-muted">Data: {item.plannedDate.slice(0, 10)}</div>
               ) : null}
             </div>
           ))}
@@ -52,7 +52,7 @@ export function DocumentsTab({ items, loading, meta, onPageChange, busy }: Props
       {meta && meta.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-2 pt-2">
           <button type="button" className={BUDGET_BTN_SECONDARY} disabled={meta.page <= 1 || busy} onClick={() => onPageChange(meta.page - 1)}>← Poprzednia</button>
-          <span className="text-sm text-gray-500">Strona {meta.page} / {meta.totalPages}</span>
+          <span className="text-sm text-text-muted">Strona {meta.page} / {meta.totalPages}</span>
           <button type="button" className={BUDGET_BTN_SECONDARY} disabled={!meta.hasMore || busy} onClick={() => onPageChange(meta.page + 1)}>Następna →</button>
         </div>
       ) : null}

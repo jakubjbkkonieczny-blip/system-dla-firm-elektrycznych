@@ -30,12 +30,12 @@ export function NotesTab({ baseUrl, budget, busy, runMutation, onNoteSaved }: Pr
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">Notatki wewnętrzne do kosztorysu projektu.</p>
+      <p className="text-sm text-text-muted">Notatki wewnętrzne do kosztorysu projektu.</p>
 
       {editing ? (
-        <div className="border rounded-xl p-4 bg-gray-50 space-y-3">
+        <div className="border border-border rounded-xl p-4 bg-bg-secondary space-y-3">
           <label className="block space-y-1">
-            <span className="text-sm text-gray-700">Notatka projektu</span>
+            <span className="text-sm text-text">Notatka projektu</span>
             <textarea
               className={`${BUDGET_INPUT_CLASS} min-h-[160px]`}
               value={note}
@@ -59,11 +59,11 @@ export function NotesTab({ baseUrl, budget, busy, runMutation, onNoteSaved }: Pr
           </div>
         </div>
       ) : (
-        <div className="border rounded-xl p-4 bg-white min-h-[120px]">
+        <div className="border border-border rounded-xl theme-glass bg-card p-4 min-h-[120px]">
           {budget.note ? (
-            <p className="text-sm text-gray-800 whitespace-pre-wrap">{budget.note}</p>
+            <p className="text-sm text-text whitespace-pre-wrap">{budget.note}</p>
           ) : (
-            <p className="text-sm text-gray-500">Brak notatki. Kliknij „Edytuj”, aby dodać.</p>
+            <p className="text-sm text-text-muted">Brak notatki. Kliknij „Edytuj”, aby dodać.</p>
           )}
           <button type="button" className={`${BUDGET_BTN_SECONDARY} mt-4`} onClick={() => setEditing(true)} disabled={busy}>
             Edytuj notatkę

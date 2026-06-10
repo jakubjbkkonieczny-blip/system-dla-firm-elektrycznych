@@ -80,16 +80,16 @@ function EmployeeNewVacationModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4">
-      <div className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border bg-white p-5 sm:p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-gray-900">Nowy wniosek urlopowy</h2>
-        <p className="text-sm text-gray-600 mt-1">Wypełnij dane urlopu i wyślij wniosek do akceptacji.</p>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-overlay p-0 sm:p-4">
+      <div className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-border theme-glass bg-card p-5 sm:p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-text">Nowy wniosek urlopowy</h2>
+        <p className="text-sm text-text-muted mt-1">Wypełnij dane urlopu i wyślij wniosek do akceptacji.</p>
 
         <div className="mt-5 space-y-4">
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-gray-600">Typ urlopu</span>
+            <span className="text-text-muted">Typ urlopu</span>
             <select
-              className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+              className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
@@ -103,19 +103,19 @@ function EmployeeNewVacationModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-sm">
-              <span className="text-gray-600">Od</span>
+              <span className="text-text-muted">Od</span>
               <input
                 type="date"
-                className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+                className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
-              <span className="text-gray-600">Do</span>
+              <span className="text-text-muted">Do</span>
               <input
                 type="date"
-                className="border rounded-lg px-3 py-2.5 bg-white min-h-[44px]"
+                className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[44px] focus:outline-none focus:ring-2 focus:ring-accent"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
@@ -123,9 +123,9 @@ function EmployeeNewVacationModal({
           </div>
 
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-gray-600">Uwagi (opcjonalnie)</span>
+            <span className="text-text-muted">Uwagi (opcjonalnie)</span>
             <textarea
-              className="border rounded-lg px-3 py-2.5 bg-white min-h-[88px]"
+              className="border border-border rounded-lg px-3 py-2.5 bg-input text-text min-h-[88px] focus:outline-none focus:ring-2 focus:ring-accent"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
@@ -135,7 +135,7 @@ function EmployeeNewVacationModal({
         <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
           <button
             type="button"
-            className="min-h-[44px] px-4 py-2 rounded-lg border bg-white text-sm"
+            className="min-h-[44px] px-4 py-2 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover"
             onClick={onClose}
             disabled={busy}
           >
@@ -143,7 +143,7 @@ function EmployeeNewVacationModal({
           </button>
           <button
             type="button"
-            className="min-h-[44px] px-4 py-2 rounded-lg bg-gray-900 text-white text-sm disabled:opacity-60"
+            className="min-h-[44px] px-4 py-2 rounded-lg bg-primary text-primary-fg text-sm disabled:opacity-60"
             disabled={busy}
             onClick={() => onSubmit({ type, startDate, endDate, reason })}
           >
@@ -168,21 +168,21 @@ function EmployeeRequestDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-overlay p-0 sm:p-4"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="w-full sm:max-w-[680px] max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border bg-white p-5 sm:p-6 shadow-xl"
+        className="w-full sm:max-w-[680px] max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-border theme-glass bg-card p-5 sm:p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
         <div className="flex items-start justify-between gap-4">
-          <h2 className="text-lg font-semibold text-gray-900">Szczegóły wniosku urlopowego</h2>
+          <h2 className="text-lg font-semibold text-text">Szczegóły wniosku urlopowego</h2>
           <button
             type="button"
-            className="min-h-[44px] min-w-[44px] rounded-lg border bg-white text-gray-600"
+            className="min-h-[44px] min-w-[44px] rounded-lg border border-border bg-card text-text-muted hover:bg-card-hover"
             onClick={onClose}
             aria-label="Zamknij"
           >
@@ -192,11 +192,11 @@ function EmployeeRequestDetailsModal({
 
         <dl className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
-            <dt className="text-xs font-medium text-gray-500">Typ urlopu</dt>
-            <dd className="mt-1 text-gray-900">{VACATION_TYPE_LABELS[request.type]}</dd>
+            <dt className="text-xs font-medium text-text-muted">Typ urlopu</dt>
+            <dd className="mt-1 text-text">{VACATION_TYPE_LABELS[request.type]}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Status</dt>
+            <dt className="text-xs font-medium text-text-muted">Status</dt>
             <dd className="mt-1">
               <span
                 className={`inline-flex px-2 py-1 rounded-full border text-xs font-medium ${getVacationStatusBadgeClass(request.status)}`}
@@ -206,26 +206,26 @@ function EmployeeRequestDetailsModal({
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Data od</dt>
-            <dd className="mt-1 text-gray-900">{formatDateShort(request.startDate)}</dd>
+            <dt className="text-xs font-medium text-text-muted">Data od</dt>
+            <dd className="mt-1 text-text">{formatDateShort(request.startDate)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Data do</dt>
-            <dd className="mt-1 text-gray-900">{formatDateShort(request.endDate)}</dd>
+            <dt className="text-xs font-medium text-text-muted">Data do</dt>
+            <dd className="mt-1 text-text">{formatDateShort(request.endDate)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Liczba dni</dt>
-            <dd className="mt-1 text-gray-900">{request.totalDays}</dd>
+            <dt className="text-xs font-medium text-text-muted">Liczba dni</dt>
+            <dd className="mt-1 text-text">{request.totalDays}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium text-gray-500">Data utworzenia</dt>
-            <dd className="mt-1 text-gray-900">{formatCreatedAt(request.createdAt)}</dd>
+            <dt className="text-xs font-medium text-text-muted">Data utworzenia</dt>
+            <dd className="mt-1 text-text">{formatCreatedAt(request.createdAt)}</dd>
           </div>
         </dl>
 
         <div className="mt-5">
-          <div className="text-xs font-medium text-gray-500">Uwagi</div>
-          <div className="mt-2 rounded-lg border bg-gray-50 px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap break-words">
+          <div className="text-xs font-medium text-text-muted">Uwagi</div>
+          <div className="mt-2 rounded-lg border border-border bg-bg-secondary px-4 py-3 text-sm text-text whitespace-pre-wrap break-words">
             {notes ? notes : "Brak uwag"}
           </div>
         </div>
@@ -313,14 +313,14 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
     <div className="p-6 space-y-6 max-w-7xl">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Moje urlopy</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="text-xl font-semibold text-text">Moje urlopy</h1>
+          <p className="text-sm text-text-muted mt-1">
             Przeglądaj swoje wykorzystane urlopy oraz składaj nowe wnioski.
           </p>
         </div>
         <button
           type="button"
-          className="min-h-[44px] px-4 py-2 rounded-lg bg-gray-900 text-white text-sm disabled:opacity-60"
+          className="min-h-[44px] px-4 py-2 rounded-lg bg-primary text-primary-fg text-sm disabled:opacity-60"
           onClick={() => setModalOpen(true)}
           disabled={busy}
         >
@@ -329,16 +329,16 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
       </div>
 
       {err && (
-        <div className="text-sm text-red-700 border border-red-200 bg-red-50 p-3 rounded-lg">{err}</div>
+        <div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg">{err}</div>
       )}
 
-      <section className="border rounded-xl bg-white p-4 sm:p-5 space-y-4">
+      <section className="border border-border rounded-xl bg-card p-4 sm:p-5 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-2 sm:gap-3">
             <label className="flex flex-col gap-1 text-sm min-w-[7rem]">
-              <span className="text-gray-600">Rok</span>
+              <span className="text-text-muted">Rok</span>
               <select
-                className="min-h-[44px] border rounded-lg px-3 py-2 bg-white"
+                className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 value={year}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
               >
@@ -350,9 +350,9 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm min-w-[10rem]">
-              <span className="text-gray-600">Miesiąc</span>
+              <span className="text-text-muted">Miesiąc</span>
               <select
-                className="min-h-[44px] border rounded-lg px-3 py-2 bg-white"
+                className="min-h-[44px] border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 value={monthNum}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
               >
@@ -366,7 +366,7 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
             <div className="flex items-center gap-2 pb-0.5">
               <button
                 type="button"
-                className="min-h-[44px] w-11 rounded-lg border bg-white text-sm"
+                className="min-h-[44px] w-11 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover"
                 onClick={goPrev}
                 aria-label="Poprzedni miesiąc"
               >
@@ -374,7 +374,7 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
               </button>
               <button
                 type="button"
-                className="min-h-[44px] w-11 rounded-lg border bg-white text-sm"
+                className="min-h-[44px] w-11 rounded-lg border border-border bg-card text-text text-sm hover:bg-card-hover"
                 onClick={goNext}
                 aria-label="Następny miesiąc"
               >
@@ -385,27 +385,27 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-sky-200 bg-sky-50 p-4">
-            <div className="text-sm font-medium text-gray-700">{data?.monthLabel ?? "—"}</div>
-            <div className="text-2xl font-semibold text-sky-900 mt-1">
+          <div className="rounded-xl border border-border bg-bg-secondary p-4">
+            <div className="text-sm font-medium text-text">{data?.monthLabel ?? "—"}</div>
+            <div className="text-2xl font-semibold text-accent mt-1">
               {data?.usedMonth.days ?? 0} dni ({data?.usedMonth.hours ?? 0}h)
             </div>
-            <p className="text-xs text-gray-600 mt-1">wykorzystane</p>
+            <p className="text-xs text-text-muted mt-1">wykorzystane</p>
           </div>
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <div className="text-sm font-medium text-gray-700">Rok {year}</div>
-            <div className="text-2xl font-semibold text-amber-900 mt-1">
+          <div className="rounded-xl border border-warning-border bg-warning-bg p-4">
+            <div className="text-sm font-medium text-text">Rok {year}</div>
+            <div className="text-2xl font-semibold text-warning mt-1">
               {data?.usedYear.days ?? 0} dni ({data?.usedYear.hours ?? 0}h)
             </div>
-            <p className="text-xs text-gray-600 mt-1">wykorzystane</p>
+            <p className="text-xs text-text-muted mt-1">wykorzystane</p>
           </div>
         </div>
       </section>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
-        <section className="border rounded-xl bg-white overflow-hidden">
-          <div className="p-4 sm:p-5 border-b space-y-3">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <section className="border border-border rounded-xl bg-card overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-border space-y-3">
+            <h2 className="text-lg font-semibold text-text">
               Moje wnioski urlopowe ({requestCount})
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -416,8 +416,8 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
                   className={[
                     "min-h-[44px] px-3 py-2 rounded-lg border text-sm",
                     statusFilter === tab.value
-                      ? "bg-gray-900 text-white border-gray-900"
-                      : "bg-white text-gray-700 hover:bg-gray-50",
+                      ? "bg-primary text-primary-fg border-primary"
+                      : "bg-card text-text border-border hover:bg-card-hover",
                   ].join(" ")}
                   onClick={() => setStatusFilter(tab.value)}
                 >
@@ -428,31 +428,31 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
           </div>
 
           <div
-            className="hidden md:block overflow-y-auto scroll-smooth overscroll-contain border-t"
+            className="hidden md:block overflow-y-auto scroll-smooth overscroll-contain border-t border-border"
             style={{ maxHeight: REQUESTS_TABLE_MAX_HEIGHT }}
           >
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 sticky top-0 z-10 shadow-[0_1px_0_0_rgb(229_231_235)]">
+              <thead className="bg-bg-secondary sticky top-0 z-10 border-b border-border">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Typ urlopu</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Od</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Do</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Dni</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Data utworzenia</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Typ urlopu</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Od</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Do</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Dni</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Status</th>
+                  <th className="text-left px-4 py-3 font-medium text-text-muted">Data utworzenia</th>
                 </tr>
               </thead>
               <tbody>
                 {(data?.requests ?? []).map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t hover:bg-gray-50/80 cursor-pointer"
+                    className="border-t border-border hover:bg-card-hover cursor-pointer"
                     onClick={() => setDetailsRequest(row)}
                   >
-                    <td className="px-4 py-3 text-gray-900">{VACATION_TYPE_LABELS[row.type]}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDateShort(row.startDate)}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDateShort(row.endDate)}</td>
-                    <td className="px-4 py-3 text-gray-700">{row.totalDays}</td>
+                    <td className="px-4 py-3 text-text">{VACATION_TYPE_LABELS[row.type]}</td>
+                    <td className="px-4 py-3 text-text">{formatDateShort(row.startDate)}</td>
+                    <td className="px-4 py-3 text-text">{formatDateShort(row.endDate)}</td>
+                    <td className="px-4 py-3 text-text">{row.totalDays}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex px-2 py-1 rounded-full border text-xs font-medium ${getVacationStatusBadgeClass(row.status)}`}
@@ -460,12 +460,12 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
                         {VACATION_STATUS_LABELS[row.status]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{formatCreatedAt(row.createdAt)}</td>
+                    <td className="px-4 py-3 text-text">{formatCreatedAt(row.createdAt)}</td>
                   </tr>
                 ))}
                 {!busy && requestCount === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={6} className="px-4 py-8 text-center text-text-muted">
                       Brak wniosków urlopowych.
                     </td>
                   </tr>
@@ -475,7 +475,7 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
           </div>
 
           <div
-            className="md:hidden overflow-y-auto scroll-smooth overscroll-contain divide-y border-t"
+            className="md:hidden overflow-y-auto scroll-smooth overscroll-contain divide-y divide-border border-t border-border"
             style={{ maxHeight: REQUESTS_MOBILE_MAX_HEIGHT }}
           >
             {(data?.requests ?? []).map((row) => (
@@ -493,32 +493,32 @@ export function EmployeeVacationDashboard({ companyId }: { companyId: string }) 
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="text-sm font-medium text-gray-900">{VACATION_TYPE_LABELS[row.type]}</div>
+                  <div className="text-sm font-medium text-text">{VACATION_TYPE_LABELS[row.type]}</div>
                   <span
                     className={`inline-flex px-2 py-1 rounded-full border text-xs font-medium ${getVacationStatusBadgeClass(row.status)}`}
                   >
                     {VACATION_STATUS_LABELS[row.status]}
                   </span>
                 </div>
-                <div className="text-sm text-gray-700">
+                <div className="text-sm text-text">
                   {formatDateShort(row.startDate)} – {formatDateShort(row.endDate)} · {row.totalDays} dni
                 </div>
-                <div className="text-xs text-gray-500">{formatCreatedAt(row.createdAt)}</div>
+                <div className="text-xs text-text-muted">{formatCreatedAt(row.createdAt)}</div>
               </article>
             ))}
             {!busy && requestCount === 0 && (
-              <p className="p-6 text-center text-sm text-gray-500">Brak wniosków urlopowych.</p>
+              <p className="p-6 text-center text-sm text-text-muted">Brak wniosków urlopowych.</p>
             )}
           </div>
         </section>
 
-        <aside className="border rounded-xl bg-white p-4 sm:p-5">
-          <h2 className="text-lg font-semibold text-gray-900">W tym roku</h2>
+        <aside className="border border-border rounded-xl bg-card p-4 sm:p-5">
+          <h2 className="text-lg font-semibold text-text">W tym roku</h2>
           <ul className="mt-4 space-y-3 text-sm">
             {SIDEBAR_TYPES.map((item) => (
               <li key={item.key} className="flex items-center justify-between gap-3">
-                <span className="text-gray-600">{item.label}</span>
-                <span className="font-medium text-gray-900">
+                <span className="text-text-muted">{item.label}</span>
+                <span className="font-medium text-text">
                   {data?.yearBreakdown[item.key] ?? 0} dni
                 </span>
               </li>
