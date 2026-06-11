@@ -1,6 +1,6 @@
 {
-  "name": "Elektra",
-  "short_name": "Elektra",
+  "name": "VectorWork",
+  "short_name": "VectorWork",
   "description": "Profesjonalny system zarządzania zleceniami, pracownikami i realizacją prac terenowych.",
   "start_url": "/dashboard",
   "display": "standalone",

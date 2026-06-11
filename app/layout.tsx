@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { AppShell } from "@/components/AppShell";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme/bootstrap-script";
+import { APP_BRANDING } from "@/lib/branding";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,12 +18,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Elektra",
-  description: "Profesjonalny system zarządzania zleceniami, pracownikami i realizacją prac terenowych.",
+  title: APP_BRANDING.name,
+  description: APP_BRANDING.description,
+  applicationName: APP_BRANDING.name,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Elektra",
+    title: APP_BRANDING.shortName,
+  },
+  openGraph: {
+    title: APP_BRANDING.name,
+    description: APP_BRANDING.description,
+    type: "website",
+    siteName: APP_BRANDING.name,
+  },
+  twitter: {
+    card: "summary",
+    title: APP_BRANDING.name,
+    description: APP_BRANDING.description,
   },
   formatDetection: {
     telephone: false,

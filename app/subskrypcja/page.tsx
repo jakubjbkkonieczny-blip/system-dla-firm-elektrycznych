@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { AuthBackground } from "@/components/auth/AuthBackground";
 import { AuthBenefitsStrip } from "@/components/auth/AuthBenefitsStrip";
-import { ElektraLogo } from "@/components/auth/ElektraLogo";
+import { AppLogo } from "@/components/auth/AppLogo";
 import { getAuthAccent } from "@/components/auth/auth-accent";
 import { apiFetch } from "@/lib/api";
 import { PRICING_SUMMARY_LINES } from "@/lib/billing/pricing-ui-copy";
@@ -141,7 +141,7 @@ export default function SubskrypcjaPage() {
           ].join(" ")}
         >
           <div className="px-6 pt-8 pb-2 sm:px-10 sm:pt-10 flex justify-center">
-            <ElektraLogo />
+            <AppLogo />
           </div>
 
           <div className="px-6 sm:px-10 pb-8 sm:pb-10 space-y-6">

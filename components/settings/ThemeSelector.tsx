@@ -2,6 +2,7 @@
 
 import { useTheme } from "@/components/ThemeProvider";
 import type { UserTheme } from "@/lib/theme/types";
+import { APP_BRANDING } from "@/lib/branding";
 import { useState } from "react";
 
 type ThemeOption = {
@@ -31,7 +32,7 @@ const THEME_OPTIONS: ThemeOption[] = [
   {
     id: "DARK_ELECTRIC",
     label: "Dark Electric",
-    description: "Nowoczesny ciemny motyw Elektra",
+    description: `Nowoczesny ciemny motyw ${APP_BRANDING.name}`,
     preview: {
       bg: "#070d18",
       card: "rgba(15, 23, 42, 0.7)",

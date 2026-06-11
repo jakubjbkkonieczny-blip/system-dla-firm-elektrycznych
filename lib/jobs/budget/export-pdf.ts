@@ -13,28 +13,11 @@ import {
 } from "@/lib/jobs/budget/export-data";
 import { formatPlnFromCents } from "@/lib/jobs/budget/money";
 import type { JobBudgetItemDto, JobBudgetLaborItemDto } from "@/lib/jobs/budget/types";
+import { PDF_BRANDING } from "@/lib/branding";
 
 // Load PDFKit from node_modules (not Turbopack bundle) so __dirname resolves to real AFM data paths.
 type PDFKitConstructor = new (options?: PDFKit.PDFDocumentOptions) => PDFKit.PDFDocument;
 const PDFDocument = createRequire(path.join(process.cwd(), "package.json"))("pdfkit") as PDFKitConstructor;
-
-/** Single branding source — change here for Elektra → VectorWork rebrand. */
-const PDF_BRANDING = {
-  appName: "Elektra",
-  tagline: "Profesjonalne kosztorysy dla branży technicznej",
-  documentTitle: "Kosztorys",
-  colors: {
-    primary: "#D97706",
-    primaryDark: "#B45309",
-    primaryLight: "#FEF3C7",
-    slate900: "#0F172A",
-    slate700: "#334155",
-    slate500: "#64748B",
-    slate200: "#E2E8F0",
-    slate50: "#F8FAFC",
-    white: "#FFFFFF",
-  },
-} as const;
 
 const COLORS = PDF_BRANDING.colors;
 const PAGE_MARGIN = 40;

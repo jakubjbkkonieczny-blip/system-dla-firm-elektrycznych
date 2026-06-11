@@ -12,6 +12,7 @@ import {
   mapLaborExportRow,
   type BudgetExportData,
 } from "@/lib/jobs/budget/export-data";
+import { APP_BRANDING } from "@/lib/branding";
 
 const HEADER_FILL: ExcelJS.Fill = {
   type: "pattern",
@@ -49,7 +50,7 @@ function addTableSheet(
 
 export async function generateBudgetXlsx(data: BudgetExportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Elektra Kosztorysy";
+  workbook.creator = APP_BRANDING.exportDocumentCreator;
   workbook.created = new Date();
 
   const summarySheet = workbook.addWorksheet("Podsumowanie");

@@ -1,6 +1,6 @@
 import type { AuthAccountType } from "@/components/auth/auth-accent";
 import { getAuthAccent } from "@/components/auth/auth-accent";
-import { ElektraLogo } from "@/components/auth/ElektraLogo";
+import { AppLogo } from "@/components/auth/AppLogo";
 import Link from "next/link";
 
 export function AuthCardHeader({
@@ -19,7 +19,7 @@ export function AuthCardHeader({
   return (
     <div className="px-6 pt-6 pb-2 sm:px-8 sm:pt-8">
       <div className="flex items-center justify-between gap-3 mb-6">
-        <ElektraLogo size="sm" />
+        <AppLogo size="sm" />
         <Link
           href="/"
           className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors min-h-[44px] inline-flex items-center"

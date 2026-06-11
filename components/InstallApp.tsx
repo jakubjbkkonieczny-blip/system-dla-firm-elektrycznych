@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { APP_BRANDING } from "@/lib/branding";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -62,7 +63,9 @@ export default function InstallApp({ className = "" }: { className?: string }) {
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div>
-            <div className="font-semibold leading-tight text-slate-100">Zainstaluj aplikację Elektra</div>
+            <div className="font-semibold leading-tight text-slate-100">
+              Zainstaluj aplikację {APP_BRANDING.name}
+            </div>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
               Dodaj do ekranu głównego i korzystaj jak z aplikacji.
             </p>

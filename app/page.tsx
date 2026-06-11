@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
+import { APP_BRANDING } from "@/lib/branding";
 
 export default function HomePage() {
   return (
@@ -73,7 +74,7 @@ export default function HomePage() {
         <div className="relative max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
-              Dlaczego firmy wybierają Elektrę?
+              Dlaczego firmy wybierają {APP_BRANDING.name}?
             </h2>
             <p className="mt-4 text-slate-300 text-base sm:text-lg leading-relaxed">
               Oszczędzaj czas, eliminuj chaos i trzymaj wszystkie informacje w jednym miejscu.
@@ -122,7 +123,7 @@ export default function HomePage() {
         <div className="relative max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
-              Dla kogo jest Elektra?
+              Dla kogo jest {APP_BRANDING.name}?
             </h2>
           </div>
 
@@ -203,7 +204,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-3xl text-center rounded-2xl border border-white/15 bg-white/[0.04] p-8 sm:p-10 backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.35)]">
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">Kontakt</h2>
             <p className="mt-3 text-slate-300 text-base sm:text-lg">
-              Masz pytania lub chcesz wdrożyć Elektrę w swojej firmie?
+              Masz pytania lub chcesz wdrożyć {APP_BRANDING.name} w swojej firmie?
             </p>
             <a
               href="mailto:jkvector.stystem@gmail.com"
@@ -217,7 +218,9 @@ export default function HomePage() {
 
       <footer className="border-t border-white/10 bg-[#050a14]">
         <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
-          <p>© {new Date().getFullYear()} Elektra — system dla firm technicznych</p>
+          <p>
+            © {new Date().getFullYear()} {APP_BRANDING.name} — {APP_BRANDING.footerTagline}
+          </p>
           <Link href="/login" className="font-medium text-amber-300 hover:text-amber-200 transition-colors">
             Zaloguj się do panelu
           </Link>

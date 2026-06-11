@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { AuthBackground } from "@/components/auth/AuthBackground";
-import { ElektraLogo } from "@/components/auth/ElektraLogo";
+import { AppLogo } from "@/components/auth/AppLogo";
 import { SuspendedStatusIcon } from "@/components/auth/SuspendedStatusIcon";
 import { getAuthAccent } from "@/components/auth/auth-accent";
 import { apiFetch } from "@/lib/api";
@@ -101,7 +101,7 @@ export default function WorkerSuspendedClient({ displayName }: Props) {
       <AuthBackground />
 
       <header className="relative z-10 flex items-center justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3 sm:px-6">
-        <ElektraLogo size="sm" />
+        <AppLogo size="sm" />
         <button
           type="button"
           disabled={busy}

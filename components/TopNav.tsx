@@ -6,6 +6,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { APP_BRANDING, LOGO_BRANDING } from "@/lib/branding";
 
 type Role = "owner" | "admin" | "staff";
 
@@ -107,10 +108,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* LOGO */}
         <div className="flex items-center gap-3 px-1">
           <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-sm">
-            ⚡
+            {LOGO_BRANDING.placeholderMark}
           </div>
           <div className="leading-tight">
-            <div className="font-semibold text-gray-900">Elektra</div>
+            <div className="font-semibold text-gray-900">{APP_BRANDING.name}</div>
             <div className="text-xs text-gray-500">Panel</div>
           </div>
         </div>

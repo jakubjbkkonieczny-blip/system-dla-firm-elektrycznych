@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AppLogoMark } from "@/components/auth/AppLogo";
+import { APP_BRANDING } from "@/lib/branding";
 
 const NAV = [
   { href: "#funkcje", label: "Funkcje" },
@@ -10,17 +12,6 @@ const NAV = [
   { href: "#jak-to-dziala", label: "Jak to działa" },
   { href: "#kontakt", label: "Kontakt" },
 ] as const;
-
-function LogoMark() {
-  return (
-    <span
-      className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/25"
-      aria-hidden
-    >
-      ⚡
-    </span>
-  );
-}
 
 export function LandingHeader({ anchorPrefix = "" }: { anchorPrefix?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,8 +43,8 @@ export function LandingHeader({ anchorPrefix = "" }: { anchorPrefix?: string }) 
       <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 lg:h-[4.25rem] items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <LogoMark />
-            <span className="text-lg font-semibold text-white tracking-tight">Elektra</span>
+            <AppLogoMark size="sm" className="rounded-lg" />
+            <span className="text-lg font-semibold text-white tracking-tight">{APP_BRANDING.name}</span>
           </Link>
 
           <nav

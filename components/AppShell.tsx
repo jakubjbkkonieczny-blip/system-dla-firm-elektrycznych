@@ -6,6 +6,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { APP_BRANDING, LOGO_BRANDING } from "@/lib/branding";
 
 type Role = "owner" | "admin" | "staff";
 
@@ -66,10 +67,10 @@ function SidebarContent({
     <>
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-primary text-primary-fg flex items-center justify-center shrink-0">
-          ⚡
+          {LOGO_BRANDING.placeholderMark}
         </div>
         <div className="leading-tight min-w-0">
-          <div className="font-semibold text-lg text-text">Elektra</div>
+          <div className="font-semibold text-lg text-text">{APP_BRANDING.name}</div>
           <div className="text-xs text-text-muted">Panel</div>
         </div>
       </div>
@@ -258,10 +259,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex-1 min-w-0 flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary text-primary-fg flex items-center justify-center shrink-0 text-sm">
-            ⚡
+            {LOGO_BRANDING.placeholderMark}
           </div>
           <div className="min-w-0 leading-tight">
-            <div className="font-semibold text-text truncate">Elektra</div>
+            <div className="font-semibold text-text truncate">{APP_BRANDING.name}</div>
             <div className="text-xs text-text-muted truncate">Panel</div>
           </div>
         </div>
