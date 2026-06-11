@@ -1,7 +1,7 @@
 {
   "name": "Elektra",
   "short_name": "Elektra",
-  "description": "System ogarniania zleceń",
+  "description": "Profesjonalny system zarządzania zleceniami, pracownikami i realizacją prac terenowych.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#f5f6f8",

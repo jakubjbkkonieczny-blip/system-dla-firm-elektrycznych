@@ -1,7 +1,7 @@
 import "server-only";
 
+import { createRequire } from "node:module";
 import path from "node:path";
-import PDFDocument from "pdfkit";
 import {
   buildSummaryRows,
   COST_EXPORT_HEADERS,
@@ -10,6 +10,10 @@ import {
   mapLaborExportRow,
   type BudgetExportData,
 } from "@/lib/jobs/budget/export-data";
+
+// Load PDFKit from node_modules (not Turbopack bundle) so __dirname resolves to real AFM data paths.
+type PDFKitConstructor = new (options?: PDFKit.PDFDocumentOptions) => PDFKit.PDFDocument;
+const PDFDocument = createRequire(path.join(process.cwd(), "package.json"))("pdfkit") as PDFKitConstructor;
 
 const PAGE_MARGIN = 40;
 const FONT_REGULAR = "DejaVuSans";
@@ -30,7 +34,7 @@ function resolveDejaVuFont(fileName: string): string | null {
   }
 }
 
-type PdfDoc = InstanceType<typeof PDFDocument>;
+type PdfDoc = PDFKit.PDFDocument;
 
 function registerFonts(doc: PdfDoc): boolean {
   const regular = resolveDejaVuFont("DejaVuSans.ttf");
@@ -84,7 +88,11 @@ function drawSimpleTable(
 
 export async function generateBudgetPdf(data: BudgetExportData): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: PAGE_MARGIN,
+      font: "",
+    });
     const chunks: Buffer[] = [];
 
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));

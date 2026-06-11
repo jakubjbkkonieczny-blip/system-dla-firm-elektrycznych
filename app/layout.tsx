@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Elektra",
-  description: "System ogarniania zleceń dla ekip technicznych",
+  description: "Profesjonalny system zarządzania zleceniami, pracownikami i realizacją prac terenowych.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
