@@ -36,6 +36,65 @@ function friendlyExportError(code: string): string {
   return ERROR_MESSAGES[code] ?? `Błąd eksportu: ${code}`;
 }
 
+function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return (
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+function mimeFromResponse(response: Response): string {
+  const raw = response.headers.get("Content-Type");
+  if (!raw) return "application/octet-stream";
+  return raw.split(";")[0]?.trim() || "application/octet-stream";
+}
+
+/** Keep blob URLs alive until mobile browsers finish reading them. */
+const BLOB_URL_REVOKE_MS = 60_000;
+
+async function triggerFileDownload(
+  blob: Blob,
+  filename: string,
+  mimeType: string
+): Promise<void> {
+  const file =
+    blob instanceof File && blob.name === filename
+      ? blob
+      : new File([blob], filename, { type: mimeType });
+
+  if (
+    isIOS() &&
+    typeof navigator.share === "function" &&
+    typeof navigator.canShare === "function" &&
+    navigator.canShare({ files: [file] })
+  ) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+    }
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  anchor.rel = "noopener noreferrer";
+  anchor.style.display = "none";
+  if (isIOS()) {
+    anchor.target = "_blank";
+  }
+
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), BLOB_URL_REVOKE_MS);
+}
+
 export type BudgetExportDownloadArgs = {
   companyId: string;
   jobId: string;
@@ -76,19 +135,7 @@ export async function downloadBudgetExport(
     parseFilenameFromDisposition(response.headers.get("Content-Disposition")) ??
     fallbackName;
 
-  const objectUrl = URL.createObjectURL(blob);
-  try {
-    const anchor = document.createElement("a");
-    anchor.href = objectUrl;
-    anchor.download = filename;
-    anchor.rel = "noopener";
-    anchor.style.display = "none";
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
+  await triggerFileDownload(blob, filename, mimeFromResponse(response));
 
   return { ok: true, filename };
 }
