@@ -5,7 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { AppShell } from "@/components/AppShell";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme/bootstrap-script";
-import { APP_BRANDING } from "@/lib/branding";
+import { APP_BRANDING, LOGO_BRANDING, appMetadataBase } from "@/lib/branding";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,9 +18,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: appMetadataBase(),
   title: APP_BRANDING.name,
   description: APP_BRANDING.description,
   applicationName: APP_BRANDING.name,
+  icons: {
+    icon: [
+      { url: LOGO_BRANDING.faviconPath, sizes: "32x32", type: "image/png" },
+      { url: LOGO_BRANDING.icon192Path, sizes: "192x192", type: "image/png" },
+      { url: LOGO_BRANDING.icon512Path, sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: LOGO_BRANDING.appleTouchIconPath, sizes: "180x180", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -31,11 +42,20 @@ export const metadata: Metadata = {
     description: APP_BRANDING.description,
     type: "website",
     siteName: APP_BRANDING.name,
+    images: [
+      {
+        url: LOGO_BRANDING.ogImagePath,
+        width: 1200,
+        height: 630,
+        alt: APP_BRANDING.name,
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: APP_BRANDING.name,
     description: APP_BRANDING.description,
+    images: [LOGO_BRANDING.ogImagePath],
   },
   formatDetection: {
     telephone: false,

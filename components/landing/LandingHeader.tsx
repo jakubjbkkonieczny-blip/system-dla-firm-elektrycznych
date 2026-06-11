@@ -43,7 +43,7 @@ export function LandingHeader({ anchorPrefix = "" }: { anchorPrefix?: string }) 
       <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 lg:h-[4.25rem] items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <AppLogoMark size="sm" className="rounded-lg" />
+            <AppLogoMark size="sm" />
             <span className="text-lg font-semibold text-white tracking-tight">{APP_BRANDING.name}</span>
           </Link>
 

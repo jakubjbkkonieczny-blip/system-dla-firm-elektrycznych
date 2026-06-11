@@ -1,6 +1,6 @@
 /**
  * Central product branding configuration.
- * Update logo asset paths here when custom logos replace placeholders.
+ * Update logo asset paths here when custom logo assets replace defaults.
  * Keep public/manifest.json in sync with APP_BRANDING name, shortName and description.
  */
 export const APP_BRANDING = {
@@ -13,10 +13,11 @@ export const APP_BRANDING = {
 } as const;
 
 export const LOGO_BRANDING = {
-  /** Placeholder mark until image assets replace it (see icon paths below). */
-  placeholderMark: "⚡",
   icon192Path: "/icon-192.png",
   icon512Path: "/icon-512.png",
+  faviconPath: "/favicon.png",
+  appleTouchIconPath: "/apple-touch-icon.png",
+  ogImagePath: "/og-image.png",
 } as const;
 
 export const PDF_BRANDING = {
@@ -35,3 +36,15 @@ export const PDF_BRANDING = {
     white: "#FFFFFF",
   },
 } as const;
+
+export function appMetadataBase(): URL {
+  const raw = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_URL;
+  if (raw) {
+    try {
+      return new URL(raw);
+    } catch {
+      // fall through
+    }
+  }
+  return new URL("http://localhost:3000");
+}
