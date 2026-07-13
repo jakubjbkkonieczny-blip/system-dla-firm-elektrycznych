@@ -2,22 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { APP_BRANDING, LOGO_BRANDING } from "@/lib/branding";
 
-/** Container px → image px (~80% fill, overflow clips PNG safe-zone). */
-const BRAND_MARK_SIZES = {
-  xs: { container: 44, image: 36 },
-  sm: { container: 52, image: 42 },
-  md: { container: 60, image: 50 },
+/** Circular brand mark — master: public/icon-512.png */
+const BRAND_MARK_PX = {
+  xs: 40,
+  sm: 48,
+  md: 56,
 } as const;
 
-type BrandMarkSize = keyof typeof BRAND_MARK_SIZES;
-
-const BRAND_MARK_CONTAINER_CLASS = [
-  "relative shrink-0 flex items-center justify-center overflow-hidden",
-  "rounded-[18px]",
-  "border border-accent/20",
-  "bg-[#0c1528]",
-  "shadow-[0_0_0_1px_rgba(56,189,248,0.1),0_0_20px_rgba(56,189,248,0.12),0_4px_18px_rgba(0,0,0,0.35)]",
-].join(" ");
+type BrandMarkSize = keyof typeof BRAND_MARK_PX;
 
 export function AppLogoMark({
   size = "md",
@@ -26,20 +18,22 @@ export function AppLogoMark({
   size?: BrandMarkSize;
   className?: string;
 }) {
-  const { container, image } = BRAND_MARK_SIZES[size];
+  const px = BRAND_MARK_PX[size];
 
   return (
     <span
-      className={[BRAND_MARK_CONTAINER_CLASS, className].filter(Boolean).join(" ")}
-      style={{ width: container, height: container }}
+      className={["relative shrink-0 overflow-hidden rounded-full", className]
+        .filter(Boolean)
+        .join(" ")}
+      style={{ width: px, height: px }}
       aria-hidden
     >
       <Image
         src={LOGO_BRANDING.icon512Path}
         alt=""
-        width={image}
-        height={image}
-        className="object-contain"
+        fill
+        sizes={`${px}px`}
+        className="object-cover"
         draggable={false}
         priority={size === "md"}
       />
