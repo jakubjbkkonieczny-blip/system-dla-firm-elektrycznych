@@ -5,6 +5,7 @@ import { SettingsSection } from "@/components/settings/SettingsSection";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { apiFetch } from "@/lib/api";
 import { PRICING_SUMMARY_LINES } from "@/lib/billing/pricing-ui-copy";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -382,6 +383,23 @@ export default function SettingsPage() {
           description="Wybierz motyw interfejsu — ustawienie dotyczy tylko Twojego konta"
         >
           <ThemeSelector />
+        </SettingsSection>
+
+        <SettingsSection
+          title="Pomoc i FAQ"
+          description="Szybkie odpowiedzi dla pracodawców i pracowników, także na telefonie i w aplikacji PWA"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-text-muted">
+              Znajdź rozwiązania dotyczące logowania, zleceń, obecności, urlopów, płatności i instalacji aplikacji.
+            </p>
+            <Link
+              href={`/pomoc?role=${role === "employer" ? "employer" : "employee"}`}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-primary-fg transition"
+            >
+              Otwórz pomoc
+            </Link>
+          </div>
         </SettingsSection>
 
         {role === "employer" ? (

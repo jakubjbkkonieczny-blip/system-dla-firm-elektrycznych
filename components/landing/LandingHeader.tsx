@@ -10,6 +10,7 @@ const NAV = [
   { href: "#korzysci", label: "Korzyści" },
   { href: "#dla-kogo", label: "Dla kogo" },
   { href: "#jak-to-dziala", label: "Jak to działa" },
+  { href: "/pomoc", label: "Pomoc" },
   { href: "#kontakt", label: "Kontakt" },
 ] as const;
 
@@ -104,16 +105,19 @@ export function LandingHeader({ anchorPrefix = "" }: { anchorPrefix?: string }) 
           className="lg:hidden border-t border-white/10 bg-slate-950/95 backdrop-blur-lg"
         >
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1" aria-label="Mobilne">
-            {NAV.map((item) => (
-              <a
-                key={item.href}
-                href={`${anchorPrefix}${item.href}`}
-                className="px-3 py-3 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white"
-                onClick={() => setMenuOpen(false)}
-              >
-                {item.label}
-              </a>
-            ))}
+            {NAV.map((item) => {
+              const href = item.href.startsWith("#") ? `${anchorPrefix}${item.href}` : item.href;
+              return (
+                <a
+                  key={item.href}
+                  href={href}
+                  className="px-3 py-3 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
             <div className="pt-3 mt-2 border-t border-white/10 flex flex-col gap-2">
               <Link
                 href="/login"
