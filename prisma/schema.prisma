@@ -30,11 +30,17 @@ model User {
   googleRefreshToken   String?  @db.Text
   pushSubscription     Json?
   isActive    Boolean  @default(true)
+  deactivatedAt DateTime?
+  scheduledDeletionAt DateTime?
   pendingDeletionAt    DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   memberships         CompanyMember[]
+
+  @@index([pendingDeletionAt], map: "User_pendingDeletionAt_idx")
+  @@index([scheduledDeletionAt], map: "User_scheduledDeletionAt_idx")
+
   createdJobs         Job[]               @relation("JobCreatedBy")
   jobAssignments      JobAssignment[]
   completedStages     JobStage[]              @relation("StageCompletedBy")
@@ -49,6 +55,7 @@ model User {
   statusChanges       JobStatusHistory[]  @relation("StatusChangedBy")
   auditLogs           AuditLog[]
   idempotencyKeys     IdempotencyKey[]
+  verificationTokens  VerificationToken[]
   attendanceSessions  AttendanceSession[]
   vacationRequests    VacationRequest[]     @relation("VacationEmployee")
   vacationDecisions   VacationRequest[]     @relation("VacationDecidedBy")
@@ -56,8 +63,6 @@ model User {
   budgetItemsCreated  JobBudgetItem[]         @relation("BudgetItemCreatedBy")
   budgetLaborAssigned JobBudgetLaborItem[]    @relation("BudgetLaborUser")
   budgetLaborCreated  JobBudgetLaborItem[]    @relation("BudgetLaborCreatedBy")
-
-  @@index([pendingDeletionAt])
 }
 
 model Company {
@@ -67,12 +72,15 @@ model Company {
   apiKeyHash           String?
   billingStatus        String?  // active, inactive, trialing, past_due, cancelled
   subscriptionEndsAt   DateTime?
+  deactivatedAt        DateTime?
   scheduledDeletionAt  DateTime?
   isActive             Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
   members              CompanyMember[]
+
+  @@index([scheduledDeletionAt])
   jobs                 Job[]
   jobAssignments       JobAssignment[]
   jobStages            JobStage[]
@@ -350,6 +358,25 @@ model IdempotencyKey {
   @@index([endpoint])
   @@index([expiresAt])
   @@index([companyId, endpoint])
+}
+
+model VerificationToken {
+  id             String   @id @default(cuid())
+  userId         String
+  purpose        String
+  tokenHash      String
+  expiresAt      DateTime
+  failedAttempts Int      @default(0)
+  usedAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([purpose])
+  @@index([expiresAt])
+  @@index([tokenHash])
+  @@index([userId, purpose, createdAt], map: "VerificationToken_userPurposeCreatedAt_idx")
 }
 
 /// Daily attendance session per employee (one row per user per day).
