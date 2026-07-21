@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { getMeData } from "@/lib/server/me/get-me";
 import { handleSessionRouteError } from "@/lib/server/auth/handle-session-route-error";
-import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
-
-function getDeleteAtIso() {
-  const d = new Date();
-  d.setMonth(d.getMonth() + 6);
-  return d.toISOString();
-}
+import { clearSessionCookie } from "@/lib/server/auth/session";
 
 export async function GET(_req: NextRequest) {
   try {
@@ -23,47 +18,29 @@ export async function GET(_req: NextRequest) {
 export async function DELETE(_req: NextRequest) {
   try {
     const sessionUser = await requireSessionUser();
-    const userId = sessionUser.id;
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      return NextResponse.json({ error: "USER_NOT_FOUND" }, { status: 404 });
+    if (sessionUser.accountRole === "employer") {
+      return NextResponse.json(
+        { error: "USE_DEACTIVATION_FINAL_ENDPOINT" },
+        { status: 403 }
+      );
     }
 
-    const deleteAt = new Date(getDeleteAtIso());
-
-    if (user.accountRole === "employer") {
-      const owned = await prisma.companyMember.findMany({
-        where: { userId, role: "owner", isActive: true },
-        select: { companyId: true },
-      });
-
-      for (const { companyId } of owned) {
-        await prisma.company.update({
-          where: { id: companyId },
-          data: {
-            isActive: false,
-            scheduledDeletionAt: deleteAt,
-          },
-        });
-
-        await prisma.companyMember.updateMany({
-          where: { companyId },
-          data: { isActive: false },
-        });
-
-        void syncSubscriptionForCompany(companyId).catch((err) =>
-          console.error("syncSubscriptionForCompany", err)
-        );
-      }
-    }
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isActive: false },
+    const now = new Date();
+    const updated = await prisma.user.updateMany({
+      where: { id: sessionUser.id, isActive: true },
+      data: {
+        isActive: false,
+        deactivatedAt: now,
+      },
     });
 
-    return NextResponse.json({ ok: true }, { status: 200 });
+    if (updated.count === 0) {
+      return NextResponse.json({ ok: true, status: "already_deactivated" }, { status: 200 });
+    }
+
+    const res = NextResponse.json({ ok: true }, { status: 200 });
+    return clearSessionCookie(res);
   } catch (e: unknown) {
     return handleSessionRouteError(e);
   }

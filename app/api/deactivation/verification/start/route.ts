@@ -30,6 +30,7 @@ export async function POST(_req: NextRequest) {
     return handleSessionRouteErrorOr(e, (msg) => {
       if (msg === "FORBIDDEN" || msg === "NOT_OWNER") return 403;
       if (msg === "TOO_MANY_REQUESTS") return 429;
+      if (msg === "EMAIL_DELIVERY_FAILED") return 503;
       return null;
     });
   }

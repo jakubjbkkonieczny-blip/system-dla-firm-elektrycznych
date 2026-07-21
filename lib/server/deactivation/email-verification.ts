@@ -1,6 +1,9 @@
 import { createHmac, randomInt } from "crypto";
+import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
+
+type VerificationDbClient = Prisma.TransactionClient | typeof prisma;
 
 export const VERIFICATION_TOKEN_PURPOSE_EMPLOYER_ACCOUNT_DEACTIVATION =
   "EMPLOYER_ACCOUNT_DEACTIVATION";
@@ -149,9 +152,12 @@ export async function consumeDeactivationVerificationToken(
   return false;
 }
 
-export async function hasRecentDeactivationVerification(userId: string): Promise<boolean> {
+export async function hasRecentDeactivationVerification(
+  userId: string,
+  client: VerificationDbClient = prisma
+): Promise<boolean> {
   const threshold = new Date(Date.now() - VERIFICATION_TOKEN_SUCCESS_WINDOW_MS);
-  const token = await prisma.verificationToken.findFirst({
+  const token = await client.verificationToken.findFirst({
     where: {
       userId,
       purpose: VERIFICATION_TOKEN_PURPOSE_EMPLOYER_ACCOUNT_DEACTIVATION,

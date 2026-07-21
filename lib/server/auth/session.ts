@@ -44,7 +44,9 @@ export function verifySignedSessionToken(
       userId?: unknown;
       exp?: unknown;
       sessionVersion?: unknown;
+      purpose?: unknown;
     };
+    if (typeof data.purpose === "string") return null;
     if (typeof data.userId !== "string" || data.userId.length === 0) return null;
     if (typeof data.exp !== "number" || !Number.isFinite(data.exp)) return null;
     if (Math.floor(Date.now() / 1000) >= data.exp) return null;

@@ -88,7 +88,10 @@ export async function syncOwnerCompaniesBilling(
   }
 
   await db.company.updateMany({
-    where: { id: { in: owned.map((row) => row.companyId) } },
+    where: {
+      id: { in: owned.map((row) => row.companyId) },
+      isActive: true,
+    },
     data: { billingStatus },
   });
 }

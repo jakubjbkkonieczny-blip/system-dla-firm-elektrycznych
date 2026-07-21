@@ -41,7 +41,7 @@ async function createTestCompany() {
 
 describe("deactivation email verification flow", () => {
   it("preserves plaintext out of the database", async () => {
-    const user = await createTestUser("test-user-plaintext", "employer", "plaintext@example.com");
+    const user = await createTestUser("employer", "plaintext");
     const { code } = await createDeactivationVerificationToken(user.id);
 
     const record = await prisma.verificationToken.findFirst({ where: { userId: user.id } });
@@ -52,7 +52,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("enforces a cooldown between code generations for the same user and purpose", async () => {
-    const user = await createTestUser("test-user-cooldown", "employer", "cooldown@example.com");
+    const user = await createTestUser("employer", "cooldown");
     await createDeactivationVerificationToken(user.id);
 
     let error: Error | null = null;
@@ -67,7 +67,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("invalidates the previous active token when a new one is created after cooldown", async () => {
-    const user = await createTestUser("test-user-new-token", "employer", "newtoken@example.com");
+    const user = await createTestUser("employer", "newtoken");
     const first = await createDeactivationVerificationToken(user.id);
     await prisma.verificationToken.updateMany({
       where: { userId: user.id, tokenHash: hashVerificationCode(first.code) },
@@ -90,7 +90,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("blocks invalid tokens after max failed attempts", async () => {
-    const user = await createTestUser("test-user-failed-attempts", "employer", "failedattempts@example.com");
+    const user = await createTestUser("employer", "failedattempts");
     const { code } = await createDeactivationVerificationToken(user.id);
     const wrongCode = code === "000000" ? "000001" : "000000";
 
@@ -108,7 +108,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("allows only one successful concurrent consumption", async () => {
-    const user = await createTestUser("test-user-concurrent", "employer", "concurrent@example.com");
+    const user = await createTestUser("employer", "concurrent");
     const { code } = await createDeactivationVerificationToken(user.id);
 
     const [first, second] = await Promise.all([
@@ -121,7 +121,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("does not treat expired token as valid confirmation state", async () => {
-    const user = await createTestUser("test-user-expired-state", "employer", "expiredstate@example.com");
+    const user = await createTestUser("employer", "expiredstate");
     const { code } = await createDeactivationVerificationToken(user.id);
     await prisma.verificationToken.updateMany({
       where: { userId: user.id },
@@ -135,7 +135,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("returns a recent confirmation state after successful token consumption", async () => {
-    const user = await createTestUser("test-user-confirmation-state", "employer", "confirmationstate@example.com");
+    const user = await createTestUser("employer", "confirmationstate");
     const { code } = await createDeactivationVerificationToken(user.id);
     const ok = await consumeDeactivationVerificationToken(user.id, code);
     assert.equal(ok, true);
@@ -145,7 +145,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("does not report confirmation state after the success window expires", async () => {
-    const user = await createTestUser("test-user-confirmation-expired", "employer", "confirmationexpired@example.com");
+    const user = await createTestUser("employer", "confirmationexpired");
     const { code } = await createDeactivationVerificationToken(user.id);
     const ok = await consumeDeactivationVerificationToken(user.id, code);
     assert.equal(ok, true);
@@ -160,8 +160,8 @@ describe("deactivation email verification flow", () => {
   });
 
   it("does not allow a different user to consume another user's token", async () => {
-    const owner = await createTestUser("test-user-owner", "employer", "owner@example.com");
-    const other = await createTestUser("test-user-other", "employer", "other@example.com");
+    const owner = await createTestUser("employer", "owner");
+    const other = await createTestUser("employer", "other");
     const { code } = await createDeactivationVerificationToken(owner.id);
 
     const ok = await consumeDeactivationVerificationToken(other.id, code);
@@ -169,7 +169,7 @@ describe("deactivation email verification flow", () => {
   });
 
   it("does not allow wrong purpose token to be consumed by deactivation flow", async () => {
-    const user = await createTestUser("test-user-wrong-purpose", "employer", "wrongpurpose@example.com");
+    const user = await createTestUser("employer", "wrongpurpose");
     await prisma.verificationToken.create({
       data: {
         userId: user.id,
@@ -184,8 +184,8 @@ describe("deactivation email verification flow", () => {
   });
 
   it("keeps user and company active flags unchanged during verification", async () => {
-    const company = await createTestCompany("test-company-state");
-    const user = await createTestUser("test-user-state", "employer", "stateuser@example.com");
+    const company = await createTestCompany();
+    const user = await createTestUser("employer", "stateuser");
     await prisma.companyMember.create({
       data: {
         companyId: company.id,
@@ -209,11 +209,11 @@ describe("deactivation email verification flow", () => {
   });
 
   it("rejects non-owner company members in assertEmployerOwner", async () => {
-    const company = await createTestCompany("test-company-auth");
-    const owner = await createTestUser("test-user-auth-owner", "employer", "authowner@example.com");
-    const admin = await createTestUser("test-user-auth-admin", "employer", "authadmin@example.com");
-    const staff = await createTestUser("test-user-auth-staff", "employer", "authstaff@example.com");
-    const worker = await createTestUser("test-user-auth-worker", "worker", "authworker@example.com");
+    const company = await createTestCompany();
+    const owner = await createTestUser("employer", "authowner");
+    const admin = await createTestUser("employer", "authadmin");
+    const staff = await createTestUser("employer", "authstaff");
+    const worker = await createTestUser("worker", "authworker");
 
     await prisma.companyMember.create({
       data: {

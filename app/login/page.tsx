@@ -1,6 +1,6 @@
 "use client";
 import { Suspense } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginTypeSelect from "@/components/LoginTypeSelect";
 import { AuthCardHeader } from "@/components/auth/AuthCardHeader";
@@ -11,6 +11,7 @@ import { AuthTabs } from "@/components/auth/AuthTabs";
 import { getAuthAccent } from "@/components/auth/auth-accent";
 import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
+import { RECOVERY_LOGIN_SUCCESS_MESSAGE } from "@/lib/deactivation/recovery-ui-copy";
 
 type AccountType = "worker" | "employer";
 type Tab = "login" | "register";
@@ -74,6 +75,7 @@ function LoginPageInner() {
   const hasType = accountType !== null;
   const selected: AccountType = accountType ?? "worker";
   const typeLabel = selected === "employer" ? "Pracodawca" : "Pracownik";
+  const recoveredNotice = useMemo(() => sp.get("recovered") === "1", [sp]);
 
   const [tab, setTab] = useState<Tab>("login");
   const [screen, setScreen] = useState<Screen>("auth");
@@ -86,6 +88,12 @@ function LoginPageInner() {
 
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!recoveredNotice || !hasType) return;
+    setMsg(RECOVERY_LOGIN_SUCCESS_MESSAGE);
+    router.replace(`/login?type=${selected}`, { scroll: false });
+  }, [hasType, recoveredNotice, router, selected]);
 
   async function afterWorkerAuth() {
     try {
@@ -137,7 +145,15 @@ function LoginPageInner() {
       }
 
       const normalizedEmail = email.trim().toLowerCase();
-      await postAuthJson("/api/auth/session", { email: normalizedEmail, password: pass });
+      const loginResult = await postAuthJson("/api/auth/session", {
+        email: normalizedEmail,
+        password: pass,
+      });
+
+      if (loginResult.deactivated === true) {
+        router.replace("/account-deactivated");
+        return;
+      }
 
       const role = await ensureRoleOrBlock(selected, "");
 

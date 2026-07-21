@@ -1,9 +1,11 @@
 "use client";
 
 import { useAuth } from "@/components/AuthProvider";
+import { DeactivationFlowModal } from "@/components/deactivation/DeactivationFlowModal";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { apiFetch } from "@/lib/api";
+import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import { PRICING_SUMMARY_LINES } from "@/lib/billing/pricing-ui-copy";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -45,7 +47,13 @@ export default function SettingsPage() {
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
+  const companyId = useActiveCompanyId();
+  const [companyRole, setCompanyRole] = useState<"owner" | "admin" | "staff" | null>(null);
+  const [companyRoleLoaded, setCompanyRoleLoaded] = useState(false);
+  const [deactivationOpen, setDeactivationOpen] = useState(false);
+
   const subscriptionExpired = useMemo(() => !billingAllowsAccess, [billingAllowsAccess]);
+  const isCompanyOwner = companyRole === "owner";
 
   const formattedEndsAt = useMemo(() => {
     if (!subscriptionEndsAt) return null;
@@ -123,6 +131,36 @@ export default function SettingsPage() {
       }
     })();
   }, [user, searchParams]);
+
+  useEffect(() => {
+    if (!user || role !== "employer" || !companyId) {
+      setCompanyRole(null);
+      setCompanyRoleLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await apiFetch(`/api/companies/${companyId}/me`);
+        if (cancelled) return;
+        const nextRole = data?.role;
+        setCompanyRole(
+          nextRole === "owner" || nextRole === "admin" || nextRole === "staff" ? nextRole : "staff"
+        );
+      } catch {
+        if (cancelled) return;
+        setCompanyRole(null);
+      } finally {
+        if (!cancelled) setCompanyRoleLoaded(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, role, companyId]);
 
   async function saveAccount() {
     setBusy(true);
@@ -521,16 +559,39 @@ export default function SettingsPage() {
           </div>
         </SettingsSection>
 
-        {role === "employer" ? (
+        {role === "employer" && companyRoleLoaded && isCompanyOwner ? (
           <SettingsSection
-            title="Strefa zagrożenia"
+            title="Strefa niebezpieczna"
+            description="Operacje krytyczne dotyczące konta pracodawcy i firmy"
+            variant="danger"
+          >
+            <p className="text-sm text-text-muted">
+              Dezaktywacja konta i firmy rozpocznie 12-miesięczny okres odzyskiwania. To działanie
+              wymaga wieloetapowego potwierdzenia.
+            </p>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDeactivationOpen(true)}
+                className="min-h-[44px] px-4 py-2 bg-danger text-white rounded-lg hover:opacity-90 transition"
+              >
+                Usuń konto i firmę
+              </button>
+            </div>
+          </SettingsSection>
+        ) : null}
+
+        {role === "worker" ? (
+          <SettingsSection
+            title="Strefa niebezpieczna"
             description="Usunięcie konta jest nieodwracalne"
             variant="danger"
           >
             <div className="flex justify-end">
               <button
+                type="button"
                 onClick={() => setDeleteOpen(true)}
-                className="px-4 py-2 bg-danger text-white rounded-lg hover:opacity-90 transition"
+                className="min-h-[44px] px-4 py-2 bg-danger text-white rounded-lg hover:opacity-90 transition"
               >
                 Usuń konto
               </button>
@@ -575,6 +636,13 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        ) : null}
+
+        {deactivationOpen && user?.email ? (
+          <DeactivationFlowModal
+            userEmail={user.email}
+            onClose={() => setDeactivationOpen(false)}
+          />
         ) : null}
 
         {deleteOpen ? (

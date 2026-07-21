@@ -6,6 +6,11 @@ import {
   createSignedSessionToken,
   setSessionCookie,
 } from "@/lib/server/auth/session";
+import {
+  createDeactivatedAccessToken,
+  setDeactivatedAccessCookie,
+} from "@/lib/server/deactivation/deactivated-account-access";
+import { resolveDeactivatedEmployerAccountState } from "@/lib/server/deactivation/get-deactivated-account-state";
 
 type Body = {
   email?: unknown;
@@ -33,6 +38,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (!user.isActive) {
+      const deactivatedState = await resolveDeactivatedEmployerAccountState(user.id);
+      if (deactivatedState) {
+        const deactivatedToken = createDeactivatedAccessToken(user.id);
+        const res = NextResponse.json({ ok: true, deactivated: true }, { status: 200 });
+        return setDeactivatedAccessCookie(res, deactivatedToken);
+      }
       return NextResponse.json({ error: "ACCOUNT_DISABLED" }, { status: 403 });
     }
 
