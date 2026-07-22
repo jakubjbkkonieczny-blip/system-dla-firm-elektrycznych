@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { AppShell } from "@/components/AppShell";
+import { ServiceWorkerRegistrar } from "@/components/push/ServiceWorkerRegistrar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme/bootstrap-script";
 import { APP_BRANDING, LOGO_BRANDING, appMetadataBase } from "@/lib/branding";
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <AuthProvider>
           <ThemeProvider>
+            <ServiceWorkerRegistrar />
             <AppShell>{children}</AppShell>
           </ThemeProvider>
         </AuthProvider>

@@ -10,8 +10,8 @@ type Notification = {
   title: string;
   body: string;
   read: boolean;
-  createdAt?: any;
-  jobId?: string;
+  createdAt?: string;
+  url?: string | null;
 };
 
 export default function NotificationsPage() {
@@ -56,7 +56,7 @@ export default function NotificationsPage() {
           {items.map((n) => (
             <Link
               key={n.id}
-              href={n.jobId ? `/jobs/${n.jobId}` : "#"}
+              href={n.url && n.url.startsWith("/") ? n.url : "#"}
               className={[
                 "block p-4 rounded-xl border min-h-[44px] transition",
                 n.read

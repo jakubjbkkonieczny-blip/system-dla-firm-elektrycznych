@@ -4,6 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { DeactivationFlowModal } from "@/components/deactivation/DeactivationFlowModal";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
+import { PushNotificationsDevPanel } from "@/components/push/PushNotificationsDevPanel";
 import { apiFetch } from "@/lib/api";
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import { PRICING_SUMMARY_LINES } from "@/lib/billing/pricing-ui-copy";
@@ -509,6 +510,13 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
         ) : null}
+
+        <SettingsSection
+          title="Powiadomienia push (test / dev)"
+          description="Foundation ETAP PUSH 1 — włączenie push wymaga świadomej akcji użytkownika"
+        >
+          <PushNotificationsDevPanel />
+        </SettingsSection>
 
         <SettingsSection
           title="Bezpieczeństwo"

@@ -10,7 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "test": "tsx --test lib/jobs/budget/__tests__/*.test.ts lib/server/workers/__tests__/*.test.ts lib/server/deactivation/__tests__/*.test.ts lib/server/email/__tests__/*.test.ts lib/deactivation/__tests__/*.test.ts"
+    "test": "tsx --test lib/jobs/budget/__tests__/*.test.ts lib/server/workers/__tests__/*.test.ts lib/server/deactivation/__tests__/*.test.ts lib/server/email/__tests__/*.test.ts lib/deactivation/__tests__/*.test.ts lib/server/push/__tests__/*.test.ts"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
@@ -25,7 +25,8 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "resend": "^6.18.0",
-    "stripe": "^20.4.0"
+    "stripe": "^20.4.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -34,6 +35,7 @@
     "@types/pdfkit": "^0.17.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
