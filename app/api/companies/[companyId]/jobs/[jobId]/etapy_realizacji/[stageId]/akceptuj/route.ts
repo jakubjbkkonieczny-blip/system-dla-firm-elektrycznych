@@ -11,6 +11,10 @@ import {
   buildStageAccessContext,
   canApproveStage,
 } from "@/lib/server/jobs/stage-permissions";
+import {
+  loadStageNotificationContext,
+  notifyStageApproved,
+} from "@/lib/server/notifications/stage-notifications";
 
 function todayYyyyMmDd() {
   return new Date().toISOString().slice(0, 10);
@@ -69,6 +73,20 @@ export async function POST(
       eventType: "approved",
       actorUserId: userId,
     });
+
+    const notificationContext = await loadStageNotificationContext({
+      companyId,
+      jobId,
+      stage: { id: stageId, name: stage.name },
+      actorUserId: userId,
+    });
+    if (notificationContext) {
+      void notifyStageApproved({
+        context: notificationContext,
+        supervisorUserId: stage.supervisorUserId,
+        submittedByUserId: stage.submittedByUserId,
+      });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

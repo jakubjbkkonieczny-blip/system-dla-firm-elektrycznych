@@ -8,6 +8,10 @@ import {
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
 import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
+import {
+  loadCompanyName,
+  notifyMemberAdded,
+} from "@/lib/server/notifications/membership-notifications";
 
 type Body = {
   email: string;
@@ -43,6 +47,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       where: { companyId_userId: { companyId, userId: invited.id } },
     });
 
+    const shouldNotifyAdded = !existing || !existing.isActive;
+
     if (!existing) {
       await prisma.companyMember.create({
         data: {
@@ -74,6 +80,18 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     void syncSubscriptionForCompany(companyId).catch((err) =>
       console.error("syncSubscriptionForCompany", err)
     );
+
+    if (shouldNotifyAdded) {
+      const companyName = await loadCompanyName(companyId);
+      if (companyName) {
+        void notifyMemberAdded({
+          companyId,
+          companyName,
+          memberUserId: invited.id,
+          actorUserId: actorId,
+        });
+      }
+    }
 
     return NextResponse.json({ ok: true, memberUid: invited.id }, { status: 200 });
   } catch (e: unknown) {

@@ -8,6 +8,11 @@ import {
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
 import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
+import {
+  loadCompanyName,
+  notifyMemberDeactivated,
+  notifyMemberRemoved,
+} from "@/lib/server/notifications/membership-notifications";
 
 type Ctx = { params: Promise<{ companyId: string; memberUid: string }> };
 
@@ -38,6 +43,9 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ ok: true }, { status: 200 });
     }
 
+    const companyName = await loadCompanyName(companyId);
+    const deactivating = member.isActive && !active;
+
     await prisma.companyMember.update({
       where: { companyId_userId: { companyId, userId: memberUid } },
       data: { isActive: active },
@@ -48,6 +56,14 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     void syncSubscriptionForCompany(companyId).catch((err) =>
       console.error("syncSubscriptionForCompany", err)
     );
+
+    if (deactivating && companyName) {
+      void notifyMemberDeactivated({
+        companyId,
+        companyName,
+        memberUserId: memberUid,
+      });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {
@@ -75,6 +91,8 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "CANNOT_DELETE_SELF" }, { status: 400 });
     }
 
+    const companyName = await loadCompanyName(companyId);
+
     await prisma.companyMember.delete({
       where: { companyId_userId: { companyId, userId: memberUid } },
     });
@@ -84,6 +102,14 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     void syncSubscriptionForCompany(companyId).catch((err) =>
       console.error("syncSubscriptionForCompany", err)
     );
+
+    if (companyName) {
+      void notifyMemberRemoved({
+        companyId,
+        companyName,
+        memberUserId: memberUid,
+      });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

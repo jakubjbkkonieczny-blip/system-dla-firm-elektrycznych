@@ -7,6 +7,11 @@ import {
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { requireOwnerOrAdmin } from "@/lib/server/attendance/require-owner-admin";
 import { decideVacationRequest } from "@/lib/server/vacations/vacation-actions";
+import {
+  loadCompanyName,
+  notifyVacationApproved,
+  notifyVacationRejected,
+} from "@/lib/server/notifications/vacation-notifications";
 
 type Ctx = { params: Promise<{ companyId: string; id: string }> };
 
@@ -25,12 +30,31 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "INVALID_ACTION" }, { status: 400 });
     }
 
-    await decideVacationRequest({
+    const updated = await decideVacationRequest({
       companyId,
       requestId: id,
       action,
       decidedById: sessionUser.id,
     });
+
+    const companyName = await loadCompanyName(companyId);
+    if (companyName) {
+      if (action === "approve") {
+        void notifyVacationApproved({
+          companyId,
+          companyName,
+          requesterUserId: updated.userId,
+          actorUserId: sessionUser.id,
+        });
+      } else {
+        void notifyVacationRejected({
+          companyId,
+          companyName,
+          requesterUserId: updated.userId,
+          actorUserId: sessionUser.id,
+        });
+      }
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

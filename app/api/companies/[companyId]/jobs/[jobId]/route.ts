@@ -19,6 +19,12 @@ import {
   parseJobDetailPatchBody,
   jobDetailPatchValidationError,
 } from "@/lib/server/jobs/job-detail-fields";
+import {
+  buildJobNotificationContext,
+  loadCompanyName,
+  notifyJobAssignmentChanges,
+  notifyJobStatusChange,
+} from "@/lib/server/notifications/job-notifications";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
 
@@ -64,38 +70,38 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const member = await requireActiveMember(companyId, userId);
     const role = String(member.role || "staff");
 
+    const existing = await prisma.job.findFirst({
+      where: { id: jobId, companyId, deletedAt: null },
+      include: { assignments: { select: { userId: true } } },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
+    }
+
+    const previousAssignedToUids = readAssignedToUids(existing);
+    const previousStatus = existing.status;
+
     const body = (await req.json()) as Record<string, unknown>;
     const data: Record<string, unknown> = {};
-
-    if (typeof body.status === "string") {
-      data.status = body.status;
-      data.statusUpdatedAt = new Date();
-    }
+    let newAssignedToUids: string[] | null = null;
 
     if (body.assignedToUids !== undefined) {
       if (!(role === "owner" || role === "admin")) {
         return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
       }
 
-      const assignedToUids = normalizeAssignedToUids(body.assignedToUids);
+      newAssignedToUids = normalizeAssignedToUids(body.assignedToUids);
 
-      await validateAssignedMembers(prisma, companyId, assignedToUids);
+      await validateAssignedMembers(prisma, companyId, newAssignedToUids);
 
       await prisma.$transaction(async (tx) => {
         await syncJobAssignments(tx, {
           companyId,
           jobId,
-          assignedToUids,
+          assignedToUids: newAssignedToUids!,
           assignedByUserId: userId,
         });
       });
-    }
-
-    const existing = await prisma.job.findFirst({
-      where: { id: jobId, companyId, deletedAt: null },
-    });
-    if (!existing) {
-      return NextResponse.json({ error: "JOB_NOT_FOUND" }, { status: 404 });
     }
 
     if (hasJobDetailPatchKeys(body)) {
@@ -118,11 +124,52 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       Object.assign(data, detail);
     }
 
+    if (typeof body.status === "string") {
+      data.status = body.status;
+      data.statusUpdatedAt = new Date();
+    }
+
     if (Object.keys(data).length > 0) {
       await prisma.job.update({
         where: { id: jobId },
         data: data as object,
       });
+    }
+
+    const assignmentChanged = newAssignedToUids !== null;
+    const statusChanged =
+      typeof body.status === "string" && body.status !== previousStatus;
+
+    if (assignmentChanged || statusChanged) {
+      const companyName = await loadCompanyName(companyId);
+      if (companyName) {
+        const context = buildJobNotificationContext({
+          companyId,
+          companyName,
+          jobId: existing.id,
+          jobNumber: existing.jobNumber,
+          customerName: existing.customerName,
+          actorUserId: userId,
+        });
+
+        if (assignmentChanged) {
+          void notifyJobAssignmentChanges({
+            context,
+            previousAssignedToUids,
+            newAssignedToUids: newAssignedToUids!,
+          });
+        }
+
+        if (statusChanged) {
+          const assignedForStatus = newAssignedToUids ?? previousAssignedToUids;
+          void notifyJobStatusChange({
+            context,
+            previousStatus,
+            newStatus: body.status as string,
+            assignedToUids: assignedForStatus,
+          });
+        }
+      }
     }
 
     return NextResponse.json({ ok: true }, { status: 200 });

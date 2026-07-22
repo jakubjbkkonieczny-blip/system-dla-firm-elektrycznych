@@ -11,6 +11,10 @@ import {
   buildStageAccessContext,
   canReopenStage,
 } from "@/lib/server/jobs/stage-permissions";
+import {
+  loadStageNotificationContext,
+  notifyStageReopened,
+} from "@/lib/server/notifications/stage-notifications";
 
 export async function POST(
   _req: NextRequest,
@@ -69,6 +73,20 @@ export async function POST(
       eventType: "reopened",
       actorUserId: userId,
     });
+
+    const notificationContext = await loadStageNotificationContext({
+      companyId,
+      jobId,
+      stage: { id: stageId, name: stage.name },
+      actorUserId: userId,
+    });
+    if (notificationContext) {
+      void notifyStageReopened({
+        context: notificationContext,
+        supervisorUserId: stage.supervisorUserId,
+        submittedByUserId: stage.submittedByUserId,
+      });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

@@ -11,6 +11,10 @@ import {
   buildStageAccessContext,
   canRejectStage,
 } from "@/lib/server/jobs/stage-permissions";
+import {
+  loadStageNotificationContext,
+  notifyStageRejected,
+} from "@/lib/server/notifications/stage-notifications";
 
 export async function POST(
   req: NextRequest,
@@ -73,6 +77,20 @@ export async function POST(
       actorUserId: userId,
       comment,
     });
+
+    const notificationContext = await loadStageNotificationContext({
+      companyId,
+      jobId,
+      stage: { id: stageId, name: stage.name },
+      actorUserId: userId,
+    });
+    if (notificationContext) {
+      void notifyStageRejected({
+        context: notificationContext,
+        supervisorUserId: stage.supervisorUserId,
+        submittedByUserId: stage.submittedByUserId,
+      });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

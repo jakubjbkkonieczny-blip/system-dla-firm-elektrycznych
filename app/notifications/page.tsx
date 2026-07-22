@@ -12,6 +12,7 @@ type Notification = {
   read: boolean;
   createdAt?: string;
   url?: string | null;
+  companyNameSnapshot?: string | null;
 };
 
 export default function NotificationsPage() {
@@ -64,6 +65,9 @@ export default function NotificationsPage() {
                   : "bg-accent/10 border-accent/30 hover:bg-accent/15",
               ].join(" ")}
             >
+              {n.companyNameSnapshot ? (
+                <div className="text-xs font-medium text-text-muted">{n.companyNameSnapshot}</div>
+              ) : null}
               <div className="font-semibold text-text">{n.title}</div>
               <div className="text-sm text-text-muted mt-1">{n.body}</div>
             </Link>

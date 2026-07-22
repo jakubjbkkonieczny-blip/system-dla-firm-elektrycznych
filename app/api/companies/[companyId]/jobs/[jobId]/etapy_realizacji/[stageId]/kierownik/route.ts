@@ -12,6 +12,10 @@ import {
   buildStageAccessContext,
   canAssignStageSupervisor,
 } from "@/lib/server/jobs/stage-permissions";
+import {
+  loadStageNotificationContext,
+  notifyStageSupervisorChange,
+} from "@/lib/server/notifications/stage-notifications";
 
 type Body = {
   kierownik_uid?: string | null;
@@ -58,6 +62,7 @@ export async function PATCH(
       }
     }
 
+    const previousSupervisorUserId = stage.supervisorUserId;
     const now = new Date();
 
     await prisma.jobStage.update({
@@ -83,6 +88,20 @@ export async function PATCH(
           }
         : null,
     });
+
+    const notificationContext = await loadStageNotificationContext({
+      companyId,
+      jobId,
+      stage: { id: stageId, name: stage.name },
+      actorUserId: userId,
+    });
+    if (notificationContext) {
+      void notifyStageSupervisorChange({
+        context: notificationContext,
+        previousSupervisorUserId,
+        newSupervisorUserId: supervisorUid || null,
+      });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

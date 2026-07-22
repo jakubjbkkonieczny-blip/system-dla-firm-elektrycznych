@@ -25,6 +25,11 @@ import {
   parseJobPriorityForWrite,
   type JobPriority,
 } from "@/lib/server/jobs/job-priority";
+import {
+  buildJobNotificationContext,
+  loadCompanyName,
+  notifyInitialJobAssignments,
+} from "@/lib/server/notifications/job-notifications";
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -188,6 +193,28 @@ export async function POST(
 
       return j.id;
     });
+
+    const [createdJob, companyName] = await Promise.all([
+      prisma.job.findUnique({
+        where: { id: jobId },
+        select: { id: true, jobNumber: true, customerName: true },
+      }),
+      loadCompanyName(companyId),
+    ]);
+
+    if (createdJob && companyName && assignedToUids.length > 0) {
+      void notifyInitialJobAssignments({
+        context: buildJobNotificationContext({
+          companyId,
+          companyName,
+          jobId: createdJob.id,
+          jobNumber: createdJob.jobNumber,
+          customerName: createdJob.customerName,
+          actorUserId: userId,
+        }),
+        assignedToUids,
+      });
+    }
 
     return NextResponse.json({ jobId }, { status: 200 });
   } catch (e: unknown) {

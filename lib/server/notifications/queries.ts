@@ -10,6 +10,7 @@ export type NotificationListItem = {
   body: string;
   url: string | null;
   companyId: string | null;
+  companyNameSnapshot: string | null;
   read: boolean;
   createdAt: string;
 };
@@ -33,6 +34,7 @@ export async function listNotificationsForUser(params: {
       body: true,
       url: true,
       companyId: true,
+      companyNameSnapshot: true,
       readAt: true,
       createdAt: true,
     },
@@ -49,6 +51,7 @@ export async function listNotificationsForUser(params: {
     body: row.body,
     url: row.url,
     companyId: row.companyId,
+    companyNameSnapshot: row.companyNameSnapshot,
     read: row.readAt != null,
     createdAt: row.createdAt.toISOString(),
   }));

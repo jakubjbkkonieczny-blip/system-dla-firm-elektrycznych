@@ -8,7 +8,10 @@ import webpush from "web-push";
 import { prisma } from "@/lib/db/prisma";
 import { upsertUserPushSubscription, deleteUserPushSubscription } from "../subscription-store";
 import { sendPushToUser } from "../sender";
-import { createNotificationForUser } from "@/lib/server/notifications/notification-service";
+import {
+  createNotificationForFormerCompanyMember,
+  createNotificationForUser,
+} from "@/lib/server/notifications/notification-service";
 import {
   listNotificationsForUser,
   markNotificationReadForUser,
@@ -294,6 +297,46 @@ describe("notification service", () => {
     await prisma.notification.delete({ where: { id: n.id } });
     await prisma.user.delete({ where: { id: user.id } });
   });
+
+  it("former company member notification persists with company snapshot without active membership", async () => {
+    const worker = await createTestUser("notif-former-member");
+    const company = await createTestCompany("notif-former-co");
+    await createMembership(worker.id, company.id);
+
+    await prisma.companyMember.update({
+      where: { companyId_userId: { companyId: company.id, userId: worker.id } },
+      data: { isActive: false },
+    });
+
+    const n = await createNotificationForFormerCompanyMember({
+      recipientUserId: worker.id,
+      companyId: company.id,
+      companyNameSnapshot: company.name,
+      type: "membership.deactivated",
+      title: "Deactivated",
+      body: "Access removed",
+    });
+
+    assert.equal(n.companyId, company.id);
+    assert.equal(n.companyNameSnapshot, company.name);
+
+    await assert.rejects(
+      () =>
+        createNotificationForUser({
+          recipientUserId: worker.id,
+          companyId: company.id,
+          type: "job.assigned",
+          title: "Blocked",
+          body: "Still blocked",
+        }),
+      /NOT_ACTIVE_MEMBER/
+    );
+
+    await prisma.notification.deleteMany({ where: { userId: worker.id } });
+    await prisma.companyMember.deleteMany({ where: { userId: worker.id } });
+    await prisma.company.delete({ where: { id: company.id } });
+    await prisma.user.delete({ where: { id: worker.id } });
+  });
 });
 
 describe("notification queries", () => {
@@ -372,10 +415,41 @@ describe("push foundation static guards", () => {
     assert.match(sw, /parsed\.origin !== self\.location\.origin/);
   });
 
-  it("no business-event routes import notification service in PUSH 1", async () => {
-    const jobRoute = await readFile("app/api/companies/[companyId]/jobs/route.ts", "utf8");
-    assert.doesNotMatch(jobRoute, /notification-service/);
+  it("no unrelated business-event routes import notification service in PUSH 1", async () => {
     const vacationRoute = await readFile("app/api/companies/[companyId]/vacations/route.ts", "utf8");
     assert.doesNotMatch(vacationRoute, /notification-service/);
+  });
+
+  it("job routes use job-notifications module for PUSH 2A side effects", async () => {
+    const jobRoute = await readFile("app/api/companies/[companyId]/jobs/route.ts", "utf8");
+    const jobIdRoute = await readFile("app/api/companies/[companyId]/jobs/[jobId]/route.ts", "utf8");
+    assert.match(jobRoute, /job-notifications/);
+    assert.match(jobIdRoute, /job-notifications/);
+  });
+
+  it("stage routes use stage-notifications module for PUSH 2B side effects", async () => {
+    const kierownikRoute = await readFile(
+      "app/api/companies/[companyId]/jobs/[jobId]/etapy_realizacji/[stageId]/kierownik/route.ts",
+      "utf8"
+    );
+    const zakonczRoute = await readFile(
+      "app/api/companies/[companyId]/jobs/[jobId]/etapy_realizacji/[stageId]/zakoncz/route.ts",
+      "utf8"
+    );
+    assert.match(kierownikRoute, /stage-notifications/);
+    assert.match(zakonczRoute, /stage-notifications/);
+  });
+
+  it("vacation and membership routes use dedicated notification modules for PUSH 2C", async () => {
+    const vacationMeRoute = await readFile(
+      "app/api/companies/[companyId]/vacations/me/route.ts",
+      "utf8"
+    );
+    const inviteRoute = await readFile(
+      "app/api/companies/[companyId]/members/invite/route.ts",
+      "utf8"
+    );
+    assert.match(vacationMeRoute, /vacation-notifications/);
+    assert.match(inviteRoute, /membership-notifications/);
   });
 });

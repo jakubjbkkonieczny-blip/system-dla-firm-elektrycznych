@@ -13,6 +13,10 @@ import {
   buildStageAccessContext,
   canSubmitStage,
 } from "@/lib/server/jobs/stage-permissions";
+import {
+  loadStageNotificationContext,
+  notifyStageSubmittedForApproval,
+} from "@/lib/server/notifications/stage-notifications";
 
 type Body = {
   notatka_pracownika?: string;
@@ -83,6 +87,16 @@ export async function POST(
       actorUserId: userId,
       comment: note || null,
     });
+
+    const notificationContext = await loadStageNotificationContext({
+      companyId,
+      jobId,
+      stage: { id: stageId, name: stage.name },
+      actorUserId: userId,
+    });
+    if (notificationContext) {
+      void notifyStageSubmittedForApproval({ context: notificationContext });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {

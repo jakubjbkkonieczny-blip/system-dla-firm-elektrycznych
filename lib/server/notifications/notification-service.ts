@@ -5,6 +5,7 @@ import { sendPushToUser } from "@/lib/server/push/sender";
 export type CreateNotificationInput = {
   recipientUserId: string;
   companyId?: string | null;
+  companyNameSnapshot?: string | null;
   type: string;
   title: string;
   body: string;
@@ -50,6 +51,50 @@ export async function createNotificationForUser(
     data: {
       userId: input.recipientUserId,
       companyId: input.companyId ?? null,
+      companyNameSnapshot: input.companyNameSnapshot ?? null,
+      type: input.type,
+      title: input.title,
+      body: input.body,
+      url: input.url ?? null,
+    },
+  });
+
+  try {
+    await sendPushToUser(input.recipientUserId, {
+      title: input.title,
+      body: input.body,
+      url: input.url ?? undefined,
+      tag: notification.id,
+    });
+  } catch {
+    // Push failure must not rollback DB record.
+  }
+
+  return notification;
+}
+
+/**
+ * Persists notification for a user who no longer has active membership in companyId.
+ * Only for explicit post-membership lifecycle events (deactivation/removal).
+ * Does not weaken createNotificationForUser membership checks for normal company events.
+ */
+export async function createNotificationForFormerCompanyMember(
+  input: CreateNotificationInput & { companyId: string }
+): Promise<Notification> {
+  const user = await prisma.user.findUnique({
+    where: { id: input.recipientUserId },
+    select: { id: true, isActive: true },
+  });
+
+  if (!user || !user.isActive) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  const notification = await prisma.notification.create({
+    data: {
+      userId: input.recipientUserId,
+      companyId: input.companyId,
+      companyNameSnapshot: input.companyNameSnapshot ?? null,
       type: input.type,
       title: input.title,
       body: input.body,

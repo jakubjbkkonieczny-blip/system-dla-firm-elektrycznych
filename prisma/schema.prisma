@@ -536,15 +536,16 @@ model StripeWebhookEvent {
 
 /// In-app notification history for a user (DB is source of truth; push is best-effort delivery).
 model Notification {
-  id        String    @id @default(cuid())
-  userId    String
-  companyId String?
-  type      String
-  title     String
-  body      String
-  url       String?
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
+  id                  String    @id @default(cuid())
+  userId              String
+  companyId           String?
+  companyNameSnapshot String?
+  type                String
+  title               String
+  body                String
+  url                 String?
+  readAt              DateTime?
+  createdAt           DateTime  @default(now())
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)

@@ -8,6 +8,10 @@ import { requireActiveMember } from "@/app/api/_lib/membership";
 import { getEmployeeVacationDashboard } from "@/lib/server/vacations/get-employee-vacation-dashboard";
 import { createVacationRequest } from "@/lib/server/vacations/vacation-actions";
 import type { VacationStatus } from "@/lib/vacations/types";
+import {
+  loadCompanyName,
+  notifyVacationRequestCreated,
+} from "@/lib/server/notifications/vacation-notifications";
 
 type Ctx = { params: Promise<{ companyId: string }> };
 
@@ -67,6 +71,15 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       endDate,
       reason,
     });
+
+    const companyName = await loadCompanyName(companyId);
+    if (companyName) {
+      void notifyVacationRequestCreated({
+        companyId,
+        companyName,
+        requesterUserId: sessionUser.id,
+      });
+    }
 
     return NextResponse.json({ id: created.id }, { status: 201 });
   } catch (e: unknown) {
