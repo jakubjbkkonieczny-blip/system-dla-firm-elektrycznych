@@ -39,6 +39,18 @@ import {
 
 type Role = "owner" | "admin" | "staff";
 
+const JOB_STATUS_LABELS: Record<string, string> = {
+  new: "Nowe",
+  scheduled: "Zaplanowane",
+  in_progress: "W trakcie",
+  done: "Zakończone",
+  cancelled: "Anulowane",
+};
+
+function formatJobStatusLabel(status: string) {
+  return JOB_STATUS_LABELS[status] ?? status;
+}
+
 
 
 type Stage = {
@@ -1593,6 +1605,8 @@ preferredTo={job.preferredTo}
 
 <label className="text-sm">Status:</label>
 
+{isOwnerOrAdmin ? (
+
 <select
 
 className="border border-border rounded-lg px-3 py-2 bg-input"
@@ -1616,6 +1630,12 @@ onChange={(e) => updateJob({ status: e.target.value })}
 <option value="cancelled">anulowane</option>
 
 </select>
+
+) : (
+
+<span className="text-sm text-text">{formatJobStatusLabel(job.status)}</span>
+
+)}
 
 </div>
 

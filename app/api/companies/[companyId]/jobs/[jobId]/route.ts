@@ -25,6 +25,10 @@ import {
   notifyJobAssignmentChanges,
   notifyJobStatusChange,
 } from "@/lib/server/notifications/job-notifications";
+import {
+  assertJobStatusMutationAllowed,
+  isJobStatusChange,
+} from "@/lib/server/jobs/job-status-mutation";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
 
@@ -85,6 +89,15 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const data: Record<string, unknown> = {};
     let newAssignedToUids: string[] | null = null;
 
+    try {
+      assertJobStatusMutationAllowed(member, body);
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message === "FORBIDDEN") {
+        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      }
+      throw e;
+    }
+
     if (body.assignedToUids !== undefined) {
       if (!(role === "owner" || role === "admin")) {
         return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
@@ -137,8 +150,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     }
 
     const assignmentChanged = newAssignedToUids !== null;
-    const statusChanged =
-      typeof body.status === "string" && body.status !== previousStatus;
+    const statusChanged = isJobStatusChange(body, previousStatus);
 
     if (assignmentChanged || statusChanged) {
       const companyName = await loadCompanyName(companyId);
