@@ -364,8 +364,14 @@ describe("deactivation service", () => {
 describe("legacy DELETE /api/me employer guard", () => {
   it("blocks employers from using the legacy self-delete path", async () => {
     const source = await readFile("app/api/me/route.ts", "utf8");
-    assert.match(source, /USE_DEACTIVATION_FINAL_ENDPOINT/);
-    assert.match(source, /accountRole === "employer"/);
+    assert.match(source, /resolveManualSelfDelete/);
     assert.doesNotMatch(source, /deactivateEmployerAccount/);
+    assert.doesNotMatch(source, /prisma\.user\.update/);
+  });
+
+  it("blocks workers from using the legacy self-delete path", async () => {
+    const source = await readFile("app/api/me/route.ts", "utf8");
+    assert.match(source, /WORKER_SELF_DELETE_NOT_ALLOWED|resolveManualSelfDelete/);
+    assert.doesNotMatch(source, /deactivatedAt/);
   });
 });

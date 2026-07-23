@@ -15,7 +15,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 type BillingStatus = "active" | "inactive" | "cancelled" | null;
 
 export default function SettingsPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -43,10 +43,6 @@ export default function SettingsPage() {
   const [portalBusy, setPortalBusy] = useState(false);
   const [resumeBusy, setResumeBusy] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState("");
-
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteBusy, setDeleteBusy] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   const companyId = useActiveCompanyId();
   const [companyRole, setCompanyRole] = useState<"owner" | "admin" | "staff" | null>(null);
@@ -327,29 +323,6 @@ export default function SettingsPage() {
     }
   }
 
-  async function deleteAccount() {
-    if (deleteConfirm !== "USUŃ") {
-      setErr("Aby usunąć konto wpisz dokładnie: USUŃ");
-      return;
-    }
-
-    setDeleteBusy(true);
-    setErr(null);
-
-    try {
-      await apiFetch("/api/me", { method: "DELETE" });
-      await logout();
-      router.replace("/login");
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "DELETE_ERROR";
-      setErr(message);
-    } finally {
-      setDeleteBusy(false);
-      setDeleteOpen(false);
-      setDeleteConfirm("");
-    }
-  }
-
   if (loading || loadingData) {
     return (
       <div className="p-6 text-text-muted">Ładowanie...</div>
@@ -589,24 +562,6 @@ export default function SettingsPage() {
           </SettingsSection>
         ) : null}
 
-        {role === "worker" ? (
-          <SettingsSection
-            title="Strefa niebezpieczna"
-            description="Usunięcie konta jest nieodwracalne"
-            variant="danger"
-          >
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setDeleteOpen(true)}
-                className="min-h-[44px] px-4 py-2 bg-danger text-white rounded-lg hover:opacity-90 transition"
-              >
-                Usuń konto
-              </button>
-            </div>
-          </SettingsSection>
-        ) : null}
-
         {cancelSubOpen ? (
           <div className="fixed inset-0 bg-overlay flex items-center justify-center p-6 z-50">
             <div className="w-full max-w-md theme-glass bg-card rounded-2xl p-6 space-y-5 border border-border shadow-lg">
@@ -651,43 +606,6 @@ export default function SettingsPage() {
             userEmail={user.email}
             onClose={() => setDeactivationOpen(false)}
           />
-        ) : null}
-
-        {deleteOpen ? (
-          <div className="fixed inset-0 bg-overlay flex items-center justify-center p-6 z-50">
-            <div className="w-full max-w-md theme-glass bg-card rounded-2xl p-6 space-y-5 border border-border shadow-lg">
-              <h3 className="text-lg font-semibold text-text">
-                Czy na pewno chcesz usunąć konto?
-              </h3>
-              <p className="text-sm text-text-muted">
-                Ta operacja jest nieodwracalna. Wpisz <b>USUŃ</b>, aby potwierdzić.
-              </p>
-              <input
-                className="w-full border border-border rounded-lg px-3 py-2 bg-input text-text focus:outline-none focus:ring-2 focus:ring-danger"
-                placeholder="USUŃ"
-                value={deleteConfirm}
-                onChange={(e) => setDeleteConfirm(e.target.value)}
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => {
-                    setDeleteOpen(false);
-                    setDeleteConfirm("");
-                  }}
-                  className="px-4 py-2 border border-border rounded-lg hover:bg-card-hover text-text"
-                >
-                  Anuluj
-                </button>
-                <button
-                  onClick={() => void deleteAccount()}
-                  disabled={deleteBusy || deleteConfirm !== "USUŃ"}
-                  className="px-4 py-2 bg-danger text-white rounded-lg hover:opacity-90 disabled:opacity-50"
-                >
-                  {deleteBusy ? "Usuwanie..." : "Usuń konto"}
-                </button>
-              </div>
-            </div>
-          </div>
         ) : null}
       </div>
     </div>
