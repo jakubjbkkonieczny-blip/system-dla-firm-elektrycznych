@@ -1,5 +1,7 @@
 "use client";
 
+import { resolvePushBrowserState, type PushBrowserState } from "./ui-state";
+
 export function isPushSupported(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -136,5 +138,32 @@ export async function registerServiceWorker(): Promise<void> {
     await navigator.serviceWorker.register("/sw.js", { scope: "/" });
   } catch {
     // Non-blocking: PWA shell must keep working without SW.
+  }
+}
+
+export async function detectPushNotificationState(): Promise<PushBrowserState> {
+  if (!isPushSupported()) {
+    return "unsupported";
+  }
+
+  const permission = Notification.permission;
+
+  try {
+    const registration = await navigator.serviceWorker.getRegistration("/sw.js");
+    const subscription = registration
+      ? await registration.pushManager.getSubscription()
+      : null;
+
+    return resolvePushBrowserState({
+      supported: true,
+      permission,
+      hasSubscription: Boolean(subscription),
+    });
+  } catch {
+    return resolvePushBrowserState({
+      supported: true,
+      permission,
+      hasSubscription: false,
+    });
   }
 }
