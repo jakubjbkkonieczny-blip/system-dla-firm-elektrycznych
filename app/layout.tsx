@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ActiveCompanyProvider } from "@/components/ActiveCompanyProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { AppShell } from "@/components/AppShell";
 import { ServiceWorkerRegistrar } from "@/components/push/ServiceWorkerRegistrar";
@@ -85,10 +86,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden`}
       >
         <AuthProvider>
-          <ThemeProvider>
-            <ServiceWorkerRegistrar />
-            <AppShell>{children}</AppShell>
-          </ThemeProvider>
+          <ActiveCompanyProvider>
+            <ThemeProvider>
+              <ServiceWorkerRegistrar />
+              <AppShell>{children}</AppShell>
+            </ThemeProvider>
+          </ActiveCompanyProvider>
         </AuthProvider>
       </body>
     </html>

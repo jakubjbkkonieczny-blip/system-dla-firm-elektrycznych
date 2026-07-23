@@ -3,9 +3,20 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import { useActiveCompany } from "@/components/ActiveCompanyProvider";
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import {
+  deriveAppShellRoleState,
+  type CompanyRoleFetchOutcome,
+} from "@/lib/appShellRole";
+import {
+  buildRoleContextKey,
+  fetchOutcomeForIdentityChange,
+  resolveRoleFetchError,
+  resolveRoleFetchResponse,
+} from "@/lib/appShellRoleContext";
 import { AppLogoMark } from "@/components/auth/AppLogo";
 import { APP_BRANDING } from "@/lib/branding";
 
@@ -131,11 +142,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout } = useAuth();
+  const { clearActiveCompanyId, ready: companyReady } = useActiveCompany();
   const companyId = useActiveCompanyId();
+  const userId = user?.uid ?? "";
 
-  const [role, setRole] = useState<Role>("staff");
-  const [roleLoaded, setRoleLoaded] = useState(false);
+  const [fetchOutcome, setFetchOutcome] = useState<CompanyRoleFetchOutcome>({
+    status: "idle",
+  });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const identityRef = useRef({ userId: "", companyId: "" });
+  identityRef.current = { userId, companyId };
 
   const hideShell =
     pathname === "/" ||
@@ -150,20 +166,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const isAuthed = !!user && !loading;
 
+  useLayoutEffect(() => {
+    setFetchOutcome(
+      fetchOutcomeForIdentityChange({
+        isAuthed,
+        hideShell,
+        companyId,
+        companyReady,
+      })
+    );
+  }, [isAuthed, hideShell, userId, companyId, companyReady]);
+
   useEffect(() => {
     let cancelled = false;
+    const requestKey = buildRoleContextKey(userId, companyId);
+
+    setFetchOutcome(
+      fetchOutcomeForIdentityChange({
+        isAuthed,
+        hideShell,
+        companyId,
+        companyReady,
+      })
+    );
 
     async function loadRole() {
-      if (!isAuthed || hideShell) return;
-
-      if (!companyId) {
-        setRole("staff");
-        setRoleLoaded(false);
+      if (!isAuthed || hideShell) {
         return;
       }
 
-      setRole("staff");
-      setRoleLoaded(false);
+      if (!companyReady || !companyId) {
+        return;
+      }
 
       try {
         const data: CompanyMeResponse = await apiFetch(
@@ -172,21 +206,57 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         if (cancelled) return;
 
-        setRole((data?.role as Role) || "staff");
-        setRoleLoaded(true);
+        const currentKey = buildRoleContextKey(
+          identityRef.current.userId,
+          identityRef.current.companyId
+        );
+        const resolved = resolveRoleFetchResponse({
+          requestKey,
+          currentKey,
+          role: data?.role,
+        });
+
+        if (resolved.kind === "stale") return;
+
+        setFetchOutcome(resolved.outcome);
       } catch {
         if (cancelled) return;
-        setRole("staff");
-        setRoleLoaded(true);
+
+        const currentKey = buildRoleContextKey(
+          identityRef.current.userId,
+          identityRef.current.companyId
+        );
+        const resolved = resolveRoleFetchError({ requestKey, currentKey });
+        if (resolved.kind === "stale") return;
+
+        setFetchOutcome(resolved.outcome);
       }
     }
 
-    loadRole();
+    void loadRole();
 
     return () => {
       cancelled = true;
     };
-  }, [isAuthed, companyId, hideShell]);
+  }, [isAuthed, hideShell, userId, companyId, companyReady]);
+
+  const roleState = useMemo(
+    () =>
+      deriveAppShellRoleState({
+        isAuthed,
+        hideShell,
+        companyId,
+        companyReady,
+        fetchOutcome,
+      }),
+    [isAuthed, hideShell, companyId, companyReady, fetchOutcome]
+  );
+
+  useEffect(() => {
+    if (roleState.shouldClearActiveCompany) {
+      clearActiveCompanyId();
+    }
+  }, [roleState.shouldClearActiveCompany, clearActiveCompanyId]);
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -210,13 +280,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobileNavOpen]);
 
-  const isOwnerOrAdmin = role === "owner" || role === "admin";
-
-  const roleLabel = useMemo(() => {
-    if (role === "owner") return "Właściciel";
-    if (role === "admin") return "Administrator";
-    return "Pracownik";
-  }, [role]);
+  const isOwnerOrAdmin = roleState.isOwnerOrAdmin;
+  const roleLabel = roleState.roleLabel;
+  const roleLoaded = roleState.roleLoaded;
 
   async function onLogout() {
     await logout();
@@ -228,7 +294,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (hideShell) return <>{children}</>;
   if (loading) return null;
   if (!user) return <>{children}</>;
-  if (!roleLoaded && companyId) return null;
+  if (isAuthed && !hideShell && (!companyReady || !roleLoaded)) return null;
 
   const topLabel =
     (user.displayName ?? "").trim() || user.email || "Użytkownik";
@@ -237,7 +303,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     topLabel,
     roleLabel,
     isOwnerOrAdmin,
-    companyId,
+    companyId: companyId || null,
     onLogout,
   };
 

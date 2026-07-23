@@ -9,6 +9,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { clearActiveCompanySessionState } from "@/lib/activeCompanyStorage";
+import { shouldRefreshSessionOnFocus } from "@/lib/authSessionSync";
 
 type User = {
   uid: string;
@@ -79,6 +81,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [refresh]);
 
+  useEffect(() => {
+    const lastRefreshAtRef = { current: 0 };
+
+    async function onFocusOrVisible() {
+      if (
+        !shouldRefreshSessionOnFocus({
+          visibilityState: document.visibilityState,
+          now: Date.now(),
+          lastRefreshAt: lastRefreshAtRef.current,
+        })
+      ) {
+        return;
+      }
+
+      lastRefreshAtRef.current = Date.now();
+      await refresh();
+    }
+
+    window.addEventListener("focus", onFocusOrVisible);
+    document.addEventListener("visibilitychange", onFocusOrVisible);
+    return () => {
+      window.removeEventListener("focus", onFocusOrVisible);
+      document.removeEventListener("visibilitychange", onFocusOrVisible);
+    };
+  }, [refresh]);
+
   const logout = useCallback(async () => {
     try {
       await fetch("/api/auth/session", {
@@ -88,6 +116,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore network errors; we still clear client state below
     }
+
+    if (typeof window !== "undefined") {
+      clearActiveCompanySessionState(localStorage);
+    }
+
     if (isMountedRef.current) {
       setUser(null);
       setLoading(false);

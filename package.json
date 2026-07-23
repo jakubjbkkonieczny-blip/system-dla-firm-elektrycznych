@@ -10,7 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "test": "tsx --test lib/jobs/budget/__tests__/*.test.ts lib/server/workers/__tests__/*.test.ts lib/server/deactivation/__tests__/*.test.ts lib/server/email/__tests__/*.test.ts lib/deactivation/__tests__/*.test.ts lib/push/__tests__/*.test.ts lib/server/jobs/__tests__/*.test.ts lib/server/push/__tests__/*.test.ts lib/server/notifications/__tests__/*.test.ts"
+    "test": "tsx --test lib/jobs/budget/__tests__/*.test.ts lib/server/workers/__tests__/*.test.ts lib/server/deactivation/__tests__/*.test.ts lib/server/email/__tests__/*.test.ts lib/deactivation/__tests__/*.test.ts lib/push/__tests__/*.test.ts lib/server/jobs/__tests__/*.test.ts lib/server/push/__tests__/*.test.ts lib/server/notifications/__tests__/*.test.ts lib/__tests__/*.test.ts"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",

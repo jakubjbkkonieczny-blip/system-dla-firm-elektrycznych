@@ -2,10 +2,8 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import { apiFetch } from "@/lib/api";
-import {
-  setActiveCompanyIdInStorage,
-  useActiveCompanyId,
-} from "@/lib/useActiveCompany";
+import { useActiveCompany } from "@/components/ActiveCompanyProvider";
+import { useActiveCompanyId } from "@/lib/useActiveCompany";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -16,6 +14,7 @@ type BillingStatus = "active" | "inactive" | "cancelled" | null;
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const { setActiveCompanyId } = useActiveCompany();
   const router = useRouter();
 
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -117,7 +116,7 @@ export default function DashboardPage() {
 
       const companyId = data.companyId as string;
 
-      setActiveCompanyIdInStorage(companyId);
+      setActiveCompanyId(companyId);
       setNewCompanyName("");
 
       await loadCompanies();
@@ -131,7 +130,7 @@ export default function DashboardPage() {
   }
 
   function onSelectCompany(id: string) {
-    setActiveCompanyIdInStorage(id);
+    setActiveCompanyId(id);
     router.refresh();
   }
 
