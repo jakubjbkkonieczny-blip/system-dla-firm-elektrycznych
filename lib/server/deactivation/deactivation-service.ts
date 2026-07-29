@@ -117,6 +117,13 @@ export async function deactivateEmployerAccount(
       throw new Error("FORBIDDEN");
     }
 
+    // Supabase-Auth-managed users have null passwordHash. Employer deactivation
+    // still requires password reauthentication — Stage 2A fails closed here.
+    // Cutover blocker: wire Supabase reauthenticate() before production Auth cutover.
+    if (!actor.passwordHash) {
+      throw new Error("AUTH_PASSWORD_REAUTH_REQUIRED");
+    }
+
     const passwordMatches = await bcrypt.compare(currentPassword, actor.passwordHash);
     if (!passwordMatches) {
       throw new Error("INVALID_PASSWORD");

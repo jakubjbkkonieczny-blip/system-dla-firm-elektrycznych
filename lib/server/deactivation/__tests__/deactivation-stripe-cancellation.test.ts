@@ -356,8 +356,14 @@ describe("existing stripe routes compatibility", () => {
   it("resume route relies on active session and does not bypass deactivated accounts", async () => {
     const source = await readFile("app/api/stripe/resume/route.ts", "utf8");
     assert.match(source, /requireSessionUser/);
-    const sessionSource = await readFile("lib/server/auth/getUserFromSession.ts", "utf8");
-    assert.match(sessionSource, /!user\.isActive/);
+    // Session resolution delegates to adapters; both must reject inactive users.
+    const legacySession = await readFile("lib/server/auth/legacy-session.ts", "utf8");
+    assert.match(legacySession, /!user\.isActive/);
+    const supabaseResolve = await readFile(
+      "lib/supabase/resolve-session-user.ts",
+      "utf8"
+    );
+    assert.match(supabaseResolve, /!user\.isActive|AUTH_USER_INACTIVE/);
   });
 
   it("final deactivation route orchestrates stripe after db deactivation", async () => {

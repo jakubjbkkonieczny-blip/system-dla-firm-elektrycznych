@@ -11,6 +11,9 @@ import {
   setDeactivatedAccessCookie,
 } from "@/lib/server/deactivation/deactivated-account-access";
 import { resolveDeactivatedEmployerAccountState } from "@/lib/server/deactivation/get-deactivated-account-state";
+import { isSupabaseAuthEnabled } from "@/lib/supabase/feature-flags";
+import { supabaseLogin, supabaseLogout } from "@/lib/supabase/auth-actions";
+import { SupabaseAuthError } from "@/lib/supabase/errors";
 
 type Body = {
   email?: unknown;
@@ -18,6 +21,32 @@ type Body = {
 };
 
 export async function POST(req: NextRequest) {
+  if (isSupabaseAuthEnabled()) {
+    try {
+      const body = (await req.json()) as Body;
+      const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+      const password = typeof body.password === "string" ? body.password : "";
+      const result = await supabaseLogin({ email, password });
+      if (!result.ok) {
+        return NextResponse.json({ error: result.error }, { status: result.status });
+      }
+      if (result.deactivated === true) {
+        return NextResponse.json({ ok: true, deactivated: true }, { status: 200 });
+      }
+      // Supabase cookies already set by signInWithPassword via server client.
+      // Do NOT mint legacy HMAC session.
+      const res = NextResponse.json({ ok: true }, { status: 200 });
+      res.headers.set("Cache-Control", "no-store");
+      return res;
+    } catch (e: unknown) {
+      if (e instanceof SupabaseAuthError) {
+        return NextResponse.json({ error: e.publicCode }, { status: e.httpStatus });
+      }
+      console.error("[supabase-auth]", { category: "AUTH_PROVIDER_UNAVAILABLE" });
+      return NextResponse.json({ error: "AUTH_PROVIDER_UNAVAILABLE" }, { status: 503 });
+    }
+  }
+
   try {
     const body = (await req.json()) as Body;
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
@@ -28,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "INVALID_CREDENTIALS" }, { status: 401 });
     }
 
@@ -57,6 +86,20 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE() {
+  if (isSupabaseAuthEnabled()) {
+    try {
+      const res = await supabaseLogout();
+      res.headers.set("Cache-Control", "no-store");
+      return res;
+    } catch (e: unknown) {
+      if (e instanceof SupabaseAuthError) {
+        return NextResponse.json({ error: e.publicCode }, { status: e.httpStatus });
+      }
+      const res = NextResponse.json({ ok: true }, { status: 200 });
+      return clearSessionCookie(res);
+    }
+  }
+
   const res = NextResponse.json({ ok: true }, { status: 200 });
   return clearSessionCookie(res);
 }

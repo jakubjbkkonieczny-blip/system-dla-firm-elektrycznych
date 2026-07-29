@@ -15,7 +15,7 @@ import { RECOVERY_LOGIN_SUCCESS_MESSAGE } from "@/lib/deactivation/recovery-ui-c
 
 type AccountType = "worker" | "employer";
 type Tab = "login" | "register";
-type Screen = "auth" | "reset" | "reset-sent";
+type Screen = "auth" | "reset" | "reset-sent" | "confirm-email";
 
 function normalizeType(v: string | null): AccountType | null {
   if (v === "worker") return "worker";
@@ -61,6 +61,11 @@ function mapAuthErrorMessage(raw: string): string {
       return "Nieprawidłowe żądanie. Spróbuj ponownie.";
     case "INTERNAL_ERROR":
       return "Błąd serwera. Spróbuj ponownie później.";
+    case "AUTH_PROVIDER_UNAVAILABLE":
+    case "AUTH_CONFIGURATION_ERROR":
+      return "Uwierzytelnianie jest tymczasowo niedostępne. Spróbuj ponownie później.";
+    case "AUTH_PROVISIONING_FAILED":
+      return "Nie udało się dokończyć rejestracji. Spróbuj ponownie.";
     default:
       return raw;
   }
@@ -207,11 +212,17 @@ function LoginPageInner() {
 
       const normalizedEmail = email.trim().toLowerCase();
       const nameTrimmed = displayName.trim();
-      await postAuthJson("/api/auth/register", {
+      const registerResult = await postAuthJson("/api/auth/register", {
         email: normalizedEmail,
         password: pass,
         displayName: nameTrimmed,
       });
+
+      if (registerResult.requiresEmailConfirmation === true) {
+        setScreen("confirm-email");
+        return;
+      }
+
       await postAuthJson("/api/auth/session", { email: normalizedEmail, password: pass });
 
       const role = await ensureRoleOrBlock(selected, nameTrimmed);
@@ -248,7 +259,9 @@ function LoginPageInner() {
 
     try {
       if (!resetEmail.trim()) throw new Error("Podaj email.");
-      console.log("RESET TODO");
+      await postAuthJson("/api/auth/forgot-password", {
+        email: resetEmail.trim().toLowerCase(),
+      });
       setScreen("reset-sent");
     } catch (e: unknown) {
       setMsg(e instanceof Error ? e.message : "Nie udało się wysłać resetu hasła.");
@@ -485,6 +498,39 @@ function LoginPageInner() {
               {resetEmail.trim() || email.trim()}
             </p>
 
+            <button
+              type="button"
+              className={`w-full min-h-[48px] rounded-xl text-base font-semibold transition-colors ${accent.button}`}
+              onClick={() => {
+                setScreen("auth");
+                setTab("login");
+                setMsg(null);
+              }}
+            >
+              Wróć do logowania
+            </button>
+          </div>
+        </>
+      )}
+
+      {screen === "confirm-email" && (
+        <>
+          <AuthCardHeader
+            accountType={selected}
+            title="Potwierdź adres email"
+            typeLabel={typeLabel}
+            onChangeType={goBackToTypeSelect}
+          />
+          <div className="px-6 sm:px-8 pb-8 pt-2 space-y-5 text-center">
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Wysłaliśmy link potwierdzający na adres:
+            </p>
+            <p className={`text-base font-semibold break-all ${accent.emailHighlight}`}>
+              {email.trim()}
+            </p>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Po kliknięciu w link wróć tutaj i zaloguj się.
+            </p>
             <button
               type="button"
               className={`w-full min-h-[48px] rounded-xl text-base font-semibold transition-colors ${accent.button}`}

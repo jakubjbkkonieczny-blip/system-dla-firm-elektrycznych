@@ -1,8 +1,9 @@
 /**
- * Browser Supabase client factory — Phase 1 scaffolding.
+ * Browser Supabase client factory.
+ * Safe to import from Client Components. Uses publishable key only.
  *
- * NOT wired into AuthProvider, login, register, or any UI.
- * Safe to import from Client Components once cutover begins.
+ * Official source:
+ * https://supabase.com/docs/guides/auth/server-side/creating-a-client
  */
 
 import { createBrowserClient } from "@supabase/ssr";

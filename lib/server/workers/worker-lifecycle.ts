@@ -24,7 +24,7 @@ export const TOMBSTONE_DISPLAY_NAME = "Usunięty użytkownik";
 
 /**
  * Placeholder password — auth is blocked by isActive=false before bcrypt runs.
- * Column is NOT NULL; empty string breaks bcrypt.compare().
+ * Kept for tombstones; passwordHash is nullable for Supabase-Auth-managed users.
  */
 export const TOMBSTONE_PASSWORD_HASH = "$2b$10$DELETED.ACCOUNT.PASSWORD.CLEARED.NO.LOGIN";
 

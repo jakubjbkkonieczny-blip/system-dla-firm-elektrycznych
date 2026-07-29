@@ -41,6 +41,7 @@ export async function findUserBySupabaseAuthUserId(
 /**
  * Persist Auth UUID ↔ User.id link.
  * Fails if another user already owns the Auth UUID (unique constraint).
+ * Refuses to overwrite a different non-null supabaseAuthUserId on the target.
  * Does not change passwordHash, sessionVersion, or roles.
  */
 export async function linkUserToSupabaseAuthUser(
@@ -51,6 +52,20 @@ export async function linkUserToSupabaseAuthUser(
   const authId = supabaseAuthUserId.trim();
   if (!userId.trim() || !authId) {
     throw new Error("linkUserToSupabaseAuthUser requires userId and supabaseAuthUserId");
+  }
+
+  const existing = await db.user.findUnique({
+    where: { id: userId },
+    select: LINKED_USER_SELECT,
+  });
+  if (!existing) {
+    throw new Error("linkUserToSupabaseAuthUser target user not found");
+  }
+  if (existing.supabaseAuthUserId && existing.supabaseAuthUserId !== authId) {
+    throw new Error("linkUserToSupabaseAuthUser refuses to overwrite existing Auth mapping");
+  }
+  if (existing.supabaseAuthUserId === authId) {
+    return existing;
   }
 
   return db.user.update({

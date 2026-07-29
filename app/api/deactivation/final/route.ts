@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, (msg) => {
       if (msg === "INVALID_PASSWORD") return 401;
+      if (msg === "AUTH_PASSWORD_REAUTH_REQUIRED") return 401;
       if (msg === "EMAIL_VERIFICATION_REQUIRED") return 403;
       if (msg === "FORBIDDEN" || msg === "NOT_OWNER") return 403;
       if (msg === "MULTIPLE_OWNED_COMPANIES") return 409;

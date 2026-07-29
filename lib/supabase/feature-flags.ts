@@ -1,8 +1,8 @@
 /**
- * Supabase Auth feature flags — Phase 1 scaffolding only.
+ * Supabase Auth feature flags.
  *
- * Default: OFF. No request path may enable Supabase Auth until a later cutover phase.
- * Setting SUPABASE_AUTH_ENABLED=true must not change behavior while no callers exist.
+ * Default: OFF. Exact env value "true" selects the Supabase Auth adapter.
+ * Any other value keeps the legacy HMAC auth path. No silent fallback.
  */
 
 export const SUPABASE_AUTH_ENABLED_ENV = "SUPABASE_AUTH_ENABLED";

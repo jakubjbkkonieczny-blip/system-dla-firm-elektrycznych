@@ -16,7 +16,9 @@ enum UserTheme {
 model User {
   id          String   @id @default(cuid())
   email       String   @unique
-  passwordHash String
+  /// Legacy credential hash. Null for Supabase-Auth-managed users (Stage 2+).
+  /// Remains required for legacy-auth users until Stage 5 removal.
+  passwordHash String?
   /// Supabase Auth `auth.users.id` (UUID). Nullable until Auth cutover links the row.
   /// Business PK remains `User.id` (cuid). Do not replace FKs / Stripe metadata with this value.
   supabaseAuthUserId String? @unique

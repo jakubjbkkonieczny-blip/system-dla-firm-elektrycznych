@@ -1,7 +1,9 @@
 /**
- * Phase 1 public surface for unused Supabase Auth scaffolding.
+ * Public surface for Supabase Auth Stage 2A.
  *
- * Do not import from legacy auth routes. Cutover phases will wire these deliberately.
+ * Browser/server/admin client factories are NOT re-exported here to avoid
+ * accidental bundling of server-only modules into client code.
+ * Import client factories from their dedicated modules.
  */
 
 export {
@@ -40,3 +42,33 @@ export type {
   AuthUserMappingClient,
   LinkedAuthUser,
 } from "@/lib/supabase/auth-user-mapping";
+
+export {
+  AUTH_ERROR_CATEGORIES,
+  SupabaseAuthError,
+  publicMessageForAuthError,
+  classifyProviderAuthError,
+} from "@/lib/supabase/errors";
+export type { AuthErrorCategory } from "@/lib/supabase/errors";
+
+export {
+  DEFAULT_SAFE_REDIRECT_PATH,
+  safeRedirectPath,
+  isSafeRedirectPath,
+} from "@/lib/supabase/safe-redirect";
+
+export {
+  normalizeAuthEmail,
+  provisionNewUserFromAuth,
+  linkExistingUserToAuth,
+  ensureProvisionedUserAfterAuth,
+  resolveLinkedUser,
+} from "@/lib/supabase/provisioning";
+export type {
+  VerifiedAuthIdentity,
+  ProvisionedUser,
+  ProvisioningClient,
+} from "@/lib/supabase/provisioning";
+
+export { getAuthMode } from "@/lib/supabase/auth-adapter";
+export type { AuthMode } from "@/lib/supabase/auth-adapter";

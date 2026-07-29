@@ -18,9 +18,19 @@ function createMockDb(seed?: LinkedAuthUser | null): {
 
   const db = {
     user: {
-      findUnique: async ({ where }: { where: { supabaseAuthUserId: string } }) => {
-        if (!row || row.supabaseAuthUserId !== where.supabaseAuthUserId) return null;
-        return row;
+      findUnique: async ({
+        where,
+      }: {
+        where: { supabaseAuthUserId?: string; id?: string };
+      }) => {
+        if (!row) return null;
+        if (where.supabaseAuthUserId !== undefined) {
+          return row.supabaseAuthUserId === where.supabaseAuthUserId ? row : null;
+        }
+        if (where.id !== undefined) {
+          return row.id === where.id ? row : null;
+        }
+        return null;
       },
       update: async ({
         where,
@@ -47,7 +57,7 @@ function createMockDb(seed?: LinkedAuthUser | null): {
   return { db, updates };
 }
 
-describe("Supabase Auth user mapping skeleton (Phase 1 unused)", () => {
+describe("Supabase Auth user mapping", () => {
   it("finds a user by supabaseAuthUserId", async () => {
     const authId = "11111111-1111-1111-1111-111111111111";
     const { db } = createMockDb({
@@ -81,6 +91,37 @@ describe("Supabase Auth user mapping skeleton (Phase 1 unused)", () => {
 
     const unlinked = await unlinkUserSupabaseAuthUserId(db, "user_cuid");
     assert.equal(unlinked.supabaseAuthUserId, null);
+  });
+
+  it("is idempotent when already linked to the same Auth UUID", async () => {
+    const authId = "33333333-3333-3333-3333-333333333333";
+    const { db, updates } = createMockDb({
+      id: "user_cuid",
+      email: "a@example.com",
+      supabaseAuthUserId: authId,
+      isActive: true,
+    });
+    const linked = await linkUserToSupabaseAuthUser(db, "user_cuid", authId);
+    assert.equal(linked.supabaseAuthUserId, authId);
+    assert.equal(updates.length, 0);
+  });
+
+  it("refuses to overwrite a different non-null Auth mapping", async () => {
+    const { db } = createMockDb({
+      id: "user_cuid",
+      email: "a@example.com",
+      supabaseAuthUserId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      isActive: true,
+    });
+    await assert.rejects(
+      () =>
+        linkUserToSupabaseAuthUser(
+          db,
+          "user_cuid",
+          "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+        ),
+      /refuses to overwrite/
+    );
   });
 
   it("rejects empty link arguments", async () => {
