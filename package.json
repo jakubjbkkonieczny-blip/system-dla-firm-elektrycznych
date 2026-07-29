@@ -10,11 +10,13 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "test": "tsx --test lib/jobs/budget/__tests__/*.test.ts lib/server/workers/__tests__/*.test.ts lib/server/deactivation/__tests__/*.test.ts lib/server/email/__tests__/*.test.ts lib/deactivation/__tests__/*.test.ts lib/push/__tests__/*.test.ts lib/server/jobs/__tests__/*.test.ts lib/server/push/__tests__/*.test.ts lib/server/notifications/__tests__/*.test.ts lib/__tests__/*.test.ts"
+    "test": "node scripts/run-tests.mjs"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
     "@prisma/client": "^5.22.0",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.111.0",
     "bcrypt": "^6.0.0",
     "dejavu-fonts-ttf": "^2.37.3",
     "dotenv": "^17.4.2",

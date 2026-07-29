@@ -17,6 +17,9 @@ model User {
   id          String   @id @default(cuid())
   email       String   @unique
   passwordHash String
+  /// Supabase Auth `auth.users.id` (UUID). Nullable until Auth cutover links the row.
+  /// Business PK remains `User.id` (cuid). Do not replace FKs / Stripe metadata with this value.
+  supabaseAuthUserId String? @unique
   displayName String?
   accountRole String?  // worker | employer (app-level account type)
   theme       UserTheme @default(LIGHT_BUSINESS)
