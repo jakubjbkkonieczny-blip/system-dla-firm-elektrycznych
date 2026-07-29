@@ -8,6 +8,7 @@ import {
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
 import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
+import { assertCanManageTargetMembership } from "@/lib/server/company/member-management-guards";
 import {
   loadCompanyName,
   notifyMemberDeactivated,
@@ -38,6 +39,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       where: { companyId_userId: { companyId, userId: memberUid } },
     });
     if (!member) throw new Error("MEMBER_NOT_FOUND");
+
+    assertCanManageTargetMembership(me.role, member.role);
 
     if (member.isActive === active) {
       return NextResponse.json({ ok: true }, { status: 200 });
@@ -90,6 +93,13 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     if (memberUid === actorId) {
       return NextResponse.json({ error: "CANNOT_DELETE_SELF" }, { status: 400 });
     }
+
+    const member = await prisma.companyMember.findUnique({
+      where: { companyId_userId: { companyId, userId: memberUid } },
+    });
+    if (!member) throw new Error("MEMBER_NOT_FOUND");
+
+    assertCanManageTargetMembership(me.role, member.role);
 
     const companyName = await loadCompanyName(companyId);
 

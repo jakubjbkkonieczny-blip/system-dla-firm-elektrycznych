@@ -13,6 +13,7 @@ import {
   canEditStageNote,
   isOwnerOrAdmin,
 } from "@/lib/server/jobs/stage-permissions";
+import { requireCompanyJobStage } from "@/lib/server/jobs/job-stage-ownership";
 
 function isYyyyMmDd(s: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(s);
@@ -122,12 +123,17 @@ export async function DELETE(
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
+    const existing = await requireCompanyJobStage(companyId, jobId, stageId);
+
     await prisma.jobStage.delete({
-      where: { id: stageId },
+      where: { id: existing.id },
     });
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {
-    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
+    return handleSessionRouteErrorOr(e, (msg) => {
+      if (msg === "STAGE_NOT_FOUND") return 404;
+      return companyRouteErrorStatus(msg);
+    });
   }
 }

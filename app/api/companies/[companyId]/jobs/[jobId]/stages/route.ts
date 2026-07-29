@@ -7,7 +7,7 @@ import {
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { jobStageListInclude, jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
-import { isUserAssignedToJob } from "@/lib/server/jobs/job-assignments";
+import { assertMemberCanAccessJob } from "@/lib/server/jobs/job-stage-ownership";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
 
@@ -22,17 +22,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     const { companyId, jobId } = await params;
 
     const me = await requireActiveMember(companyId, userId);
-    const job = await prisma.job.findFirst({
-      where: { id: jobId, companyId, deletedAt: null },
-    });
-    if (!job) throw new Error("JOB_NOT_FOUND");
-
-    const isAdmin = me.role === "owner" || me.role === "admin";
-    const isAssignedStaff = await isUserAssignedToJob(jobId, userId, companyId);
-
-    if (!isAdmin && !isAssignedStaff) {
-      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
-    }
+    await assertMemberCanAccessJob(me, userId, companyId, jobId);
 
     const rows = await prisma.jobStage.findMany({
       where: { companyId, jobId },

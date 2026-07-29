@@ -8,6 +8,7 @@ import {
 import { requireActiveMember } from "@/app/api/_lib/membership";
 import { syncSubscriptionForCompany } from "@/app/api/_lib/billing";
 import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
+import { assertCanManageTargetMembership } from "@/lib/server/company/member-management-guards";
 import {
   loadCompanyName,
   notifyMemberAdded,
@@ -61,9 +62,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
         },
       });
     } else {
-      if (existing.role === "owner") {
-        return NextResponse.json({ error: "CANNOT_MODIFY_OWNER" }, { status: 400 });
-      }
+      assertCanManageTargetMembership(me.role, existing.role);
       await prisma.companyMember.update({
         where: { companyId_userId: { companyId, userId: invited.id } },
         data: {

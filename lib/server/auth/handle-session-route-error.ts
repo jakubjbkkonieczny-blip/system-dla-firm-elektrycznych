@@ -32,6 +32,9 @@ export function companyRouteErrorStatus(message: string): number | null {
   ) {
     return 403;
   }
+  if (message === "CANNOT_MODIFY_OWNER") {
+    return 400;
+  }
   return null;
 }
 

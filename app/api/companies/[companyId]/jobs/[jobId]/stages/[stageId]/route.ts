@@ -6,6 +6,7 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
+import { requireCompanyJobStage } from "@/lib/server/jobs/job-stage-ownership";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string; stageId: string }> };
 
@@ -44,13 +45,10 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       data.plannedDate = d ? new Date(`${d}T00:00:00.000Z`) : null;
     }
 
-    const existing = await prisma.jobStage.findFirst({
-      where: { id: stageId, companyId, jobId },
-    });
-    if (!existing) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
+    const existing = await requireCompanyJobStage(companyId, jobId, stageId);
 
     await prisma.jobStage.update({
-      where: { id: stageId },
+      where: { id: existing.id },
       data: data as object,
     });
     return NextResponse.json({ ok: true }, { status: 200 });
@@ -69,12 +67,9 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     const isAdmin = me.role === "owner" || me.role === "admin";
     if (!isAdmin) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
-    const existing = await prisma.jobStage.findFirst({
-      where: { id: stageId, companyId, jobId },
-    });
-    if (!existing) return NextResponse.json({ error: "STAGE_NOT_FOUND" }, { status: 404 });
+    const existing = await requireCompanyJobStage(companyId, jobId, stageId);
 
-    await prisma.jobStage.delete({ where: { id: stageId } });
+    await prisma.jobStage.delete({ where: { id: existing.id } });
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, companyRouteErrorStatus);

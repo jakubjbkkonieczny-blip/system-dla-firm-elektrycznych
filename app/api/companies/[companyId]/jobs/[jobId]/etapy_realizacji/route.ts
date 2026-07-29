@@ -7,6 +7,7 @@ import {
   companyRouteErrorStatus,
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
+import { assertMemberCanAccessJob } from "@/lib/server/jobs/job-stage-ownership";
 
 type CreateStageBody = {
   nazwa_etapu: string;
@@ -27,7 +28,8 @@ export async function GET(
     const userId = sessionUser.id;
     const { companyId, jobId } = await params;
 
-    await requireActiveMember(companyId, userId);
+    const member = await requireActiveMember(companyId, userId);
+    await assertMemberCanAccessJob(member, userId, companyId, jobId);
 
     const rows = await prisma.jobStage.findMany({
       where: { companyId, jobId },

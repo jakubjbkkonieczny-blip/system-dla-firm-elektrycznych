@@ -1,11 +1,17 @@
 import "server-only";
 import { prisma } from "@/lib/db/prisma";
 import { normalizeJobPriority } from "@/lib/server/jobs/job-priority";
+import {
+  canMemberSeeJob,
+  type JobVisibilityMember,
+} from "@/lib/server/jobs/job-visibility";
 
-export type JobVisibilityMember = {
-  role: string;
-  scope: string | null;
-};
+export type { JobVisibilityMember };
+export { canMemberSeeJob };
+export {
+  assertMemberCanAccessJob,
+  requireCompanyJobStage,
+} from "@/lib/server/jobs/job-stage-ownership";
 
 type CompanyMemberCounter = {
   companyMember: {
@@ -43,17 +49,6 @@ export function normalizeAssignedToUids(input: unknown): string[] {
 
 export function readAssignedToUids(job: { assignments: { userId: string }[] }): string[] {
   return job.assignments.map((a) => a.userId);
-}
-
-export function canMemberSeeJob(
-  member: JobVisibilityMember,
-  userId: string,
-  assignedIds: string[]
-): boolean {
-  const role = String(member.role || "staff");
-  const scope = String(member.scope || "all");
-  if (role === "owner" || role === "admin") return true;
-  return assignedIds.includes(userId) || scope === "all";
 }
 
 export function jobWithAssignmentFields<
