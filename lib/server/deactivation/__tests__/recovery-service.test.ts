@@ -71,6 +71,7 @@ async function deactivateOwner(ownerId: string, companyId?: string) {
     currentPassword: PASSWORD,
     companyId,
     syncWorkerOrphanStateFn: testSyncWorkerOrphanState,
+    env: { SUPABASE_AUTH_ENABLED: "false" },
   });
 }
 
@@ -367,7 +368,7 @@ describe("billing after employer account recovery", () => {
 describe("recovery route contract", () => {
   it("requires deactivated access and clears cookie on success", async () => {
     const routeSource = await readFile("app/api/deactivation/recover/route.ts", "utf8");
-    assert.match(routeSource, /getDeactivatedAccessUserId/);
+    assert.match(routeSource, /getVerifiedDeactivatedAccess|getDeactivatedAccountStateFromAccess/);
     assert.match(routeSource, /clearDeactivatedAccessCookie/);
     assert.match(routeSource, /requiresLogin:\s*true/);
     assert.doesNotMatch(routeSource, /setSessionCookie/);

@@ -6,11 +6,8 @@ import {
   createSignedSessionToken,
   setSessionCookie,
 } from "@/lib/server/auth/session";
-import {
-  createDeactivatedAccessToken,
-  setDeactivatedAccessCookie,
-} from "@/lib/server/deactivation/deactivated-account-access";
-import { resolveDeactivatedEmployerAccountState } from "@/lib/server/deactivation/get-deactivated-account-state";
+import { setDeactivatedAccessCookie } from "@/lib/server/deactivation/deactivated-account-access";
+import { mintDeactivatedAccessForUser } from "@/lib/server/deactivation/mint-deactivated-access";
 import { isSupabaseAuthEnabled } from "@/lib/supabase/feature-flags";
 import { supabaseLogin, supabaseLogout } from "@/lib/supabase/auth-actions";
 import { SupabaseAuthError } from "@/lib/supabase/errors";
@@ -31,7 +28,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: result.error }, { status: result.status });
       }
       if (result.deactivated === true) {
-        return NextResponse.json({ ok: true, deactivated: true }, { status: 200 });
+        // Auth session already revoked in supabaseLogin; mint recovery capability only.
+        const minted = await mintDeactivatedAccessForUser(result.userId);
+        if (!minted.ok) {
+          return NextResponse.json({ error: "ACCOUNT_DISABLED" }, { status: 403 });
+        }
+        const res = NextResponse.json({ ok: true, deactivated: true }, { status: 200 });
+        res.headers.set("Cache-Control", "no-store");
+        return setDeactivatedAccessCookie(res, minted.token);
       }
       // Supabase cookies already set by signInWithPassword via server client.
       // Do NOT mint legacy HMAC session.
@@ -67,11 +71,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!user.isActive) {
-      const deactivatedState = await resolveDeactivatedEmployerAccountState(user.id);
-      if (deactivatedState) {
-        const deactivatedToken = createDeactivatedAccessToken(user.id);
+      const minted = await mintDeactivatedAccessForUser(user.id);
+      if (minted.ok) {
         const res = NextResponse.json({ ok: true, deactivated: true }, { status: 200 });
-        return setDeactivatedAccessCookie(res, deactivatedToken);
+        return setDeactivatedAccessCookie(res, minted.token);
       }
       return NextResponse.json({ error: "ACCOUNT_DISABLED" }, { status: 403 });
     }

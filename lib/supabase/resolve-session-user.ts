@@ -131,12 +131,28 @@ export async function resolveSupabaseSessionUser(): Promise<ResolveSupabaseSessi
     if (error instanceof SupabaseAuthError) {
       return { ok: false, error };
     }
+    // Do not swallow Next.js dynamic-rendering signals. Wrapping cookies() usage as
+    // AUTH_PROVIDER_UNAVAILABLE breaks static generation (build fails on auth pages).
+    if (isNextDynamicServerUsageError(error)) {
+      throw error;
+    }
     logAuthDiagnostic("AUTH_PROVIDER_UNAVAILABLE", { unexpected: true });
     return {
       ok: false,
       error: new SupabaseAuthError("AUTH_PROVIDER_UNAVAILABLE", { cause: error }),
     };
   }
+}
+
+function isNextDynamicServerUsageError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const digest = (error as { digest?: unknown }).digest;
+  if (digest === "DYNAMIC_SERVER_USAGE") return true;
+  const message = error instanceof Error ? error.message : "";
+  return (
+    message.includes("Dynamic server usage") ||
+    message.includes("couldn't be rendered statically because it used `cookies`")
+  );
 }
 
 export async function requireSupabaseSessionUser(): Promise<SessionUser> {

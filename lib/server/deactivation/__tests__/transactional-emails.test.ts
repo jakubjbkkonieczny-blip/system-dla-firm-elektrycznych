@@ -208,6 +208,7 @@ describe("account deactivated confirmation email", () => {
       actorUserId: owner.id,
       currentPassword: PASSWORD,
       syncWorkerOrphanStateFn: testSyncWorkerOrphanState,
+      env: { SUPABASE_AUTH_ENABLED: "false" },
     });
 
     assert.equal(outcome.status, "deactivated");
@@ -243,6 +244,7 @@ describe("account recovered confirmation email", () => {
       actorUserId: owner.id,
       currentPassword: PASSWORD,
       syncWorkerOrphanStateFn: testSyncWorkerOrphanState,
+      env: { SUPABASE_AUTH_ENABLED: "false" },
     });
 
     const first = await recoverEmployerAccount(owner.id);
@@ -280,6 +282,7 @@ describe("account recovered confirmation email", () => {
       actorUserId: owner.id,
       currentPassword: PASSWORD,
       syncWorkerOrphanStateFn: testSyncWorkerOrphanState,
+      env: { SUPABASE_AUTH_ENABLED: "false" },
     });
 
     const outcome = await recoverEmployerAccount(owner.id);

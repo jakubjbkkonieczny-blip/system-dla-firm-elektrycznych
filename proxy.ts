@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { checkRateLimit } from "@/lib/server/rate-limit";
 import { logRequestSummary } from "@/lib/server/request-log";
+import {
+  DEACTIVATED_ACCESS_COOKIE_NAME,
+  isDeactivatedRecoveryApiPath,
+  verifyDeactivatedAccessToken,
+} from "@/lib/server/deactivation/deactivated-account-access";
 import { isSupabaseAuthEnabled } from "@/lib/supabase/feature-flags";
 import { updateSupabaseSession } from "@/lib/supabase/update-session";
 
@@ -22,6 +27,12 @@ function withApiLog(req: NextRequest, startedAt: number, res: NextResponse): Nex
     durationMs: Date.now() - startedAt,
   });
   return res;
+}
+
+function hasValidDeactivatedAccess(request: NextRequest): boolean {
+  const raw = request.cookies.get(DEACTIVATED_ACCESS_COOKIE_NAME)?.value;
+  if (!raw) return false;
+  return verifyDeactivatedAccessToken(raw) !== null;
 }
 
 export async function proxy(request: NextRequest) {
@@ -48,6 +59,13 @@ export async function proxy(request: NextRequest) {
     }
     const response = NextResponse.next();
     return isApi ? withApiLog(request, startedAt, response) : response;
+  }
+
+  // Narrow recovery surface: HMAC deactivated_access only — not a general session.
+  // Does not grant /dashboard, company APIs, or other protected routes.
+  if (isApi && isDeactivatedRecoveryApiPath(pathname) && hasValidDeactivatedAccess(request)) {
+    const response = NextResponse.next();
+    return withApiLog(request, startedAt, response);
   }
 
   if (supabaseMode) {

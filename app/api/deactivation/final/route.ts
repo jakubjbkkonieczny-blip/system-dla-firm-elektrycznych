@@ -19,6 +19,7 @@ import { isSupabaseAuthEnabled } from "@/lib/supabase/feature-flags";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { logAuthDiagnostic } from "@/lib/supabase/errors";
 
+
 type Body = {
   currentPassword?: unknown;
   companyId?: unknown;
@@ -112,12 +113,21 @@ export async function POST(req: NextRequest) {
       }
     }
     clearSessionCookie(res);
-    setDeactivatedAccessCookie(res, createDeactivatedAccessToken(outcome.userId));
+    setDeactivatedAccessCookie(
+      res,
+      createDeactivatedAccessToken({
+        userId: outcome.userId,
+        companyId: outcome.companyId,
+        sessionVersion: outcome.sessionVersion,
+      })
+    );
     return res;
   } catch (e: unknown) {
     return handleSessionRouteErrorOr(e, (msg) => {
-      if (msg === "INVALID_PASSWORD") return 401;
+      if (msg === "INVALID_PASSWORD" || msg === "UNAUTHORIZED") return 401;
       if (msg === "AUTH_PASSWORD_REAUTH_REQUIRED") return 401;
+      if (msg === "AUTH_PROVIDER_UNAVAILABLE") return 503;
+      if (msg === "MISSING_CURRENT_PASSWORD") return 400;
       if (msg === "EMAIL_VERIFICATION_REQUIRED") return 403;
       if (msg === "FORBIDDEN" || msg === "NOT_OWNER") return 403;
       if (msg === "MULTIPLE_OWNED_COMPANIES") return 409;

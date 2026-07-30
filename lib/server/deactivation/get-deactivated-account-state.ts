@@ -22,6 +22,7 @@ export async function resolveDeactivatedEmployerAccountState(
       isActive: true,
       deactivatedAt: true,
       scheduledDeletionAt: true,
+      sessionVersion: true,
     },
   });
 
@@ -73,11 +74,26 @@ export async function resolveDeactivatedEmployerAccountState(
   };
 }
 
+/**
+ * Resolve deactivated employer state from the narrowly scoped recovery cookie.
+ * Binds claims to User.id + companyId + sessionVersion (replay after recover fails).
+ */
 export async function getDeactivatedAccountStateFromAccess(
   now = new Date()
 ): Promise<DeactivatedAccountState | null> {
-  const { getDeactivatedAccessUserId } = await import("./deactivated-account-access");
-  const userId = await getDeactivatedAccessUserId();
-  if (!userId) return null;
-  return resolveDeactivatedEmployerAccountState(userId, now);
+  const { getVerifiedDeactivatedAccess } = await import("./deactivated-account-access");
+  const claims = await getVerifiedDeactivatedAccess();
+  if (!claims) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: claims.userId },
+    select: { sessionVersion: true, isActive: true },
+  });
+  if (!user || user.isActive) return null;
+  if (user.sessionVersion !== claims.sessionVersion) return null;
+
+  const state = await resolveDeactivatedEmployerAccountState(claims.userId, now);
+  if (!state) return null;
+  if (state.companyId !== claims.companyId) return null;
+  return state;
 }

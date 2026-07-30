@@ -1,9 +1,12 @@
 import { Prisma } from "@prisma/client";
-import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/db/prisma";
 import { hasRecentDeactivationVerification } from "./email-verification";
 import { getRecoveryDeadline } from "./lifecycle";
+import {
+  verifyDeactivationPassword,
+  type VerifyDeactivationPasswordInput,
+} from "./verify-deactivation-password";
 
 export type DeactivationStatus = "deactivated" | "already_deactivated";
 
@@ -13,6 +16,8 @@ export type DeactivationOutcome = {
   userId: string;
   deactivatedAt: Date;
   scheduledDeletionAt: Date;
+  /** Session version after deactivation (for deactivated-access token binding). */
+  sessionVersion: number;
 };
 
 type TransactionResult = DeactivationOutcome & {
@@ -62,7 +67,7 @@ async function buildAlreadyDeactivatedOutcome(
   const [user, company] = await Promise.all([
     tx.user.findUnique({
       where: { id: actorUserId },
-      select: { deactivatedAt: true },
+      select: { deactivatedAt: true, sessionVersion: true },
     }),
     tx.company.findUnique({
       where: { id: targetCompanyId },
@@ -80,6 +85,7 @@ async function buildAlreadyDeactivatedOutcome(
     userId: actorUserId,
     deactivatedAt: user.deactivatedAt,
     scheduledDeletionAt: company.scheduledDeletionAt,
+    sessionVersion: user.sessionVersion,
   };
 }
 
@@ -90,6 +96,10 @@ export type DeactivateEmployerAccountInput = {
   currentPassword: string;
   companyId?: string | null;
   syncWorkerOrphanStateFn?: SyncWorkerOrphanStateFn;
+  /** Test seam for password proof (defaults to mode-aware verifier). */
+  verifyPasswordFn?: (input: VerifyDeactivationPasswordInput) => Promise<void>;
+  createSupabaseClient?: VerifyDeactivationPasswordInput["createSupabaseClient"];
+  env?: VerifyDeactivationPasswordInput["env"];
 };
 
 export async function deactivateEmployerAccount(
@@ -97,38 +107,43 @@ export async function deactivateEmployerAccount(
 ): Promise<DeactivationOutcome> {
   const { actorUserId, currentPassword, companyId, syncWorkerOrphanStateFn } = input;
 
+  // Password proof is outside the DB transaction (may call Supabase Auth).
+  const actor = await prisma.user.findUnique({
+    where: { id: actorUserId },
+    select: {
+      id: true,
+      email: true,
+      accountRole: true,
+      passwordHash: true,
+      supabaseAuthUserId: true,
+      isActive: true,
+      deactivatedAt: true,
+    },
+  });
+
+  if (!actor) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  if (actor.accountRole !== "employer") {
+    throw new Error("FORBIDDEN");
+  }
+
+  const verify = input.verifyPasswordFn ?? verifyDeactivationPassword;
+  await verify({
+    actor: {
+      id: actor.id,
+      email: actor.email,
+      passwordHash: actor.passwordHash,
+      supabaseAuthUserId: actor.supabaseAuthUserId,
+      isActive: actor.isActive,
+    },
+    currentPassword,
+    createSupabaseClient: input.createSupabaseClient,
+    env: input.env,
+  });
+
   const result = await prisma.$transaction(async (tx) => {
-    const actor = await tx.user.findUnique({
-      where: { id: actorUserId },
-      select: {
-        id: true,
-        accountRole: true,
-        passwordHash: true,
-        isActive: true,
-        deactivatedAt: true,
-      },
-    });
-
-    if (!actor) {
-      throw new Error("USER_NOT_FOUND");
-    }
-
-    if (actor.accountRole !== "employer") {
-      throw new Error("FORBIDDEN");
-    }
-
-    // Supabase-Auth-managed users have null passwordHash. Employer deactivation
-    // still requires password reauthentication — Stage 2A fails closed here.
-    // Cutover blocker: wire Supabase reauthenticate() before production Auth cutover.
-    if (!actor.passwordHash) {
-      throw new Error("AUTH_PASSWORD_REAUTH_REQUIRED");
-    }
-
-    const passwordMatches = await bcrypt.compare(currentPassword, actor.passwordHash);
-    if (!passwordMatches) {
-      throw new Error("INVALID_PASSWORD");
-    }
-
     let targetCompanyId: string;
     try {
       targetCompanyId = await resolveTargetCompanyId(actorUserId, companyId, tx, "active");
@@ -154,7 +169,15 @@ export async function deactivateEmployerAccount(
       throw new Error("COMPANY_NOT_FOUND");
     }
 
-    if (!actor.isActive || !company.isActive) {
+    const freshActor = await tx.user.findUnique({
+      where: { id: actorUserId },
+      select: { isActive: true, sessionVersion: true },
+    });
+    if (!freshActor) {
+      throw new Error("USER_NOT_FOUND");
+    }
+
+    if (!freshActor.isActive || !company.isActive) {
       return {
         ...(await buildAlreadyDeactivatedOutcome(tx, actorUserId, targetCompanyId)),
         affectedUserIds: [],
@@ -231,12 +254,18 @@ export async function deactivateEmployerAccount(
       },
     });
 
+    const updatedUser = await tx.user.findUnique({
+      where: { id: actorUserId },
+      select: { sessionVersion: true },
+    });
+
     return {
       status: "deactivated" as const,
       companyId: targetCompanyId,
       userId: actorUserId,
       deactivatedAt: now,
       scheduledDeletionAt,
+      sessionVersion: updatedUser?.sessionVersion ?? freshActor.sessionVersion + 1,
       affectedUserIds,
       runWorkerSync: true,
     };
@@ -252,5 +281,6 @@ export async function deactivateEmployerAccount(
     userId: result.userId,
     deactivatedAt: result.deactivatedAt,
     scheduledDeletionAt: result.scheduledDeletionAt,
+    sessionVersion: result.sessionVersion,
   };
 }

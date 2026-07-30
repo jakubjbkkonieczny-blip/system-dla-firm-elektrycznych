@@ -15,8 +15,10 @@ import {
 import { testSyncWorkerOrphanState } from "./test-worker-sync";
 
 process.env.SESSION_SECRET = process.env.SESSION_SECRET ?? "test-session-secret-0123456789abcdef";
+process.env.SUPABASE_AUTH_ENABLED = "false";
 
 const PASSWORD = "Password123!";
+const LEGACY_ENV = { SUPABASE_AUTH_ENABLED: "false" };
 
 async function createTestUser(accountRole: string, emailPrefix: string, password = PASSWORD) {
   const id = randomUUID();
@@ -85,6 +87,7 @@ function deactivate(input: {
     currentPassword: input.currentPassword ?? PASSWORD,
     companyId: input.companyId,
     syncWorkerOrphanStateFn: testSyncWorkerOrphanState,
+    env: LEGACY_ENV,
   });
 }
 
@@ -170,6 +173,7 @@ describe("deactivation service", () => {
         actorUserId: owner.id,
         currentPassword: "WrongPassword",
         syncWorkerOrphanStateFn: testSyncWorkerOrphanState,
+        env: LEGACY_ENV,
       }),
       /INVALID_PASSWORD/
     );

@@ -26,6 +26,10 @@ import {
   type VerifiedAuthIdentity,
 } from "@/lib/supabase/provisioning";
 import {
+  reconcileBusinessEmailFromVerifiedAuth,
+  resolveLinkedUserWithEmailReconciliation,
+} from "@/lib/supabase/email-reconciliation";
+import {
   authIdentityFromSupabaseUser,
   resolveSupabaseSessionUser,
 } from "@/lib/supabase/resolve-session-user";
@@ -104,14 +108,32 @@ export async function supabaseRegister(input: {
     });
 
     if (error) {
-      logAuthDiagnostic("AUTH_PROVIDER_UNAVAILABLE", {
-        signupFailed: true,
-        status: error.status ?? 0,
-      });
-      // Avoid leaking account existence beyond generic failure when possible.
       const msg = (error.message ?? "").toLowerCase();
+      const code = (error.code ?? "").toLowerCase();
+      const rateLimited =
+        error.status === 429 ||
+        code.includes("rate_limit") ||
+        msg.includes("rate") ||
+        msg.includes("over_email_send_rate_limit");
+      logAuthDiagnostic(
+        rateLimited ? "AUTH_PROVIDER_UNAVAILABLE" : "AUTH_PROVIDER_UNAVAILABLE",
+        {
+          signupFailed: true,
+          status: error.status ?? 0,
+          rateLimited,
+        }
+      );
+      // Avoid leaking account existence beyond generic failure when possible.
       if (msg.includes("already") || msg.includes("registered")) {
         return { ok: false, status: 400, error: "USER_EXISTS" };
+      }
+      if (rateLimited) {
+        return {
+          ok: false,
+          status: 429,
+          error: "AUTH_PROVIDER_UNAVAILABLE",
+          message: publicMessageForAuthError("AUTH_PROVIDER_UNAVAILABLE"),
+        };
       }
       return { ok: false, status: 400, error: "INVALID_INPUT" };
     }
@@ -176,7 +198,7 @@ export async function supabaseLogin(input: {
   password: string;
 }): Promise<
   | { ok: true; userId: string; deactivated?: false }
-  | { ok: true; deactivated: true }
+  | { ok: true; userId: string; deactivated: true }
   | { ok: false; status: number; error: string }
 > {
   assertSupabaseMode();
@@ -204,7 +226,11 @@ export async function supabaseLogin(input: {
     // Does not auto-claim existing unlinked emails (still AUTH_USER_CONFLICT).
     let linked;
     try {
-      linked = await resolveLinkedUser(prisma, identity);
+      linked = await resolveLinkedUserWithEmailReconciliation(
+        prisma,
+        identity,
+        resolveLinkedUser
+      );
     } catch (mapError) {
       if (
         mapError instanceof SupabaseAuthError &&
@@ -230,14 +256,36 @@ export async function supabaseLogin(input: {
           }
           return { ok: false, status: 401, error: "INVALID_CREDENTIALS" };
         }
+      } else if (
+        mapError instanceof SupabaseAuthError &&
+        mapError.category === "AUTH_USER_INACTIVE"
+      ) {
+        // Inactive employer recovery: password was proven via signInWithPassword.
+        // Revoke the Auth session immediately — recovery uses deactivated_access only.
+        const inactive = await prisma.user.findUnique({
+          where: { supabaseAuthUserId: identity.authUserId },
+          select: { id: true, email: true, isActive: true },
+        });
+        await supabase.auth.signOut();
+        if (
+          !inactive ||
+          inactive.isActive ||
+          normalizeAuthEmail(inactive.email) !== identity.email
+        ) {
+          // Fail closed without distinguishing mapping conflicts to callers.
+          return { ok: false, status: 403, error: "ACCOUNT_DISABLED" };
+        }
+        const { resolveDeactivatedEmployerAccountState } = await import(
+          "@/lib/server/deactivation/get-deactivated-account-state"
+        );
+        const state = await resolveDeactivatedEmployerAccountState(inactive.id);
+        if (!state || !state.isRecoverable) {
+          return { ok: false, status: 403, error: "ACCOUNT_DISABLED" };
+        }
+        return { ok: true, userId: inactive.id, deactivated: true };
       } else {
         await supabase.auth.signOut();
         if (mapError instanceof SupabaseAuthError) {
-          if (mapError.category === "AUTH_USER_INACTIVE") {
-            // Deactivated employer recovery remains a separate business flow.
-            // Supabase path does not mint deactivated-access via passwordHash.
-            return { ok: false, status: 403, error: "ACCOUNT_DISABLED" };
-          }
           if (
             mapError.category === "AUTH_EMAIL_CONFLICT" ||
             mapError.category === "AUTH_USER_CONFLICT"
@@ -514,9 +562,42 @@ export async function handleAuthCallback(input: {
       return res;
     }
 
-    // Signup confirmation / magic link style: ensure VectorWork user exists.
+    // Signup confirmation / magic link / email_change:
+    // Prefer reconcile-then-resolve for already-linked users so Auth email drift
+    // does not fail closed before a safe User.email update can run.
     try {
-      await ensureProvisionedUserAfterAuth(prisma, identity);
+      const existing = await prisma.user.findUnique({
+        where: { supabaseAuthUserId: identity.authUserId },
+        select: { id: true },
+      });
+      if (existing) {
+        const reconcile = await reconcileBusinessEmailFromVerifiedAuth(prisma, identity);
+        if (reconcile.status === "conflict") {
+          if (
+            reconcile.reason === "DESTINATION_EMAIL_OWNED" ||
+            reconcile.reason === "CONFLICTING_AUTH_MAPPING"
+          ) {
+            await supabase.auth.signOut().catch(() => undefined);
+            const category =
+              reconcile.reason === "DESTINATION_EMAIL_OWNED"
+                ? "AUTH_EMAIL_CONFLICT"
+                : "AUTH_USER_CONFLICT";
+            logAuthDiagnostic(category, { callbackEmailReconcileConflict: true });
+            return errorRedirect(category);
+          }
+          if (reconcile.reason === "INACTIVE_USER") {
+            await supabase.auth.signOut().catch(() => undefined);
+            return errorRedirect("AUTH_USER_INACTIVE");
+          }
+          if (reconcile.reason === "UNVERIFIED") {
+            await supabase.auth.signOut().catch(() => undefined);
+            return errorRedirect("AUTH_UNAUTHENTICATED");
+          }
+        }
+        await resolveLinkedUser(prisma, identity);
+      } else {
+        await ensureProvisionedUserAfterAuth(prisma, identity);
+      }
     } catch (provisionError) {
       await supabase.auth.signOut().catch(() => undefined);
       if (provisionError instanceof SupabaseAuthError) {

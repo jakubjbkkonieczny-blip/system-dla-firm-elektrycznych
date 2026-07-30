@@ -91,6 +91,22 @@ describe("source contracts — Stage 2A / 3A", () => {
     assert.match(src, /ensureProvisionedUserAfterAuth/);
   });
 
+  it("signup rate limits map to AUTH_PROVIDER_UNAVAILABLE not INVALID_INPUT", () => {
+    const src = readFileSync(join(ROOT, "lib/supabase/auth-actions.ts"), "utf8");
+    assert.match(src, /over_email_send_rate_limit|rateLimited/);
+    assert.match(src, /status:\s*429/);
+    assert.match(src, /error:\s*"AUTH_PROVIDER_UNAVAILABLE"/);
+  });
+
+  it("does not wrap Next.js DYNAMIC_SERVER_USAGE as AUTH_PROVIDER_UNAVAILABLE", () => {
+    const src = readFileSync(
+      join(ROOT, "lib/supabase/resolve-session-user.ts"),
+      "utf8"
+    );
+    assert.match(src, /DYNAMIC_SERVER_USAGE/);
+    assert.match(src, /isNextDynamicServerUsageError/);
+  });
+
   it("provisioning sets passwordHash null and does not create memberships", () => {
     const src = readFileSync(join(ROOT, "lib/supabase/provisioning.ts"), "utf8");
     assert.match(src, /passwordHash:\s*null/);
@@ -114,6 +130,23 @@ describe("source contracts — Stage 2A / 3A", () => {
     assert.match(proxy, /updateSupabaseSession/);
     assert.match(update, /getClaims/);
     assert.doesNotMatch(update, /getSession\(/);
+  });
+
+  it("proxy allowlists deactivated recovery APIs without granting general session", () => {
+    const proxy = readFileSync(join(ROOT, "proxy.ts"), "utf8");
+    assert.match(proxy, /isDeactivatedRecoveryApiPath/);
+    assert.match(proxy, /hasValidDeactivatedAccess|DEACTIVATED_ACCESS_COOKIE_NAME/);
+    assert.doesNotMatch(proxy, /\/api\/deactivation\/final/);
+  });
+
+  it("employer deactivation uses Supabase reauth not bcrypt when Auth mode is on", () => {
+    const verify = readFileSync(
+      join(ROOT, "lib/server/deactivation/verify-deactivation-password.ts"),
+      "utf8"
+    );
+    assert.match(verify, /signInWithPassword/);
+    assert.match(verify, /isSupabaseAuthEnabled/);
+    assert.doesNotMatch(verify, /SUPABASE_SERVICE_ROLE_KEY|createSupabaseAdminClient/);
   });
 
   it("no production code changes DATABASE_URL or DIRECT_URL assignment", () => {
