@@ -1,0 +1,431 @@
+{
+  "created_at": "2026-07-30T18:24:58.455Z",
+  "method": "logical JSONL dump via Prisma $queryRaw (public business tables only)",
+  "scope": "All 21 VectorWork business tables from Neon public schema",
+  "source_host": "ep-green-wave-aljyrgvl-pooler.c-3.eu-central-1.aws.neon.tech",
+  "source_database": "neondb",
+  "location": "D:\\Users\\Konieczny Robert\\Desktop\\system-dla-firm-elek\\backups\\stage4c-neon-2026-07-30T18-24-58-450Z",
+  "tables": {
+    "User": {
+      "row_count": 3605,
+      "columns": [
+        "id",
+        "email",
+        "displayName",
+        "isActive",
+        "createdAt",
+        "updatedAt",
+        "passwordHash",
+        "accountRole",
+        "stripeCustomerId",
+        "stripeSubscriptionId",
+        "subscriptionEndsAt",
+        "subscriptionCancelAtPeriodEnd",
+        "googleAccessToken",
+        "googleRefreshToken",
+        "pushSubscription",
+        "theme",
+        "sessionVersion",
+        "subscriptionStatus",
+        "pendingDeletionAt",
+        "deactivatedAt",
+        "scheduledDeletionAt",
+        "supabaseAuthUserId"
+      ],
+      "id_set_sha256": "37b8d9aa28c1312f841520aa741bf62d8753bbaedaaa647c09f651ad60021943",
+      "jsonl": "User.jsonl",
+      "sql": "User.sql"
+    },
+    "Company": {
+      "row_count": 2543,
+      "columns": [
+        "id",
+        "name",
+        "slug",
+        "billingStatus",
+        "subscriptionEndsAt",
+        "isActive",
+        "createdAt",
+        "updatedAt",
+        "apiKeyHash",
+        "scheduledDeletionAt",
+        "deactivatedAt"
+      ],
+      "id_set_sha256": "88e39f4811ae789cd7ccb13469fd396fdd92c3ff6467f25cdc53bcce149ca581",
+      "jsonl": "Company.jsonl",
+      "sql": "Company.sql"
+    },
+    "CompanyMember": {
+      "row_count": 2477,
+      "columns": [
+        "id",
+        "companyId",
+        "userId",
+        "role",
+        "scope",
+        "isActive",
+        "invitedById",
+        "createdAt",
+        "updatedAt"
+      ],
+      "id_set_sha256": "0a8b353364626b63e674065603ed6193efc4692874d25d4d6bd5b9b7313bf2a9",
+      "jsonl": "CompanyMember.jsonl",
+      "sql": "CompanyMember.sql"
+    },
+    "Job": {
+      "row_count": 58,
+      "columns": [
+        "id",
+        "companyId",
+        "customerName",
+        "customerPhone",
+        "addressCity",
+        "addressStreet",
+        "addressZip",
+        "addressNotes",
+        "description",
+        "preferredFrom",
+        "preferredTo",
+        "priority",
+        "status",
+        "statusUpdatedAt",
+        "createdByUserId",
+        "createdAt",
+        "updatedAt",
+        "version",
+        "deletedAt",
+        "jobNumber"
+      ],
+      "id_set_sha256": "84e7061b7044652b2dbb1208bb5732864c145e921bb767f6678c0753f6daeb59",
+      "jsonl": "Job.jsonl",
+      "sql": "Job.sql"
+    },
+    "JobAssignment": {
+      "row_count": 13,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "userId",
+        "assignedByUserId",
+        "assignedAt"
+      ],
+      "id_set_sha256": "787014b5406c5f6ae715c822b107e677201b0228fdd5cac13c98e6ec0ce89b64",
+      "jsonl": "JobAssignment.jsonl",
+      "sql": "JobAssignment.sql"
+    },
+    "JobStage": {
+      "row_count": 13,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "name",
+        "description",
+        "plannedDate",
+        "status",
+        "completedAt",
+        "completedByUserId",
+        "workerNote",
+        "sortOrder",
+        "createdAt",
+        "updatedAt",
+        "version",
+        "supervisorUserId",
+        "supervisorCanCreateStages",
+        "supervisorAssignedAt",
+        "supervisorAssignedByUserId",
+        "submittedForApprovalAt",
+        "submittedByUserId",
+        "approvedAt",
+        "approvedByUserId",
+        "rejectedAt",
+        "rejectedByUserId",
+        "rejectionComment"
+      ],
+      "id_set_sha256": "21c4beebfe4f6a6e06321f4b8e4bca48c85e4560905ee02d94cb01649a0e2591",
+      "jsonl": "JobStage.jsonl",
+      "sql": "JobStage.sql"
+    },
+    "JobStageHistory": {
+      "row_count": 12,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "stageId",
+        "eventType",
+        "actorUserId",
+        "targetUserId",
+        "comment",
+        "metadata",
+        "createdAt"
+      ],
+      "id_set_sha256": "1228fc69f22dd6aba9c17e496d9ffa0b87db5507f7979eb16ce2e2f7ca94fd1e",
+      "jsonl": "JobStageHistory.jsonl",
+      "sql": "JobStageHistory.sql"
+    },
+    "JobStageNoteHistory": {
+      "row_count": 7,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "stageId",
+        "editedByUserId",
+        "previousNote",
+        "newNote",
+        "createdAt"
+      ],
+      "id_set_sha256": "dc3f4a7d7444d7619322bd3730925ecadc4e3bd59a3f3f3d45e0ffd824f153bc",
+      "jsonl": "JobStageNoteHistory.jsonl",
+      "sql": "JobStageNoteHistory.sql"
+    },
+    "JobStagePhoto": {
+      "row_count": 0,
+      "columns": [
+        "id",
+        "companyId",
+        "jobStageId",
+        "bucket",
+        "objectKey",
+        "contentType",
+        "sizeBytes",
+        "uploadedByUserId",
+        "createdAt"
+      ],
+      "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "jsonl": "JobStagePhoto.jsonl",
+      "sql": "JobStagePhoto.sql"
+    },
+    "JobStatusHistory": {
+      "row_count": 0,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "fromStatus",
+        "toStatus",
+        "changedByUserId",
+        "reason",
+        "changedAt"
+      ],
+      "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "jsonl": "JobStatusHistory.jsonl",
+      "sql": "JobStatusHistory.sql"
+    },
+    "AuditLog": {
+      "row_count": 1314,
+      "columns": [
+        "id",
+        "companyId",
+        "userId",
+        "action",
+        "entityType",
+        "entityId",
+        "data",
+        "requestId",
+        "createdAt"
+      ],
+      "id_set_sha256": "ea5b81b95c861446d1f6ddd90c5e5fde1a0c8e577e3a05dc63f8cff0bb797b2c",
+      "jsonl": "AuditLog.jsonl",
+      "sql": "AuditLog.sql"
+    },
+    "IdempotencyKey": {
+      "row_count": 0,
+      "columns": [
+        "id",
+        "companyId",
+        "userId",
+        "endpoint",
+        "idempotencyKey",
+        "requestHash",
+        "responseCode",
+        "responseBody",
+        "status",
+        "createdAt",
+        "expiresAt"
+      ],
+      "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "jsonl": "IdempotencyKey.jsonl",
+      "sql": "IdempotencyKey.sql"
+    },
+    "VerificationToken": {
+      "row_count": 1673,
+      "columns": [
+        "id",
+        "userId",
+        "purpose",
+        "tokenHash",
+        "expiresAt",
+        "usedAt",
+        "createdAt",
+        "failedAttempts"
+      ],
+      "id_set_sha256": "18a846cf81676b2556cc96110ef00a57c01f2491728d993b3f21fe8ae839c59e",
+      "jsonl": "VerificationToken.jsonl",
+      "sql": "VerificationToken.sql"
+    },
+    "AttendanceSession": {
+      "row_count": 16,
+      "columns": [
+        "id",
+        "companyId",
+        "userId",
+        "status",
+        "sessionDate",
+        "startedAt",
+        "breakStartedAt",
+        "endedAt",
+        "checkInPhotoUrl",
+        "checkInPhotoExpiresAt",
+        "checkOutPhotoUrl",
+        "checkOutPhotoExpiresAt",
+        "locationText",
+        "createdAt",
+        "updatedAt",
+        "totalBreakMinutes",
+        "totalWorkedMinutes",
+        "managerProofPhotoUrl",
+        "managerProofPhotoExpiresAt"
+      ],
+      "id_set_sha256": "001fd7de5c7d359d34a368d8548cc4e6f0bdefc41d71cb3dd5d9b199e91f747a",
+      "jsonl": "AttendanceSession.jsonl",
+      "sql": "AttendanceSession.sql"
+    },
+    "VacationRequest": {
+      "row_count": 17,
+      "columns": [
+        "id",
+        "companyId",
+        "userId",
+        "type",
+        "startDate",
+        "endDate",
+        "totalDays",
+        "status",
+        "reason",
+        "decidedById",
+        "decidedAt",
+        "createdAt",
+        "updatedAt"
+      ],
+      "id_set_sha256": "b37741a5b0e1efc3622c1b6c79e786ddd4beef75257de7435c7df697c0d7e9ea",
+      "jsonl": "VacationRequest.jsonl",
+      "sql": "VacationRequest.sql"
+    },
+    "JobBudget": {
+      "row_count": 3,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "totalBudgetCents",
+        "note",
+        "createdAt",
+        "updatedAt"
+      ],
+      "id_set_sha256": "3bfd0c1a5bf8194791fbdf1ad6bf08a50decada7baf2a04b2f730abf1285c48a",
+      "jsonl": "JobBudget.jsonl",
+      "sql": "JobBudget.sql"
+    },
+    "JobBudgetItem": {
+      "row_count": 10,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "budgetId",
+        "category",
+        "taxCategory",
+        "name",
+        "netAmountCents",
+        "vatRate",
+        "grossAmountCents",
+        "deductible",
+        "documentType",
+        "plannedDate",
+        "assignedUserId",
+        "note",
+        "createdByUserId",
+        "createdAt",
+        "updatedAt",
+        "documentNumber",
+        "supplier"
+      ],
+      "id_set_sha256": "4965033bc8f6d35cd100667bafafa9d23842d88a220ee0be29937fbaa901c4d9",
+      "jsonl": "JobBudgetItem.jsonl",
+      "sql": "JobBudgetItem.sql"
+    },
+    "JobBudgetLaborItem": {
+      "row_count": 7,
+      "columns": [
+        "id",
+        "companyId",
+        "jobId",
+        "budgetId",
+        "userId",
+        "plannedMinutes",
+        "hourlyRateCents",
+        "plannedDate",
+        "note",
+        "createdByUserId",
+        "createdAt",
+        "updatedAt",
+        "employmentType"
+      ],
+      "id_set_sha256": "c17fa548b37daa44fb8a6b8e81975726db87da31b7b67c6df93bc13290a5b186",
+      "jsonl": "JobBudgetLaborItem.jsonl",
+      "sql": "JobBudgetLaborItem.sql"
+    },
+    "StripeWebhookEvent": {
+      "row_count": 0,
+      "columns": [
+        "id",
+        "eventId",
+        "eventType",
+        "status",
+        "errorMessage",
+        "processedAt",
+        "createdAt"
+      ],
+      "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "jsonl": "StripeWebhookEvent.jsonl",
+      "sql": "StripeWebhookEvent.sql"
+    },
+    "Notification": {
+      "row_count": 11,
+      "columns": [
+        "id",
+        "userId",
+        "companyId",
+        "type",
+        "title",
+        "body",
+        "url",
+        "readAt",
+        "createdAt",
+        "companyNameSnapshot"
+      ],
+      "id_set_sha256": "df93d05060f0b52148f5524b3508621bfe9cd354a4ddc285ec01510d8d32ae39",
+      "jsonl": "Notification.jsonl",
+      "sql": "Notification.sql"
+    },
+    "PushSubscription": {
+      "row_count": 1,
+      "columns": [
+        "id",
+        "userId",
+        "endpoint",
+        "p256dh",
+        "auth",
+        "userAgent",
+        "createdAt",
+        "updatedAt"
+      ],
+      "id_set_sha256": "723079c2f4892cfe293da994ed902b9c5daa5c40e3e478b8d4c504ed5aa51daa",
+      "jsonl": "PushSubscription.jsonl",
+      "sql": "PushSubscription.sql"
+    }
+  }
+}
