@@ -200,27 +200,53 @@ export async function supabaseLogin(input: {
 
     const identity = authIdentityFromSupabaseUser(data.user);
 
-    // Mapping missing → authenticated but not authorized in VectorWork.
+    // Mapping missing → try idempotent Case-1 provisioning retry (partial-failure recovery).
+    // Does not auto-claim existing unlinked emails (still AUTH_USER_CONFLICT).
     let linked;
     try {
       linked = await resolveLinkedUser(prisma, identity);
     } catch (mapError) {
-      await supabase.auth.signOut();
-      if (mapError instanceof SupabaseAuthError) {
-        if (mapError.category === "AUTH_USER_INACTIVE") {
-          // Deactivated employer recovery remains a separate business flow.
-          // Supabase path does not mint deactivated-access via passwordHash.
-          return { ok: false, status: 403, error: "ACCOUNT_DISABLED" };
+      if (
+        mapError instanceof SupabaseAuthError &&
+        mapError.category === "AUTH_USER_UNLINKED"
+      ) {
+        try {
+          linked = await ensureProvisionedUserAfterAuth(prisma, identity);
+        } catch (provisionError) {
+          await supabase.auth.signOut();
+          if (provisionError instanceof SupabaseAuthError) {
+            if (provisionError.category === "AUTH_USER_INACTIVE") {
+              return { ok: false, status: 403, error: "ACCOUNT_DISABLED" };
+            }
+            if (
+              provisionError.category === "AUTH_EMAIL_CONFLICT" ||
+              provisionError.category === "AUTH_USER_CONFLICT"
+            ) {
+              return { ok: false, status: 403, error: "INVALID_CREDENTIALS" };
+            }
+            if (provisionError.category === "AUTH_PROVISIONING_FAILED") {
+              return { ok: false, status: 503, error: "AUTH_PROVISIONING_FAILED" };
+            }
+          }
+          return { ok: false, status: 401, error: "INVALID_CREDENTIALS" };
         }
-        if (
-          mapError.category === "AUTH_USER_UNLINKED" ||
-          mapError.category === "AUTH_EMAIL_CONFLICT" ||
-          mapError.category === "AUTH_USER_CONFLICT"
-        ) {
-          return { ok: false, status: 403, error: "INVALID_CREDENTIALS" };
+      } else {
+        await supabase.auth.signOut();
+        if (mapError instanceof SupabaseAuthError) {
+          if (mapError.category === "AUTH_USER_INACTIVE") {
+            // Deactivated employer recovery remains a separate business flow.
+            // Supabase path does not mint deactivated-access via passwordHash.
+            return { ok: false, status: 403, error: "ACCOUNT_DISABLED" };
+          }
+          if (
+            mapError.category === "AUTH_EMAIL_CONFLICT" ||
+            mapError.category === "AUTH_USER_CONFLICT"
+          ) {
+            return { ok: false, status: 403, error: "INVALID_CREDENTIALS" };
+          }
         }
+        return { ok: false, status: 401, error: "INVALID_CREDENTIALS" };
       }
-      return { ok: false, status: 401, error: "INVALID_CREDENTIALS" };
     }
 
     return { ok: true, userId: linked.id };

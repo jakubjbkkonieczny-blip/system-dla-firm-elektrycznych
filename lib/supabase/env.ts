@@ -1,7 +1,10 @@
 /**
- * Public / server Supabase env helpers — Phase 1 scaffolding (unused by auth flows).
+ * Public / server Supabase env helpers.
  *
- * Official Next.js names (docs 2026-07-29):
+ * Used by Stage 2A+ Auth clients when SUPABASE_AUTH_ENABLED=true.
+ * When the flag is off, callers must not require these values (legacy auth).
+ *
+ * Official Next.js names (docs verified Stage 3A):
  * - NEXT_PUBLIC_SUPABASE_URL
  * - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
  *
@@ -49,7 +52,7 @@ export function getSupabaseAdminEnv(
   return { ...publicEnv, serviceRoleKey };
 }
 
-/** Throws when public env is missing. Intended for future cutover callers only. */
+/** Throws when public env is missing. Used by Auth client factories in Supabase mode. */
 export function requireSupabasePublicEnv(
   env: EnvLike = process.env
 ): SupabasePublicEnv {
@@ -62,7 +65,7 @@ export function requireSupabasePublicEnv(
   return resolved;
 }
 
-/** Throws when admin env is missing. Intended for future cutover callers only. */
+/** Throws when admin env is missing. Admin client is cutover/migration only — not login. */
 export function requireSupabaseAdminEnv(
   env: EnvLike = process.env
 ): SupabaseAdminEnv {

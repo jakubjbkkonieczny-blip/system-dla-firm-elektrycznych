@@ -15,6 +15,9 @@ import {
 } from "@/lib/server/deactivation/deactivation-stripe-cancellation";
 import { sendAccountDeactivatedConfirmationEmail } from "@/lib/server/deactivation/account-deactivated-email";
 import { syncWorkerOrphanState } from "@/lib/server/workers/worker-lifecycle";
+import { isSupabaseAuthEnabled } from "@/lib/supabase/feature-flags";
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
+import { logAuthDiagnostic } from "@/lib/supabase/errors";
 
 type Body = {
   currentPassword?: unknown;
@@ -97,6 +100,17 @@ export async function POST(req: NextRequest) {
       },
       { status: 200 }
     );
+    // Supabase mode: must revoke Auth cookies — legacy HMAC clear alone is insufficient.
+    if (isSupabaseAuthEnabled()) {
+      try {
+        const supabase = await createSupabaseServerClient();
+        await supabase.auth.signOut();
+      } catch {
+        logAuthDiagnostic("AUTH_PROVIDER_UNAVAILABLE", {
+          deactivationSignOutFailed: true,
+        });
+      }
+    }
     clearSessionCookie(res);
     setDeactivatedAccessCookie(res, createDeactivatedAccessToken(outcome.userId));
     return res;

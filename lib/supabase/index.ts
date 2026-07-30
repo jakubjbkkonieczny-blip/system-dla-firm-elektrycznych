@@ -1,5 +1,5 @@
 /**
- * Public surface for Supabase Auth Stage 2A.
+ * Public surface for Supabase Auth (Stage 2A implementation / Stage 3A staging).
  *
  * Browser/server/admin client factories are NOT re-exported here to avoid
  * accidental bundling of server-only modules into client code.

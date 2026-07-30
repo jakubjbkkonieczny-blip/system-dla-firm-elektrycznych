@@ -164,3 +164,5 @@ Supabase owns Auth emails. For production, configure custom SMTP in the Supabase
 ## STOP
 
 Stage 2A ends here. Do not enable production cutover, import passwords, migrate Neon, or remove legacy auth.
+
+Staging activation and validation: see `docs/supabase-migration-stage-3a.md`.

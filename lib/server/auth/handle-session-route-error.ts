@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { SupabaseAuthError } from "@/lib/supabase/errors";
+
 /**
  * Maps non-auth errors to HTTP status, or returns `null` to fall through to 500 INTERNAL_ERROR.
  */
@@ -42,6 +44,14 @@ export function handleSessionRouteErrorOr(
   e: unknown,
   mapStatus: SessionRouteErrorMap
 ): NextResponse {
+  // Supabase Auth mode: surface typed provider/config failures (fail closed, no secrets).
+  if (e instanceof SupabaseAuthError) {
+    return NextResponse.json(
+      { error: e.publicCode },
+      { status: e.httpStatus, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
   const msg = e instanceof Error ? e.message : "UNKNOWN";
   if (msg === "MISSING_AUTH") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -60,7 +60,7 @@ describe("env isolation", () => {
   });
 });
 
-describe("source contracts — Stage 2A", () => {
+describe("source contracts — Stage 2A / 3A", () => {
   it("admin-client is server-only", () => {
     const src = readFileSync(join(ROOT, "lib/supabase/admin-client.ts"), "utf8");
     assert.match(src, /import ["']server-only["']/);
@@ -85,11 +85,35 @@ describe("source contracts — Stage 2A", () => {
     assert.doesNotMatch(src, /passwordHash\s*:/);
   });
 
+  it("login retries Case-1 provisioning for unlinked confirmed Auth users", () => {
+    const src = readFileSync(join(ROOT, "lib/supabase/auth-actions.ts"), "utf8");
+    assert.match(src, /AUTH_USER_UNLINKED/);
+    assert.match(src, /ensureProvisionedUserAfterAuth/);
+  });
+
   it("provisioning sets passwordHash null and does not create memberships", () => {
     const src = readFileSync(join(ROOT, "lib/supabase/provisioning.ts"), "utf8");
     assert.match(src, /passwordHash:\s*null/);
     assert.doesNotMatch(src, /bcrypt/);
     assert.doesNotMatch(src, /companyMember\.create|prisma\.companyMember/i);
+  });
+
+  it("deactivation final signs out Supabase session when Auth mode is on", () => {
+    const src = readFileSync(
+      join(ROOT, "app/api/deactivation/final/route.ts"),
+      "utf8"
+    );
+    assert.match(src, /isSupabaseAuthEnabled/);
+    assert.match(src, /auth\.signOut/);
+    assert.match(src, /clearSessionCookie/);
+  });
+
+  it("proxy refreshes Supabase session via getClaims when enabled", () => {
+    const proxy = readFileSync(join(ROOT, "proxy.ts"), "utf8");
+    const update = readFileSync(join(ROOT, "lib/supabase/update-session.ts"), "utf8");
+    assert.match(proxy, /updateSupabaseSession/);
+    assert.match(update, /getClaims/);
+    assert.doesNotMatch(update, /getSession\(/);
   });
 
   it("no production code changes DATABASE_URL or DIRECT_URL assignment", () => {
@@ -127,5 +151,18 @@ describe("source contracts — Stage 2A", () => {
         file
       );
     }
+  });
+
+  it("Stage 3A runbook documents rollback and production restriction", () => {
+    const doc = readFileSync(
+      join(ROOT, "docs/supabase-migration-stage-3a.md"),
+      "utf8"
+    );
+    assert.match(doc, /Rollback procedure/);
+    assert.match(doc, /SUPABASE_AUTH_ENABLED=true/);
+    assert.match(doc, /Production restriction/);
+    assert.match(doc, /AUTH_PASSWORD_REAUTH_REQUIRED/);
+    assert.match(doc, /Do \*\*not\*\* begin Stage 3B/);
+    assert.doesNotMatch(doc, /Proceed to Stage 3B/i);
   });
 });
