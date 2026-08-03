@@ -1,0 +1,64 @@
+{
+  "stage": "4F",
+  "mode": "stabilize-env",
+  "at": "2026-08-03T15:33:25.530Z",
+  "changed_file": ".env.local",
+  "production_env_untouched": true,
+  "before": {
+    "DATABASE_URL": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "connection_limit": "5",
+      "pool_timeout": "20",
+      "isNeon": false,
+      "isSupabasePooler": true,
+      "isSupabaseDirect": false
+    },
+    "DIRECT_URL": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "connection_limit": "5",
+      "pool_timeout": "20",
+      "isNeon": false,
+      "isSupabasePooler": true,
+      "isSupabaseDirect": false
+    }
+  },
+  "after": {
+    "DATABASE_URL": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "connection_limit": "5",
+      "pool_timeout": "20",
+      "isNeon": false,
+      "isSupabasePooler": true,
+      "isSupabaseDirect": false
+    },
+    "DIRECT_URL": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "connection_limit": "5",
+      "pool_timeout": "20",
+      "isNeon": false,
+      "isSupabasePooler": true,
+      "isSupabaseDirect": false
+    }
+  },
+  "applied": {
+    "connection_limit": 5,
+    "pool_timeout": 20,
+    "note": "Single Next.js process; leave headroom for migrations/admin/scripts."
+  }
+}

@@ -43,3 +43,9 @@ next-env.d.ts
 serviceAccountKey.json
 .env.local
 
+# Production migration artifacts (may contain PII / Auth identifiers / secrets)
+/migration-artifacts/
+/vectorwork-migration-artifacts/
+scripts/production/_*.json
+scripts/production/**/artifacts/
+

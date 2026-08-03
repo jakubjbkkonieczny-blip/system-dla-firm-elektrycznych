@@ -1,0 +1,111 @@
+{
+  "stage": "4E",
+  "mode": "post-cutover",
+  "created_at": "2026-08-03T15:25:34.888Z",
+  "runtime": {
+    "database": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "isNeon": false,
+      "isSupabase": true
+    },
+    "direct": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "isNeon": false,
+      "isSupabase": true
+    }
+  },
+  "smoke": {
+    "label": "staging_runtime",
+    "database": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "isNeon": false,
+      "isSupabase": true
+    },
+    "direct": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "require",
+      "isNeon": false,
+      "isSupabase": true
+    },
+    "connect": {
+      "ok": true,
+      "db": "postgres",
+      "addr": "2a05:d01c:874:6b00:de36:e9b7:db7a:e07/128",
+      "version": "17.6"
+    },
+    "counts": {
+      "users": 3704,
+      "linked": 0,
+      "companies": 2606,
+      "jobs": 60
+    },
+    "tx_commit": {
+      "ok": true
+    },
+    "tx_rollback": {
+      "ok": true,
+      "detail": "intentional throw"
+    },
+    "advisory_lock": {
+      "ok": true
+    },
+    "auth_schema": true,
+    "auth_users_count": 1,
+    "prisma_migrations_rows": 23
+  },
+  "writes": {
+    "label": "staging_runtime",
+    "marker": "stage4e-probe-1785770732875",
+    "created": [
+      {
+        "table": "AuditLog",
+        "id": "cmsddscg90004atz0dn55za7g",
+        "action": "stage4e-probe-1785770732875"
+      },
+      {
+        "table": "User",
+        "id": "cmsddscoa0007atz0ui92pw6o",
+        "email": "stage4e.probe.1785770733609@example.invalid"
+      }
+    ],
+    "deleted": [
+      {
+        "table": "User",
+        "id": "cmsddscoa0007atz0ui92pw6o"
+      },
+      {
+        "table": "AuditLog",
+        "id": "cmsddscg90004atz0dn55za7g"
+      }
+    ],
+    "companyId": "cmpa3meul0000a0ho6vcvduaj",
+    "read_back": true,
+    "fk_enforced": true,
+    "fk_code": "P2003",
+    "unique_enforced": true,
+    "unique_code": "P2002",
+    "cleanup_ok": true
+  },
+  "jobnum": {
+    "ok": true,
+    "companyId": "cmpa5dv4w0001ipjrjwkyfovv",
+    "lockKey": "2261039023543653599",
+    "nextJobNumber": 4,
+    "persisted": false
+  }
+}

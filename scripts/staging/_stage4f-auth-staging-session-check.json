@@ -1,0 +1,45 @@
+{
+  "stage": "4F-auth-staging-session-check",
+  "at": "2026-08-03T18:18:16.040Z",
+  "mode": "structural_resolveLinkedUser_only",
+  "results": {
+    "active_bcrypt": {
+      "ok": true,
+      "userId": "0039cc2b-e83b-42a5-9cf2-5c2c32bc2b3c",
+      "authUserId": "2495653e-457f-40e2-b5b2-d16606a7f122",
+      "resolvedUserId": "0039cc2b-e83b-42a5-9cf2-5c2c32bc2b3c",
+      "isActive": true,
+      "hashKind": "bcrypt",
+      "expected": "structural resolve success"
+    },
+    "active_placeholder": {
+      "ok": true,
+      "userId": "f039d97e-cce1-47a7-99f9-46e4372b4de1",
+      "authUserId": "c2c5bd86-02bf-4aff-9355-1d611f1a5072",
+      "resolvedUserId": "f039d97e-cce1-47a7-99f9-46e4372b4de1",
+      "isActive": true,
+      "hashKind": "placeholder",
+      "expected": "structural resolve success",
+      "note": "Linked resolution succeeds structurally; login still requires password reset path"
+    },
+    "inactive_bcrypt": {
+      "ok": true,
+      "userId": "003b86b5-4a81-483b-a731-e745871e72a5",
+      "authUserId": "8ec9337e-d6db-488b-a250-e4bbb8369927",
+      "isActive": false,
+      "hashKind": "bcrypt",
+      "category": "AUTH_USER_INACTIVE",
+      "expected": "AUTH_USER_INACTIVE"
+    },
+    "inactive_placeholder": {
+      "ok": true,
+      "userId": "009a637b-bb21-4b95-9779-9732db3c9d64",
+      "authUserId": "e67b43e4-9f8e-44af-ae7c-e67b3dc41063",
+      "isActive": false,
+      "hashKind": "placeholder",
+      "category": "AUTH_USER_INACTIVE",
+      "expected": "AUTH_USER_INACTIVE"
+    }
+  },
+  "ok": true
+}

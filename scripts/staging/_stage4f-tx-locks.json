@@ -1,0 +1,72 @@
+{
+  "stage": "4F",
+  "mode": "tx-locks",
+  "at": "2026-08-03T15:54:10.956Z",
+  "runtime": {
+    "host": "aws-1-eu-west-2.pooler.supabase.com",
+    "port": "5432",
+    "user": "postgres.yzezdhwffgamtmozmfse",
+    "db": "postgres",
+    "sslmode": "require",
+    "connection_limit": "3",
+    "pool_timeout": "30",
+    "isNeon": false,
+    "isSupabasePooler": true,
+    "isSupabaseDirect": false
+  },
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "marker": "stage4f-tx-1785772450956",
+  "checks": {
+    "tx_commit": {
+      "ok": true,
+      "userId": "cmsdet67q0001l003rubo7vdr"
+    },
+    "tx_rollback": {
+      "ok": true,
+      "rollbackCaught": true,
+      "ghostExists": false
+    },
+    "advisory_lock": {
+      "ok": true,
+      "lockKey": "-3011957021895213881"
+    },
+    "sequential_job_numbers": {
+      "ok": true,
+      "numbers": [
+        1,
+        2,
+        3
+      ]
+    },
+    "concurrent_job_numbers": {
+      "ok": true,
+      "attempted": 8,
+      "succeeded": 8,
+      "numbers": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "unique": 8,
+      "duplicates": 0,
+      "failures": []
+    }
+  },
+  "cleanup": {
+    "ok": true,
+    "leftoverUsers": 0,
+    "leftoverCompanies": 0,
+    "leftoverJobs": 0
+  },
+  "counts_after": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58
+  },
+  "passed": true
+}

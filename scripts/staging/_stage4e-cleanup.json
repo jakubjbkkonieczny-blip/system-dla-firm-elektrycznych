@@ -1,0 +1,59 @@
+{
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "mode": "cleanup",
+  "stage4e_start": "2026-08-03T15:15:00.000Z",
+  "before": {
+    "users": 3704,
+    "companies": 2606,
+    "jobs": 60,
+    "members": 2541,
+    "linked": 0
+  },
+  "test_users_found": 99,
+  "test_companies_found": 63,
+  "sample_emails": [
+    "authworker-0236ee29-b7e4-4f91-9aff-3b7331d5e13e@example.com",
+    "authstaff-3024326f-2be6-45f3-9bb3-29ed59761e07@example.com",
+    "authadmin-aaab092e-5624-4415-aa86-c5aaa79312b7@example.com",
+    "authowner-57e82e56-4e4f-447d-b7e4-d4174db9ea7d@example.com",
+    "stateuser-ce8d88fa-6c0a-41a7-b8cf-fdac284a0e6e@example.com",
+    "wrongpurpose-fbb4bf84-3d47-4e7f-848d-46b4f73157a2@example.com",
+    "other-21e0ada0-64d5-42ee-9143-3e07615c5a45@example.com",
+    "owner-50789813-1980-4ddb-903a-b8baeb14b044@example.com",
+    "confirmationexpired-dbac85bb-de3b-4e5e-a4d1-28379ba806fd@example.com",
+    "confirmationstate-5eade65f-4202-4844-8c2d-f3e16ace763f@example.com",
+    "expiredstate-8889cb04-c89c-4d26-b7b2-26331799a81b@example.com",
+    "concurrent-48f3863c-8b0a-423f-9456-53a46704241f@example.com",
+    "failedattempts-3d9b9343-e72f-4c2d-9109-f767981f9f9b@example.com",
+    "newtoken-fb19f0db-47ac-42a8-88db-6ed354b5b309@example.com",
+    "cooldown-5edb1918-cf8f-4c14-820f-f1b550020735@example.com",
+    "plaintext-22bc6e0a-dfd9-4dfa-94b0-f01f85c96cd3@example.com",
+    "recover-billing-67ccec9c-cda2-4104-bfd0-23e9d66aeb07@example.com",
+    "recover-multi-owner-c522dd0c-ccd4-4aca-a754-19f2367dad99@example.com",
+    "legacy-bypass-1909eb36-28b3-4651-97d2-01aee15e12a7@example.com",
+    "owner-jobs-d0328715-7f82-48c8-b615-04110a941e33@example.com"
+  ],
+  "sample_companies": [
+    "Company-95d8593b-9141-41cd-880f-b0e7ad091d85",
+    "Company-8dc098cb-8c79-46b0-9500-a4a02ecc95d6",
+    "recover-billing-company-daa19144-7450-4569-816c-f773ade70d60",
+    "recover-multi-b-3392b250-1758-4bfe-b430-233aeb18331d",
+    "recover-multi-a-5fc32af9-bf30-4467-b00e-eed55ef9b877",
+    "company-legacy-bypass-ee006a63-509c-4c05-a98e-4f972f75fcfc",
+    "recover-company-b-9a411200-5452-4998-982c-65bb72ae0e90",
+    "company-jobs-2b5d311f-5cd0-4f10-90bc-cbd798cf78ec",
+    "recover-company-a-057fd184-b800-4aaa-a1c0-81ae2d3c54b7",
+    "company-orphan-worker-fbb8958a-0268-489a-b332-87ac1db0c1f8"
+  ],
+  "deleted": {
+    "users": 99,
+    "companies": 63
+  },
+  "after": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58,
+    "members": 2477,
+    "linked": 0
+  }
+}

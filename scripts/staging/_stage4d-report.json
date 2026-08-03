@@ -1,0 +1,2205 @@
+{
+  "stage": "4D",
+  "created_at": "2026-08-03T15:07:50.620Z",
+  "mode": "read-only",
+  "sources": {
+    "neon_host": "ep-green-wave-aljyrgvl-pooler.c-3.eu-central-1.aws.neon.tech",
+    "supabase_host": "aws-1-eu-west-2.pooler.supabase.com"
+  },
+  "neon_auth": {
+    "label": "neon",
+    "auth_schema": false
+  },
+  "supabase_auth": {
+    "label": "supabase_staging",
+    "auth_schema": true,
+    "auth_users_count": 1,
+    "public_user_with_supabaseAuthUserId": 0,
+    "public_user_missing_auth_parent": 0,
+    "duplicate_supabaseAuthUserId": 0,
+    "architecture": "auth.users.id → User.supabaseAuthUserId → User.id"
+  },
+  "row_counts": [
+    {
+      "table": "User",
+      "neon": 3605,
+      "supabase": 3605,
+      "match": true
+    },
+    {
+      "table": "Company",
+      "neon": 2543,
+      "supabase": 2543,
+      "match": true
+    },
+    {
+      "table": "CompanyMember",
+      "neon": 2477,
+      "supabase": 2477,
+      "match": true
+    },
+    {
+      "table": "Job",
+      "neon": 58,
+      "supabase": 58,
+      "match": true
+    },
+    {
+      "table": "JobAssignment",
+      "neon": 13,
+      "supabase": 13,
+      "match": true
+    },
+    {
+      "table": "JobStage",
+      "neon": 13,
+      "supabase": 13,
+      "match": true
+    },
+    {
+      "table": "JobStageHistory",
+      "neon": 12,
+      "supabase": 12,
+      "match": true
+    },
+    {
+      "table": "JobStageNoteHistory",
+      "neon": 7,
+      "supabase": 7,
+      "match": true
+    },
+    {
+      "table": "JobStagePhoto",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "table": "JobStatusHistory",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "table": "AuditLog",
+      "neon": 1314,
+      "supabase": 1314,
+      "match": true
+    },
+    {
+      "table": "IdempotencyKey",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "table": "VerificationToken",
+      "neon": 1673,
+      "supabase": 1673,
+      "match": true
+    },
+    {
+      "table": "AttendanceSession",
+      "neon": 16,
+      "supabase": 16,
+      "match": true
+    },
+    {
+      "table": "VacationRequest",
+      "neon": 17,
+      "supabase": 17,
+      "match": true
+    },
+    {
+      "table": "JobBudget",
+      "neon": 3,
+      "supabase": 3,
+      "match": true
+    },
+    {
+      "table": "JobBudgetItem",
+      "neon": 10,
+      "supabase": 10,
+      "match": true
+    },
+    {
+      "table": "JobBudgetLaborItem",
+      "neon": 7,
+      "supabase": 7,
+      "match": true
+    },
+    {
+      "table": "StripeWebhookEvent",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "table": "Notification",
+      "neon": 11,
+      "supabase": 11,
+      "match": true
+    },
+    {
+      "table": "PushSubscription",
+      "neon": 1,
+      "supabase": 1,
+      "match": true
+    }
+  ],
+  "primary_keys": [
+    {
+      "table": "User",
+      "match": true,
+      "neon": {
+        "row_count": 3605,
+        "pk_nonnull_count": 3605,
+        "pk_distinct_count": 3605,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 3605,
+        "pk_nonnull_count": 3605,
+        "pk_distinct_count": 3605,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "Company",
+      "match": true,
+      "neon": {
+        "row_count": 2543,
+        "pk_nonnull_count": 2543,
+        "pk_distinct_count": 2543,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 2543,
+        "pk_nonnull_count": 2543,
+        "pk_distinct_count": 2543,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "CompanyMember",
+      "match": true,
+      "neon": {
+        "row_count": 2477,
+        "pk_nonnull_count": 2477,
+        "pk_distinct_count": 2477,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 2477,
+        "pk_nonnull_count": 2477,
+        "pk_distinct_count": 2477,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "Job",
+      "match": true,
+      "neon": {
+        "row_count": 58,
+        "pk_nonnull_count": 58,
+        "pk_distinct_count": 58,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 58,
+        "pk_nonnull_count": 58,
+        "pk_distinct_count": 58,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobAssignment",
+      "match": true,
+      "neon": {
+        "row_count": 13,
+        "pk_nonnull_count": 13,
+        "pk_distinct_count": 13,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 13,
+        "pk_nonnull_count": 13,
+        "pk_distinct_count": 13,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobStage",
+      "match": true,
+      "neon": {
+        "row_count": 13,
+        "pk_nonnull_count": 13,
+        "pk_distinct_count": 13,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 13,
+        "pk_nonnull_count": 13,
+        "pk_distinct_count": 13,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobStageHistory",
+      "match": true,
+      "neon": {
+        "row_count": 12,
+        "pk_nonnull_count": 12,
+        "pk_distinct_count": 12,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 12,
+        "pk_nonnull_count": 12,
+        "pk_distinct_count": 12,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobStageNoteHistory",
+      "match": true,
+      "neon": {
+        "row_count": 7,
+        "pk_nonnull_count": 7,
+        "pk_distinct_count": 7,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 7,
+        "pk_nonnull_count": 7,
+        "pk_distinct_count": 7,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobStagePhoto",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobStatusHistory",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "AuditLog",
+      "match": true,
+      "neon": {
+        "row_count": 1314,
+        "pk_nonnull_count": 1314,
+        "pk_distinct_count": 1314,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 1314,
+        "pk_nonnull_count": 1314,
+        "pk_distinct_count": 1314,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "IdempotencyKey",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "VerificationToken",
+      "match": true,
+      "neon": {
+        "row_count": 1673,
+        "pk_nonnull_count": 1673,
+        "pk_distinct_count": 1673,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 1673,
+        "pk_nonnull_count": 1673,
+        "pk_distinct_count": 1673,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "AttendanceSession",
+      "match": true,
+      "neon": {
+        "row_count": 16,
+        "pk_nonnull_count": 16,
+        "pk_distinct_count": 16,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 16,
+        "pk_nonnull_count": 16,
+        "pk_distinct_count": 16,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "VacationRequest",
+      "match": true,
+      "neon": {
+        "row_count": 17,
+        "pk_nonnull_count": 17,
+        "pk_distinct_count": 17,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 17,
+        "pk_nonnull_count": 17,
+        "pk_distinct_count": 17,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobBudget",
+      "match": true,
+      "neon": {
+        "row_count": 3,
+        "pk_nonnull_count": 3,
+        "pk_distinct_count": 3,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 3,
+        "pk_nonnull_count": 3,
+        "pk_distinct_count": 3,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobBudgetItem",
+      "match": true,
+      "neon": {
+        "row_count": 10,
+        "pk_nonnull_count": 10,
+        "pk_distinct_count": 10,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 10,
+        "pk_nonnull_count": 10,
+        "pk_distinct_count": 10,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "JobBudgetLaborItem",
+      "match": true,
+      "neon": {
+        "row_count": 7,
+        "pk_nonnull_count": 7,
+        "pk_distinct_count": 7,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 7,
+        "pk_nonnull_count": 7,
+        "pk_distinct_count": 7,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "StripeWebhookEvent",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 0,
+        "pk_nonnull_count": 0,
+        "pk_distinct_count": 0,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "Notification",
+      "match": true,
+      "neon": {
+        "row_count": 11,
+        "pk_nonnull_count": 11,
+        "pk_distinct_count": 11,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 11,
+        "pk_nonnull_count": 11,
+        "pk_distinct_count": 11,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    },
+    {
+      "table": "PushSubscription",
+      "match": true,
+      "neon": {
+        "row_count": 1,
+        "pk_nonnull_count": 1,
+        "pk_distinct_count": 1,
+        "pk_duplicate_count": 0
+      },
+      "supabase": {
+        "row_count": 1,
+        "pk_nonnull_count": 1,
+        "pk_distinct_count": 1,
+        "pk_duplicate_count": 0
+      },
+      "pk_cols_match": true
+    }
+  ],
+  "foreign_keys": [
+    {
+      "table": "User",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 0,
+      "supabase_fk_count": 0,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "Company",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 0,
+      "supabase_fk_count": 0,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "CompanyMember",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "Job",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobAssignment",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 3,
+      "supabase_fk_count": 3,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobStage",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 8,
+      "supabase_fk_count": 8,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobStageHistory",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 5,
+      "supabase_fk_count": 5,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobStageNoteHistory",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 4,
+      "supabase_fk_count": 4,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobStagePhoto",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobStatusHistory",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 3,
+      "supabase_fk_count": 3,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "AuditLog",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "IdempotencyKey",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "VerificationToken",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 1,
+      "supabase_fk_count": 1,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "AttendanceSession",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "VacationRequest",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 3,
+      "supabase_fk_count": 3,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobBudget",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobBudgetItem",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 5,
+      "supabase_fk_count": 5,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "JobBudgetLaborItem",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 5,
+      "supabase_fk_count": 5,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "StripeWebhookEvent",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 0,
+      "supabase_fk_count": 0,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "Notification",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 2,
+      "supabase_fk_count": 2,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    },
+    {
+      "table": "PushSubscription",
+      "match": true,
+      "neon_orphan_total": 0,
+      "supabase_orphan_total": 0,
+      "neon_fk_count": 1,
+      "supabase_fk_count": 1,
+      "neon_orphans": [],
+      "supabase_orphans": []
+    }
+  ],
+  "unique_constraints": [
+    {
+      "table": "User",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "Company",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "CompanyMember",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "Job",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobAssignment",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobStage",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobStageHistory",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobStageNoteHistory",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobStagePhoto",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobStatusHistory",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "AuditLog",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "IdempotencyKey",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "VerificationToken",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "AttendanceSession",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "VacationRequest",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobBudget",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobBudgetItem",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "JobBudgetLaborItem",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "StripeWebhookEvent",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "Notification",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    },
+    {
+      "table": "PushSubscription",
+      "match": true,
+      "neon_constraint_count": 1,
+      "supabase_constraint_count": 1,
+      "neon_dups": [],
+      "supabase_dups": []
+    }
+  ],
+  "identity": [
+    {
+      "table": "User",
+      "neon": {
+        "columns": [
+          "id",
+          "supabaseAuthUserId",
+          "email",
+          "stripeCustomerId",
+          "stripeSubscriptionId",
+          "googleAccessToken",
+          "googleRefreshToken",
+          "pushSubscription",
+          "createdAt",
+          "updatedAt",
+          "deactivatedAt",
+          "scheduledDeletionAt",
+          "pendingDeletionAt"
+        ],
+        "row_count": 3605,
+        "sha256": "1e73e3e2062da089866f718bb929e5ba1f46fedc41e268932ea0f52b2b342839",
+        "md5": "27edc7fb652a41a5c3ba8d36404b5d02"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "supabaseAuthUserId",
+          "email",
+          "stripeCustomerId",
+          "stripeSubscriptionId",
+          "googleAccessToken",
+          "googleRefreshToken",
+          "pushSubscription",
+          "createdAt",
+          "updatedAt",
+          "deactivatedAt",
+          "scheduledDeletionAt",
+          "pendingDeletionAt"
+        ],
+        "row_count": 3605,
+        "sha256": "1e73e3e2062da089866f718bb929e5ba1f46fedc41e268932ea0f52b2b342839",
+        "md5": "27edc7fb652a41a5c3ba8d36404b5d02"
+      },
+      "match": true
+    },
+    {
+      "table": "Company",
+      "neon": {
+        "columns": [
+          "id",
+          "slug",
+          "createdAt",
+          "updatedAt",
+          "deactivatedAt",
+          "scheduledDeletionAt"
+        ],
+        "row_count": 2543,
+        "sha256": "b24648f3c9fa69113f351091050205a26be2ed154ce63eb0e6199445deec72e0",
+        "md5": "314a2636c04c90f68bfbf48ad05b02fd"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "slug",
+          "createdAt",
+          "updatedAt",
+          "deactivatedAt",
+          "scheduledDeletionAt"
+        ],
+        "row_count": 2543,
+        "sha256": "b24648f3c9fa69113f351091050205a26be2ed154ce63eb0e6199445deec72e0",
+        "md5": "314a2636c04c90f68bfbf48ad05b02fd"
+      },
+      "match": true
+    },
+    {
+      "table": "CompanyMember",
+      "neon": {
+        "columns": [
+          "id",
+          "companyId",
+          "userId",
+          "role",
+          "scope",
+          "isActive",
+          "invitedById",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 2477,
+        "sha256": "2d706a77e41be5d5a3b9c52ddc1d3dfaf07277108afe53ccd73d184af6f73a80",
+        "md5": "1eddaf97380736fedb3f3e1c948550a8"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "companyId",
+          "userId",
+          "role",
+          "scope",
+          "isActive",
+          "invitedById",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 2477,
+        "sha256": "2d706a77e41be5d5a3b9c52ddc1d3dfaf07277108afe53ccd73d184af6f73a80",
+        "md5": "1eddaf97380736fedb3f3e1c948550a8"
+      },
+      "match": true
+    },
+    {
+      "table": "Job",
+      "neon": {
+        "columns": [
+          "id",
+          "companyId",
+          "createdByUserId",
+          "jobNumber",
+          "status",
+          "deletedAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 58,
+        "sha256": "2f9558dacad5faae27c28b7687b28f22dcc631132f967799b7d07b393ceb3828",
+        "md5": "3363a3958d88213521169cebd0cb454e"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "companyId",
+          "createdByUserId",
+          "jobNumber",
+          "status",
+          "deletedAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 58,
+        "sha256": "2f9558dacad5faae27c28b7687b28f22dcc631132f967799b7d07b393ceb3828",
+        "md5": "3363a3958d88213521169cebd0cb454e"
+      },
+      "match": true
+    },
+    {
+      "table": "VerificationToken",
+      "neon": {
+        "columns": [
+          "id",
+          "userId",
+          "purpose",
+          "tokenHash",
+          "expiresAt",
+          "usedAt",
+          "createdAt",
+          "failedAttempts"
+        ],
+        "row_count": 1673,
+        "sha256": "7c9f88731b9fe920a453db604d03622cc0ec227ab3f392202aad6ff3d9b06a28",
+        "md5": "ca4bd98c06fee7bc93fb9a731852ca65"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "userId",
+          "purpose",
+          "tokenHash",
+          "expiresAt",
+          "usedAt",
+          "createdAt",
+          "failedAttempts"
+        ],
+        "row_count": 1673,
+        "sha256": "7c9f88731b9fe920a453db604d03622cc0ec227ab3f392202aad6ff3d9b06a28",
+        "md5": "ca4bd98c06fee7bc93fb9a731852ca65"
+      },
+      "match": true
+    },
+    {
+      "table": "AttendanceSession",
+      "neon": {
+        "columns": [
+          "id",
+          "companyId",
+          "userId",
+          "sessionDate",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 16,
+        "sha256": "def30b082e85a0fadbc25ec7e09a453e5cdbfe69bc0827dd81a782a2b3c1d8f2",
+        "md5": "3b591d76d264abbdc5098b69d0afad6a"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "companyId",
+          "userId",
+          "sessionDate",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 16,
+        "sha256": "def30b082e85a0fadbc25ec7e09a453e5cdbfe69bc0827dd81a782a2b3c1d8f2",
+        "md5": "3b591d76d264abbdc5098b69d0afad6a"
+      },
+      "match": true
+    },
+    {
+      "table": "VacationRequest",
+      "neon": {
+        "columns": [
+          "id",
+          "companyId",
+          "userId",
+          "status",
+          "decidedById",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 17,
+        "sha256": "5982fbf27741fffcc4a5934c83de62fef65e80fd4ecbdb1508de6f6f288936f7",
+        "md5": "59fcdc8bf3d4bbc19f533d55738c13cf"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "companyId",
+          "userId",
+          "status",
+          "decidedById",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 17,
+        "sha256": "5982fbf27741fffcc4a5934c83de62fef65e80fd4ecbdb1508de6f6f288936f7",
+        "md5": "59fcdc8bf3d4bbc19f533d55738c13cf"
+      },
+      "match": true
+    },
+    {
+      "table": "JobBudget",
+      "neon": {
+        "columns": [
+          "id",
+          "companyId",
+          "jobId",
+          "totalBudgetCents",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 3,
+        "sha256": "5d88674d1ccabc0bb21902b8900c415ecad1b00dd053bf7f873f998db5e82cc9",
+        "md5": "efa230f80f963a37fe565a10f85bc503"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "companyId",
+          "jobId",
+          "totalBudgetCents",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 3,
+        "sha256": "5d88674d1ccabc0bb21902b8900c415ecad1b00dd053bf7f873f998db5e82cc9",
+        "md5": "efa230f80f963a37fe565a10f85bc503"
+      },
+      "match": true
+    },
+    {
+      "table": "JobBudgetItem",
+      "neon": {
+        "columns": [
+          "id",
+          "companyId",
+          "jobId",
+          "budgetId",
+          "createdByUserId",
+          "assignedUserId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 10,
+        "sha256": "5d03b094853409d953f4a51288e4c21a0c1053e946b6e6f33a17138b9b93646e",
+        "md5": "e941313b80600a3676afd1a4b2444798"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "companyId",
+          "jobId",
+          "budgetId",
+          "createdByUserId",
+          "assignedUserId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 10,
+        "sha256": "5d03b094853409d953f4a51288e4c21a0c1053e946b6e6f33a17138b9b93646e",
+        "md5": "e941313b80600a3676afd1a4b2444798"
+      },
+      "match": true
+    },
+    {
+      "table": "JobBudgetLaborItem",
+      "neon": {
+        "columns": [
+          "id",
+          "companyId",
+          "jobId",
+          "budgetId",
+          "userId",
+          "createdByUserId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 7,
+        "sha256": "fbf80d3f553d228f7e29c5e2afa45a9be5543550f06429ad9ef0cdb20727bb77",
+        "md5": "35b98922097ae9667447be6b1239bc42"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "companyId",
+          "jobId",
+          "budgetId",
+          "userId",
+          "createdByUserId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 7,
+        "sha256": "fbf80d3f553d228f7e29c5e2afa45a9be5543550f06429ad9ef0cdb20727bb77",
+        "md5": "35b98922097ae9667447be6b1239bc42"
+      },
+      "match": true
+    },
+    {
+      "table": "Notification",
+      "neon": {
+        "columns": [
+          "id",
+          "userId",
+          "companyId",
+          "type",
+          "createdAt",
+          "readAt"
+        ],
+        "row_count": 11,
+        "sha256": "0d1edf809f9a0b26a643399ee9b53cd6c53940d2433fce3d05b457ba51c04122",
+        "md5": "40d31515830fc6525d4657f6e75745a2"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "userId",
+          "companyId",
+          "type",
+          "createdAt",
+          "readAt"
+        ],
+        "row_count": 11,
+        "sha256": "0d1edf809f9a0b26a643399ee9b53cd6c53940d2433fce3d05b457ba51c04122",
+        "md5": "40d31515830fc6525d4657f6e75745a2"
+      },
+      "match": true
+    },
+    {
+      "table": "PushSubscription",
+      "neon": {
+        "columns": [
+          "id",
+          "userId",
+          "endpoint",
+          "p256dh",
+          "auth",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 1,
+        "sha256": "e31586ecee9cc931cdd10d540e947a4b635afcad24b8ddd474c6c5f09f7fe1e0",
+        "md5": "9cf429c2a22244f18eae8ac0018d41f9"
+      },
+      "supabase": {
+        "columns": [
+          "id",
+          "userId",
+          "endpoint",
+          "p256dh",
+          "auth",
+          "createdAt",
+          "updatedAt"
+        ],
+        "row_count": 1,
+        "sha256": "e31586ecee9cc931cdd10d540e947a4b635afcad24b8ddd474c6c5f09f7fe1e0",
+        "md5": "9cf429c2a22244f18eae8ac0018d41f9"
+      },
+      "match": true
+    },
+    {
+      "set": "user_ids_sha256",
+      "neon": "37913ad4b68c953fb29681d550d0752af853485355f37d86c43c9968e2be9703",
+      "supabase": "37913ad4b68c953fb29681d550d0752af853485355f37d86c43c9968e2be9703",
+      "match": true
+    },
+    {
+      "set": "user_supabaseAuthUserId_sha256",
+      "neon": "3e06210730184a843245f7e02263c1de698ec4e7f01a85628eb03905eea392b4",
+      "supabase": "3e06210730184a843245f7e02263c1de698ec4e7f01a85628eb03905eea392b4",
+      "match": true
+    },
+    {
+      "set": "company_ids_sha256",
+      "neon": "01e4e0b28ee59c6e374bdee66fc125ae2ba6814f3aaba298b333c4dda6947ec7",
+      "supabase": "01e4e0b28ee59c6e374bdee66fc125ae2ba6814f3aaba298b333c4dda6947ec7",
+      "match": true
+    },
+    {
+      "set": "company_member_sha256",
+      "neon": "22e8a98aa91ce116e49e79bdfbeef3a888c2496ee633945ba58b5a5a616951c6",
+      "supabase": "22e8a98aa91ce116e49e79bdfbeef3a888c2496ee633945ba58b5a5a616951c6",
+      "match": true
+    },
+    {
+      "set": "job_ownership_sha256",
+      "neon": "a72c4fa50ea95c8e16f47715972b49cfc6d3af65a3570d845bf14e389eef4389",
+      "supabase": "a72c4fa50ea95c8e16f47715972b49cfc6d3af65a3570d845bf14e389eef4389",
+      "match": true
+    },
+    {
+      "set": "notification_ownership_sha256",
+      "neon": "85c0baaf172779c1f526057dc5c6ad0af87a7a98a399785c6f082c26283c34cd",
+      "supabase": "85c0baaf172779c1f526057dc5c6ad0af87a7a98a399785c6f082c26283c34cd",
+      "match": true
+    },
+    {
+      "set": "attendance_ownership_sha256",
+      "neon": "e99d71fc67a0101cee745b2c1f7912e2fb4e558e4288cd4f09d00e131fd72e3d",
+      "supabase": "e99d71fc67a0101cee745b2c1f7912e2fb4e558e4288cd4f09d00e131fd72e3d",
+      "match": true
+    },
+    {
+      "set": "vacation_ownership_sha256",
+      "neon": "e33095193428d4e737b4c00b002951baff6eee6af6316f86c8fd3a6842324d7e",
+      "supabase": "e33095193428d4e737b4c00b002951baff6eee6af6316f86c8fd3a6842324d7e",
+      "match": true
+    },
+    {
+      "set": "budget_ownership_sha256",
+      "neon": "7a459a92227b9f2c3c1114aabcf16139ce90db8044eaad77cedee2fb76404818",
+      "supabase": "7a459a92227b9f2c3c1114aabcf16139ce90db8044eaad77cedee2fb76404818",
+      "match": true
+    },
+    {
+      "set": "push_sha256",
+      "neon": "6e12dd99db3db8aa50c72ee52befc20f758d0b97d33ba540308272036ce68b4a",
+      "supabase": "6e12dd99db3db8aa50c72ee52befc20f758d0b97d33ba540308272036ce68b4a",
+      "match": true
+    },
+    {
+      "set": "verification_sha256",
+      "neon": "e0ba3880e1e5d8609d17b251304a50ccf176d865c160cd571358d4a3db507d9d",
+      "supabase": "e0ba3880e1e5d8609d17b251304a50ccf176d865c160cd571358d4a3db507d9d",
+      "match": true
+    },
+    {
+      "set": "stripe_sha256",
+      "neon": "e43ee80d3fe0c9aa53aec6f6288c9d2fe978adba52f02ef6f6b3f35705e13c0d",
+      "supabase": "e43ee80d3fe0c9aa53aec6f6288c9d2fe978adba52f02ef6f6b3f35705e13c0d",
+      "match": true
+    },
+    {
+      "set": "google_sha256",
+      "neon": "e1c984f8bca090ee030d56e35a1966d492d691ba92d71ba92a83d4515f42fbd9",
+      "supabase": "e1c984f8bca090ee030d56e35a1966d492d691ba92d71ba92a83d4515f42fbd9",
+      "match": true
+    }
+  ],
+  "business_integrity": [
+    {
+      "name": "CompanyMember → User",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "CompanyMember → Company",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "Job → Company",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "Job → creator User",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "Notification → User",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "JobBudget → Job",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "PushSubscription → User",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "VerificationToken → User",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "AttendanceSession → User/Company",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "VacationRequest → User/Company",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    },
+    {
+      "name": "CompanyMember duplicate (companyId,userId) groups",
+      "neon": 0,
+      "supabase": 0,
+      "match": true
+    }
+  ],
+  "checksums": [
+    {
+      "table": "User",
+      "match": true,
+      "neon": {
+        "row_count": 3605,
+        "ordered_row_md5": "c6613cc05b68e1e96539c62d6b7b908d",
+        "ordered_row_sha256": "03e25c71d1e9e3193febfe4a9ddd7c1a4d09359d9d0f71a263c24416c9adf99c",
+        "id_set_sha256": "27ec7b0158e479cf350dc156bc6f1c33a634aeb111db82a3ef13ba8f8b0acd33",
+        "id_set_md5": "fd9b959f88a6bdd8937186d6d5354295"
+      },
+      "supabase": {
+        "row_count": 3605,
+        "ordered_row_md5": "c6613cc05b68e1e96539c62d6b7b908d",
+        "ordered_row_sha256": "03e25c71d1e9e3193febfe4a9ddd7c1a4d09359d9d0f71a263c24416c9adf99c",
+        "id_set_sha256": "27ec7b0158e479cf350dc156bc6f1c33a634aeb111db82a3ef13ba8f8b0acd33",
+        "id_set_md5": "fd9b959f88a6bdd8937186d6d5354295"
+      }
+    },
+    {
+      "table": "Company",
+      "match": true,
+      "neon": {
+        "row_count": 2543,
+        "ordered_row_md5": "05edd355cc161ec546d9f858c9c960db",
+        "ordered_row_sha256": "564505eec6bf7cdb9c69d17949f8f60e6ca62e11089dae07a4585b2bf4d21e7e",
+        "id_set_sha256": "c12c791290665ea44df38d5c8bddf3acff7b2b013a3bfcc798cd5105d68a70e5",
+        "id_set_md5": "652749d8d333e81167b713c9f43311ef"
+      },
+      "supabase": {
+        "row_count": 2543,
+        "ordered_row_md5": "05edd355cc161ec546d9f858c9c960db",
+        "ordered_row_sha256": "564505eec6bf7cdb9c69d17949f8f60e6ca62e11089dae07a4585b2bf4d21e7e",
+        "id_set_sha256": "c12c791290665ea44df38d5c8bddf3acff7b2b013a3bfcc798cd5105d68a70e5",
+        "id_set_md5": "652749d8d333e81167b713c9f43311ef"
+      }
+    },
+    {
+      "table": "CompanyMember",
+      "match": true,
+      "neon": {
+        "row_count": 2477,
+        "ordered_row_md5": "1eddaf97380736fedb3f3e1c948550a8",
+        "ordered_row_sha256": "2d706a77e41be5d5a3b9c52ddc1d3dfaf07277108afe53ccd73d184af6f73a80",
+        "id_set_sha256": "b75c7c0e83cdf4d5113f18aaa7c70ec46cb928e9ddab2a258bbd050fd79f58c7",
+        "id_set_md5": "34a80a88c5e3d702fc11c458438d9cfe"
+      },
+      "supabase": {
+        "row_count": 2477,
+        "ordered_row_md5": "1eddaf97380736fedb3f3e1c948550a8",
+        "ordered_row_sha256": "2d706a77e41be5d5a3b9c52ddc1d3dfaf07277108afe53ccd73d184af6f73a80",
+        "id_set_sha256": "b75c7c0e83cdf4d5113f18aaa7c70ec46cb928e9ddab2a258bbd050fd79f58c7",
+        "id_set_md5": "34a80a88c5e3d702fc11c458438d9cfe"
+      }
+    },
+    {
+      "table": "Job",
+      "match": true,
+      "neon": {
+        "row_count": 58,
+        "ordered_row_md5": "2392c5ba859b5e7a4ddf0579bff0ec12",
+        "ordered_row_sha256": "8eae2398049909a6759c873fae4389c8ea4f6e28566bf64b1d8d966db5d2c916",
+        "id_set_sha256": "f62dc35c0763dcb1c50f273e0d57f5bb9347d3f2d9685c30a32d996297350eda",
+        "id_set_md5": "4e2ea2784a715e35376d629ae48a4abc"
+      },
+      "supabase": {
+        "row_count": 58,
+        "ordered_row_md5": "2392c5ba859b5e7a4ddf0579bff0ec12",
+        "ordered_row_sha256": "8eae2398049909a6759c873fae4389c8ea4f6e28566bf64b1d8d966db5d2c916",
+        "id_set_sha256": "f62dc35c0763dcb1c50f273e0d57f5bb9347d3f2d9685c30a32d996297350eda",
+        "id_set_md5": "4e2ea2784a715e35376d629ae48a4abc"
+      }
+    },
+    {
+      "table": "JobAssignment",
+      "match": true,
+      "neon": {
+        "row_count": 13,
+        "ordered_row_md5": "d294176aa74d3170fc7fd54ac501377e",
+        "ordered_row_sha256": "29649cde0ec3e9a7e7eb86329354c49508f6aa7d35dd99b599bfa268ff950f9a",
+        "id_set_sha256": "9189ee2ed2b87dff4b9d7b5c484c74fd0d2691d9feaf3b077d2a21d008f94dea",
+        "id_set_md5": "c1b1f195e000bbd3009d0a19facb232f"
+      },
+      "supabase": {
+        "row_count": 13,
+        "ordered_row_md5": "d294176aa74d3170fc7fd54ac501377e",
+        "ordered_row_sha256": "29649cde0ec3e9a7e7eb86329354c49508f6aa7d35dd99b599bfa268ff950f9a",
+        "id_set_sha256": "9189ee2ed2b87dff4b9d7b5c484c74fd0d2691d9feaf3b077d2a21d008f94dea",
+        "id_set_md5": "c1b1f195e000bbd3009d0a19facb232f"
+      }
+    },
+    {
+      "table": "JobStage",
+      "match": true,
+      "neon": {
+        "row_count": 13,
+        "ordered_row_md5": "b08079791f1353ae909feb4ad0b7cbe9",
+        "ordered_row_sha256": "cc25b09c69fabde6d508d97f1614a4094a14c72915a1c7045c29fceeaa037dca",
+        "id_set_sha256": "c02bcc8ef822b7a208b34c2552adcab608e73e81d69256f4b88a42e7064ab20c",
+        "id_set_md5": "ab2e352d1cff32b48f3d694838b4d450"
+      },
+      "supabase": {
+        "row_count": 13,
+        "ordered_row_md5": "b08079791f1353ae909feb4ad0b7cbe9",
+        "ordered_row_sha256": "cc25b09c69fabde6d508d97f1614a4094a14c72915a1c7045c29fceeaa037dca",
+        "id_set_sha256": "c02bcc8ef822b7a208b34c2552adcab608e73e81d69256f4b88a42e7064ab20c",
+        "id_set_md5": "ab2e352d1cff32b48f3d694838b4d450"
+      }
+    },
+    {
+      "table": "JobStageHistory",
+      "match": true,
+      "neon": {
+        "row_count": 12,
+        "ordered_row_md5": "814995aeaab44742b3539ec4c1d0322b",
+        "ordered_row_sha256": "75e108d8b2b13702979aaaf3999fd25c68f3c00eda44ab2526d3cd140bf19b15",
+        "id_set_sha256": "0b9c7d1195fd8ceb14b1e35ab41b4d69e5dde706b53d3215e9676499ddad7424",
+        "id_set_md5": "ab42e2fc5d86c2cc393a3d7c255b4e66"
+      },
+      "supabase": {
+        "row_count": 12,
+        "ordered_row_md5": "814995aeaab44742b3539ec4c1d0322b",
+        "ordered_row_sha256": "75e108d8b2b13702979aaaf3999fd25c68f3c00eda44ab2526d3cd140bf19b15",
+        "id_set_sha256": "0b9c7d1195fd8ceb14b1e35ab41b4d69e5dde706b53d3215e9676499ddad7424",
+        "id_set_md5": "ab42e2fc5d86c2cc393a3d7c255b4e66"
+      }
+    },
+    {
+      "table": "JobStageNoteHistory",
+      "match": true,
+      "neon": {
+        "row_count": 7,
+        "ordered_row_md5": "f12ceee87aea1bebff137a0f1beadedf",
+        "ordered_row_sha256": "bfa74c2765f5062be0aace3cc0fcc4b2ca62a4b6a112322816da1c55130f010e",
+        "id_set_sha256": "ec659fc1d1265417e485475f0c10fd436d9e52c1c0df7075939c71389f678428",
+        "id_set_md5": "cd5460618ab7a80db09c58cc70ed49a6"
+      },
+      "supabase": {
+        "row_count": 7,
+        "ordered_row_md5": "f12ceee87aea1bebff137a0f1beadedf",
+        "ordered_row_sha256": "bfa74c2765f5062be0aace3cc0fcc4b2ca62a4b6a112322816da1c55130f010e",
+        "id_set_sha256": "ec659fc1d1265417e485475f0c10fd436d9e52c1c0df7075939c71389f678428",
+        "id_set_md5": "cd5460618ab7a80db09c58cc70ed49a6"
+      }
+    },
+    {
+      "table": "JobStagePhoto",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    {
+      "table": "JobStatusHistory",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    {
+      "table": "AuditLog",
+      "match": true,
+      "neon": {
+        "row_count": 1314,
+        "ordered_row_md5": "bd1ddd656a9b6cca38c46e76eaa73169",
+        "ordered_row_sha256": "d07a9a73d51880804db1732b0f023e3b0052c714219e4facd3a204ac3a9ed126",
+        "id_set_sha256": "d61589c05fd92d8612153e251d6cb23a27e5d5795d359250fde7285c635d861a",
+        "id_set_md5": "939dc787a82bf31b9c9da82e59f33128"
+      },
+      "supabase": {
+        "row_count": 1314,
+        "ordered_row_md5": "bd1ddd656a9b6cca38c46e76eaa73169",
+        "ordered_row_sha256": "d07a9a73d51880804db1732b0f023e3b0052c714219e4facd3a204ac3a9ed126",
+        "id_set_sha256": "d61589c05fd92d8612153e251d6cb23a27e5d5795d359250fde7285c635d861a",
+        "id_set_md5": "939dc787a82bf31b9c9da82e59f33128"
+      }
+    },
+    {
+      "table": "IdempotencyKey",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    {
+      "table": "VerificationToken",
+      "match": true,
+      "neon": {
+        "row_count": 1673,
+        "ordered_row_md5": "ca4bd98c06fee7bc93fb9a731852ca65",
+        "ordered_row_sha256": "7c9f88731b9fe920a453db604d03622cc0ec227ab3f392202aad6ff3d9b06a28",
+        "id_set_sha256": "9ee89935ca9da239f7e1a82814dd0619d167fb34dec13f3fbc69541d5bc7fe13",
+        "id_set_md5": "739ed66b9819b03edd515031a3964abd"
+      },
+      "supabase": {
+        "row_count": 1673,
+        "ordered_row_md5": "ca4bd98c06fee7bc93fb9a731852ca65",
+        "ordered_row_sha256": "7c9f88731b9fe920a453db604d03622cc0ec227ab3f392202aad6ff3d9b06a28",
+        "id_set_sha256": "9ee89935ca9da239f7e1a82814dd0619d167fb34dec13f3fbc69541d5bc7fe13",
+        "id_set_md5": "739ed66b9819b03edd515031a3964abd"
+      }
+    },
+    {
+      "table": "AttendanceSession",
+      "match": true,
+      "neon": {
+        "row_count": 16,
+        "ordered_row_md5": "f31650d7672bf94a6b2d3daf990448aa",
+        "ordered_row_sha256": "8b2974e1e75df1f3d1b4970bf3316daa8cf1c1f832e60d94f6a49eb59dd7ac23",
+        "id_set_sha256": "fb18dd64d57c75e225683f249123693aaff68eac27e2087d0a400827e8e0a5fa",
+        "id_set_md5": "0e7222e95a9b1c3ec0bcbbf86a089658"
+      },
+      "supabase": {
+        "row_count": 16,
+        "ordered_row_md5": "f31650d7672bf94a6b2d3daf990448aa",
+        "ordered_row_sha256": "8b2974e1e75df1f3d1b4970bf3316daa8cf1c1f832e60d94f6a49eb59dd7ac23",
+        "id_set_sha256": "fb18dd64d57c75e225683f249123693aaff68eac27e2087d0a400827e8e0a5fa",
+        "id_set_md5": "0e7222e95a9b1c3ec0bcbbf86a089658"
+      }
+    },
+    {
+      "table": "VacationRequest",
+      "match": true,
+      "neon": {
+        "row_count": 17,
+        "ordered_row_md5": "d8a6874fc8b35cee9096757a5dad0a2e",
+        "ordered_row_sha256": "f7cd088a2deccc9dcdc9097505968977f0bd459a99ce19016e918702bd355037",
+        "id_set_sha256": "cd4436b2dd7490708f82e7c3e8ddc826358fa9715363629023c544aa51b406df",
+        "id_set_md5": "cb4ee344936fb93aeb2fdd9f26dd8e37"
+      },
+      "supabase": {
+        "row_count": 17,
+        "ordered_row_md5": "d8a6874fc8b35cee9096757a5dad0a2e",
+        "ordered_row_sha256": "f7cd088a2deccc9dcdc9097505968977f0bd459a99ce19016e918702bd355037",
+        "id_set_sha256": "cd4436b2dd7490708f82e7c3e8ddc826358fa9715363629023c544aa51b406df",
+        "id_set_md5": "cb4ee344936fb93aeb2fdd9f26dd8e37"
+      }
+    },
+    {
+      "table": "JobBudget",
+      "match": true,
+      "neon": {
+        "row_count": 3,
+        "ordered_row_md5": "9a84587c98af651cbe292ef0d88dd5ac",
+        "ordered_row_sha256": "0dd4853ae54f65a3a00421269f3b44b4ffa02d341d97e44e5f6e4218fd4a7aa2",
+        "id_set_sha256": "d352dd846aa71f80785d4a8e044c08db4ef2b8f78220b7f016ad3a8b70cee250",
+        "id_set_md5": "5c85a715612d018a6d0af42aec3aec94"
+      },
+      "supabase": {
+        "row_count": 3,
+        "ordered_row_md5": "9a84587c98af651cbe292ef0d88dd5ac",
+        "ordered_row_sha256": "0dd4853ae54f65a3a00421269f3b44b4ffa02d341d97e44e5f6e4218fd4a7aa2",
+        "id_set_sha256": "d352dd846aa71f80785d4a8e044c08db4ef2b8f78220b7f016ad3a8b70cee250",
+        "id_set_md5": "5c85a715612d018a6d0af42aec3aec94"
+      }
+    },
+    {
+      "table": "JobBudgetItem",
+      "match": true,
+      "neon": {
+        "row_count": 10,
+        "ordered_row_md5": "6dc0fef3490b7cfc7a1dca70d6674d9f",
+        "ordered_row_sha256": "ba58f2584059e523b0808b4dbc6d0036a91fc9ba62134bbfc6a290d948b160a3",
+        "id_set_sha256": "267d76f5d2b706729b3652f1ac67cac5b1156484095336bf5ef686030e63bd55",
+        "id_set_md5": "bcc7d7d78eee160ccd40140913264c50"
+      },
+      "supabase": {
+        "row_count": 10,
+        "ordered_row_md5": "6dc0fef3490b7cfc7a1dca70d6674d9f",
+        "ordered_row_sha256": "ba58f2584059e523b0808b4dbc6d0036a91fc9ba62134bbfc6a290d948b160a3",
+        "id_set_sha256": "267d76f5d2b706729b3652f1ac67cac5b1156484095336bf5ef686030e63bd55",
+        "id_set_md5": "bcc7d7d78eee160ccd40140913264c50"
+      }
+    },
+    {
+      "table": "JobBudgetLaborItem",
+      "match": true,
+      "neon": {
+        "row_count": 7,
+        "ordered_row_md5": "ccb7b28e2f4933cd74930c0f8ea0826f",
+        "ordered_row_sha256": "aec18cb98a35cdd233b9774cde0487ddaefbfc461af199ad56930aab882da1c7",
+        "id_set_sha256": "9743f65a84bfaa34b0fb7aa448d76b434bdd8f744f8278e734776d9c4152f371",
+        "id_set_md5": "f9e00398aea1d9c5de9d122807579336"
+      },
+      "supabase": {
+        "row_count": 7,
+        "ordered_row_md5": "ccb7b28e2f4933cd74930c0f8ea0826f",
+        "ordered_row_sha256": "aec18cb98a35cdd233b9774cde0487ddaefbfc461af199ad56930aab882da1c7",
+        "id_set_sha256": "9743f65a84bfaa34b0fb7aa448d76b434bdd8f744f8278e734776d9c4152f371",
+        "id_set_md5": "f9e00398aea1d9c5de9d122807579336"
+      }
+    },
+    {
+      "table": "StripeWebhookEvent",
+      "match": true,
+      "neon": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    {
+      "table": "Notification",
+      "match": true,
+      "neon": {
+        "row_count": 11,
+        "ordered_row_md5": "b116315926f099af4080bbda9c6d7313",
+        "ordered_row_sha256": "3b9b093bb015f80895344f31047832c4f1cfb9b1fcc256701ec0f1a047a03c96",
+        "id_set_sha256": "639b72c2e2190fe5511ab63114edaa770b7dd217639399721b1d0a16048264b3",
+        "id_set_md5": "192b5337c21085731c978de1c7858be1"
+      },
+      "supabase": {
+        "row_count": 11,
+        "ordered_row_md5": "b116315926f099af4080bbda9c6d7313",
+        "ordered_row_sha256": "3b9b093bb015f80895344f31047832c4f1cfb9b1fcc256701ec0f1a047a03c96",
+        "id_set_sha256": "639b72c2e2190fe5511ab63114edaa770b7dd217639399721b1d0a16048264b3",
+        "id_set_md5": "192b5337c21085731c978de1c7858be1"
+      }
+    },
+    {
+      "table": "PushSubscription",
+      "match": true,
+      "neon": {
+        "row_count": 1,
+        "ordered_row_md5": "dc9221d85f3bacbaf80c9dd1726460a1",
+        "ordered_row_sha256": "fc7b2b53c4c8043f320cdda23b5ea0c7b7180b3fdf5f70cace954af4f58c6007",
+        "id_set_sha256": "723079c2f4892cfe293da994ed902b9c5daa5c40e3e478b8d4c504ed5aa51daa",
+        "id_set_md5": "b0691b6f1fe1bda8cfe1ce51fdc9b8d3"
+      },
+      "supabase": {
+        "row_count": 1,
+        "ordered_row_md5": "dc9221d85f3bacbaf80c9dd1726460a1",
+        "ordered_row_sha256": "fc7b2b53c4c8043f320cdda23b5ea0c7b7180b3fdf5f70cace954af4f58c6007",
+        "id_set_sha256": "723079c2f4892cfe293da994ed902b9c5daa5c40e3e478b8d4c504ed5aa51daa",
+        "id_set_md5": "b0691b6f1fe1bda8cfe1ce51fdc9b8d3"
+      }
+    }
+  ],
+  "schema_mismatches": [],
+  "mismatches": [],
+  "verdict": "DATA VALIDATION PASSED",
+  "mismatch_count": 0,
+  "table_summaries": {
+    "User": {
+      "neon_rows": 3605,
+      "supabase_rows": 3605,
+      "neon_checksum": {
+        "row_count": 3605,
+        "ordered_row_md5": "c6613cc05b68e1e96539c62d6b7b908d",
+        "ordered_row_sha256": "03e25c71d1e9e3193febfe4a9ddd7c1a4d09359d9d0f71a263c24416c9adf99c",
+        "id_set_sha256": "27ec7b0158e479cf350dc156bc6f1c33a634aeb111db82a3ef13ba8f8b0acd33",
+        "id_set_md5": "fd9b959f88a6bdd8937186d6d5354295"
+      },
+      "supabase_checksum": {
+        "row_count": 3605,
+        "ordered_row_md5": "c6613cc05b68e1e96539c62d6b7b908d",
+        "ordered_row_sha256": "03e25c71d1e9e3193febfe4a9ddd7c1a4d09359d9d0f71a263c24416c9adf99c",
+        "id_set_sha256": "27ec7b0158e479cf350dc156bc6f1c33a634aeb111db82a3ef13ba8f8b0acd33",
+        "id_set_md5": "fd9b959f88a6bdd8937186d6d5354295"
+      }
+    },
+    "Company": {
+      "neon_rows": 2543,
+      "supabase_rows": 2543,
+      "neon_checksum": {
+        "row_count": 2543,
+        "ordered_row_md5": "05edd355cc161ec546d9f858c9c960db",
+        "ordered_row_sha256": "564505eec6bf7cdb9c69d17949f8f60e6ca62e11089dae07a4585b2bf4d21e7e",
+        "id_set_sha256": "c12c791290665ea44df38d5c8bddf3acff7b2b013a3bfcc798cd5105d68a70e5",
+        "id_set_md5": "652749d8d333e81167b713c9f43311ef"
+      },
+      "supabase_checksum": {
+        "row_count": 2543,
+        "ordered_row_md5": "05edd355cc161ec546d9f858c9c960db",
+        "ordered_row_sha256": "564505eec6bf7cdb9c69d17949f8f60e6ca62e11089dae07a4585b2bf4d21e7e",
+        "id_set_sha256": "c12c791290665ea44df38d5c8bddf3acff7b2b013a3bfcc798cd5105d68a70e5",
+        "id_set_md5": "652749d8d333e81167b713c9f43311ef"
+      }
+    },
+    "CompanyMember": {
+      "neon_rows": 2477,
+      "supabase_rows": 2477,
+      "neon_checksum": {
+        "row_count": 2477,
+        "ordered_row_md5": "1eddaf97380736fedb3f3e1c948550a8",
+        "ordered_row_sha256": "2d706a77e41be5d5a3b9c52ddc1d3dfaf07277108afe53ccd73d184af6f73a80",
+        "id_set_sha256": "b75c7c0e83cdf4d5113f18aaa7c70ec46cb928e9ddab2a258bbd050fd79f58c7",
+        "id_set_md5": "34a80a88c5e3d702fc11c458438d9cfe"
+      },
+      "supabase_checksum": {
+        "row_count": 2477,
+        "ordered_row_md5": "1eddaf97380736fedb3f3e1c948550a8",
+        "ordered_row_sha256": "2d706a77e41be5d5a3b9c52ddc1d3dfaf07277108afe53ccd73d184af6f73a80",
+        "id_set_sha256": "b75c7c0e83cdf4d5113f18aaa7c70ec46cb928e9ddab2a258bbd050fd79f58c7",
+        "id_set_md5": "34a80a88c5e3d702fc11c458438d9cfe"
+      }
+    },
+    "Job": {
+      "neon_rows": 58,
+      "supabase_rows": 58,
+      "neon_checksum": {
+        "row_count": 58,
+        "ordered_row_md5": "2392c5ba859b5e7a4ddf0579bff0ec12",
+        "ordered_row_sha256": "8eae2398049909a6759c873fae4389c8ea4f6e28566bf64b1d8d966db5d2c916",
+        "id_set_sha256": "f62dc35c0763dcb1c50f273e0d57f5bb9347d3f2d9685c30a32d996297350eda",
+        "id_set_md5": "4e2ea2784a715e35376d629ae48a4abc"
+      },
+      "supabase_checksum": {
+        "row_count": 58,
+        "ordered_row_md5": "2392c5ba859b5e7a4ddf0579bff0ec12",
+        "ordered_row_sha256": "8eae2398049909a6759c873fae4389c8ea4f6e28566bf64b1d8d966db5d2c916",
+        "id_set_sha256": "f62dc35c0763dcb1c50f273e0d57f5bb9347d3f2d9685c30a32d996297350eda",
+        "id_set_md5": "4e2ea2784a715e35376d629ae48a4abc"
+      }
+    },
+    "JobAssignment": {
+      "neon_rows": 13,
+      "supabase_rows": 13,
+      "neon_checksum": {
+        "row_count": 13,
+        "ordered_row_md5": "d294176aa74d3170fc7fd54ac501377e",
+        "ordered_row_sha256": "29649cde0ec3e9a7e7eb86329354c49508f6aa7d35dd99b599bfa268ff950f9a",
+        "id_set_sha256": "9189ee2ed2b87dff4b9d7b5c484c74fd0d2691d9feaf3b077d2a21d008f94dea",
+        "id_set_md5": "c1b1f195e000bbd3009d0a19facb232f"
+      },
+      "supabase_checksum": {
+        "row_count": 13,
+        "ordered_row_md5": "d294176aa74d3170fc7fd54ac501377e",
+        "ordered_row_sha256": "29649cde0ec3e9a7e7eb86329354c49508f6aa7d35dd99b599bfa268ff950f9a",
+        "id_set_sha256": "9189ee2ed2b87dff4b9d7b5c484c74fd0d2691d9feaf3b077d2a21d008f94dea",
+        "id_set_md5": "c1b1f195e000bbd3009d0a19facb232f"
+      }
+    },
+    "JobStage": {
+      "neon_rows": 13,
+      "supabase_rows": 13,
+      "neon_checksum": {
+        "row_count": 13,
+        "ordered_row_md5": "b08079791f1353ae909feb4ad0b7cbe9",
+        "ordered_row_sha256": "cc25b09c69fabde6d508d97f1614a4094a14c72915a1c7045c29fceeaa037dca",
+        "id_set_sha256": "c02bcc8ef822b7a208b34c2552adcab608e73e81d69256f4b88a42e7064ab20c",
+        "id_set_md5": "ab2e352d1cff32b48f3d694838b4d450"
+      },
+      "supabase_checksum": {
+        "row_count": 13,
+        "ordered_row_md5": "b08079791f1353ae909feb4ad0b7cbe9",
+        "ordered_row_sha256": "cc25b09c69fabde6d508d97f1614a4094a14c72915a1c7045c29fceeaa037dca",
+        "id_set_sha256": "c02bcc8ef822b7a208b34c2552adcab608e73e81d69256f4b88a42e7064ab20c",
+        "id_set_md5": "ab2e352d1cff32b48f3d694838b4d450"
+      }
+    },
+    "JobStageHistory": {
+      "neon_rows": 12,
+      "supabase_rows": 12,
+      "neon_checksum": {
+        "row_count": 12,
+        "ordered_row_md5": "814995aeaab44742b3539ec4c1d0322b",
+        "ordered_row_sha256": "75e108d8b2b13702979aaaf3999fd25c68f3c00eda44ab2526d3cd140bf19b15",
+        "id_set_sha256": "0b9c7d1195fd8ceb14b1e35ab41b4d69e5dde706b53d3215e9676499ddad7424",
+        "id_set_md5": "ab42e2fc5d86c2cc393a3d7c255b4e66"
+      },
+      "supabase_checksum": {
+        "row_count": 12,
+        "ordered_row_md5": "814995aeaab44742b3539ec4c1d0322b",
+        "ordered_row_sha256": "75e108d8b2b13702979aaaf3999fd25c68f3c00eda44ab2526d3cd140bf19b15",
+        "id_set_sha256": "0b9c7d1195fd8ceb14b1e35ab41b4d69e5dde706b53d3215e9676499ddad7424",
+        "id_set_md5": "ab42e2fc5d86c2cc393a3d7c255b4e66"
+      }
+    },
+    "JobStageNoteHistory": {
+      "neon_rows": 7,
+      "supabase_rows": 7,
+      "neon_checksum": {
+        "row_count": 7,
+        "ordered_row_md5": "f12ceee87aea1bebff137a0f1beadedf",
+        "ordered_row_sha256": "bfa74c2765f5062be0aace3cc0fcc4b2ca62a4b6a112322816da1c55130f010e",
+        "id_set_sha256": "ec659fc1d1265417e485475f0c10fd436d9e52c1c0df7075939c71389f678428",
+        "id_set_md5": "cd5460618ab7a80db09c58cc70ed49a6"
+      },
+      "supabase_checksum": {
+        "row_count": 7,
+        "ordered_row_md5": "f12ceee87aea1bebff137a0f1beadedf",
+        "ordered_row_sha256": "bfa74c2765f5062be0aace3cc0fcc4b2ca62a4b6a112322816da1c55130f010e",
+        "id_set_sha256": "ec659fc1d1265417e485475f0c10fd436d9e52c1c0df7075939c71389f678428",
+        "id_set_md5": "cd5460618ab7a80db09c58cc70ed49a6"
+      }
+    },
+    "JobStagePhoto": {
+      "neon_rows": 0,
+      "supabase_rows": 0,
+      "neon_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    "JobStatusHistory": {
+      "neon_rows": 0,
+      "supabase_rows": 0,
+      "neon_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    "AuditLog": {
+      "neon_rows": 1314,
+      "supabase_rows": 1314,
+      "neon_checksum": {
+        "row_count": 1314,
+        "ordered_row_md5": "bd1ddd656a9b6cca38c46e76eaa73169",
+        "ordered_row_sha256": "d07a9a73d51880804db1732b0f023e3b0052c714219e4facd3a204ac3a9ed126",
+        "id_set_sha256": "d61589c05fd92d8612153e251d6cb23a27e5d5795d359250fde7285c635d861a",
+        "id_set_md5": "939dc787a82bf31b9c9da82e59f33128"
+      },
+      "supabase_checksum": {
+        "row_count": 1314,
+        "ordered_row_md5": "bd1ddd656a9b6cca38c46e76eaa73169",
+        "ordered_row_sha256": "d07a9a73d51880804db1732b0f023e3b0052c714219e4facd3a204ac3a9ed126",
+        "id_set_sha256": "d61589c05fd92d8612153e251d6cb23a27e5d5795d359250fde7285c635d861a",
+        "id_set_md5": "939dc787a82bf31b9c9da82e59f33128"
+      }
+    },
+    "IdempotencyKey": {
+      "neon_rows": 0,
+      "supabase_rows": 0,
+      "neon_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    "VerificationToken": {
+      "neon_rows": 1673,
+      "supabase_rows": 1673,
+      "neon_checksum": {
+        "row_count": 1673,
+        "ordered_row_md5": "ca4bd98c06fee7bc93fb9a731852ca65",
+        "ordered_row_sha256": "7c9f88731b9fe920a453db604d03622cc0ec227ab3f392202aad6ff3d9b06a28",
+        "id_set_sha256": "9ee89935ca9da239f7e1a82814dd0619d167fb34dec13f3fbc69541d5bc7fe13",
+        "id_set_md5": "739ed66b9819b03edd515031a3964abd"
+      },
+      "supabase_checksum": {
+        "row_count": 1673,
+        "ordered_row_md5": "ca4bd98c06fee7bc93fb9a731852ca65",
+        "ordered_row_sha256": "7c9f88731b9fe920a453db604d03622cc0ec227ab3f392202aad6ff3d9b06a28",
+        "id_set_sha256": "9ee89935ca9da239f7e1a82814dd0619d167fb34dec13f3fbc69541d5bc7fe13",
+        "id_set_md5": "739ed66b9819b03edd515031a3964abd"
+      }
+    },
+    "AttendanceSession": {
+      "neon_rows": 16,
+      "supabase_rows": 16,
+      "neon_checksum": {
+        "row_count": 16,
+        "ordered_row_md5": "f31650d7672bf94a6b2d3daf990448aa",
+        "ordered_row_sha256": "8b2974e1e75df1f3d1b4970bf3316daa8cf1c1f832e60d94f6a49eb59dd7ac23",
+        "id_set_sha256": "fb18dd64d57c75e225683f249123693aaff68eac27e2087d0a400827e8e0a5fa",
+        "id_set_md5": "0e7222e95a9b1c3ec0bcbbf86a089658"
+      },
+      "supabase_checksum": {
+        "row_count": 16,
+        "ordered_row_md5": "f31650d7672bf94a6b2d3daf990448aa",
+        "ordered_row_sha256": "8b2974e1e75df1f3d1b4970bf3316daa8cf1c1f832e60d94f6a49eb59dd7ac23",
+        "id_set_sha256": "fb18dd64d57c75e225683f249123693aaff68eac27e2087d0a400827e8e0a5fa",
+        "id_set_md5": "0e7222e95a9b1c3ec0bcbbf86a089658"
+      }
+    },
+    "VacationRequest": {
+      "neon_rows": 17,
+      "supabase_rows": 17,
+      "neon_checksum": {
+        "row_count": 17,
+        "ordered_row_md5": "d8a6874fc8b35cee9096757a5dad0a2e",
+        "ordered_row_sha256": "f7cd088a2deccc9dcdc9097505968977f0bd459a99ce19016e918702bd355037",
+        "id_set_sha256": "cd4436b2dd7490708f82e7c3e8ddc826358fa9715363629023c544aa51b406df",
+        "id_set_md5": "cb4ee344936fb93aeb2fdd9f26dd8e37"
+      },
+      "supabase_checksum": {
+        "row_count": 17,
+        "ordered_row_md5": "d8a6874fc8b35cee9096757a5dad0a2e",
+        "ordered_row_sha256": "f7cd088a2deccc9dcdc9097505968977f0bd459a99ce19016e918702bd355037",
+        "id_set_sha256": "cd4436b2dd7490708f82e7c3e8ddc826358fa9715363629023c544aa51b406df",
+        "id_set_md5": "cb4ee344936fb93aeb2fdd9f26dd8e37"
+      }
+    },
+    "JobBudget": {
+      "neon_rows": 3,
+      "supabase_rows": 3,
+      "neon_checksum": {
+        "row_count": 3,
+        "ordered_row_md5": "9a84587c98af651cbe292ef0d88dd5ac",
+        "ordered_row_sha256": "0dd4853ae54f65a3a00421269f3b44b4ffa02d341d97e44e5f6e4218fd4a7aa2",
+        "id_set_sha256": "d352dd846aa71f80785d4a8e044c08db4ef2b8f78220b7f016ad3a8b70cee250",
+        "id_set_md5": "5c85a715612d018a6d0af42aec3aec94"
+      },
+      "supabase_checksum": {
+        "row_count": 3,
+        "ordered_row_md5": "9a84587c98af651cbe292ef0d88dd5ac",
+        "ordered_row_sha256": "0dd4853ae54f65a3a00421269f3b44b4ffa02d341d97e44e5f6e4218fd4a7aa2",
+        "id_set_sha256": "d352dd846aa71f80785d4a8e044c08db4ef2b8f78220b7f016ad3a8b70cee250",
+        "id_set_md5": "5c85a715612d018a6d0af42aec3aec94"
+      }
+    },
+    "JobBudgetItem": {
+      "neon_rows": 10,
+      "supabase_rows": 10,
+      "neon_checksum": {
+        "row_count": 10,
+        "ordered_row_md5": "6dc0fef3490b7cfc7a1dca70d6674d9f",
+        "ordered_row_sha256": "ba58f2584059e523b0808b4dbc6d0036a91fc9ba62134bbfc6a290d948b160a3",
+        "id_set_sha256": "267d76f5d2b706729b3652f1ac67cac5b1156484095336bf5ef686030e63bd55",
+        "id_set_md5": "bcc7d7d78eee160ccd40140913264c50"
+      },
+      "supabase_checksum": {
+        "row_count": 10,
+        "ordered_row_md5": "6dc0fef3490b7cfc7a1dca70d6674d9f",
+        "ordered_row_sha256": "ba58f2584059e523b0808b4dbc6d0036a91fc9ba62134bbfc6a290d948b160a3",
+        "id_set_sha256": "267d76f5d2b706729b3652f1ac67cac5b1156484095336bf5ef686030e63bd55",
+        "id_set_md5": "bcc7d7d78eee160ccd40140913264c50"
+      }
+    },
+    "JobBudgetLaborItem": {
+      "neon_rows": 7,
+      "supabase_rows": 7,
+      "neon_checksum": {
+        "row_count": 7,
+        "ordered_row_md5": "ccb7b28e2f4933cd74930c0f8ea0826f",
+        "ordered_row_sha256": "aec18cb98a35cdd233b9774cde0487ddaefbfc461af199ad56930aab882da1c7",
+        "id_set_sha256": "9743f65a84bfaa34b0fb7aa448d76b434bdd8f744f8278e734776d9c4152f371",
+        "id_set_md5": "f9e00398aea1d9c5de9d122807579336"
+      },
+      "supabase_checksum": {
+        "row_count": 7,
+        "ordered_row_md5": "ccb7b28e2f4933cd74930c0f8ea0826f",
+        "ordered_row_sha256": "aec18cb98a35cdd233b9774cde0487ddaefbfc461af199ad56930aab882da1c7",
+        "id_set_sha256": "9743f65a84bfaa34b0fb7aa448d76b434bdd8f744f8278e734776d9c4152f371",
+        "id_set_md5": "f9e00398aea1d9c5de9d122807579336"
+      }
+    },
+    "StripeWebhookEvent": {
+      "neon_rows": 0,
+      "supabase_rows": 0,
+      "neon_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "supabase_checksum": {
+        "row_count": 0,
+        "ordered_row_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "ordered_row_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "id_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    },
+    "Notification": {
+      "neon_rows": 11,
+      "supabase_rows": 11,
+      "neon_checksum": {
+        "row_count": 11,
+        "ordered_row_md5": "b116315926f099af4080bbda9c6d7313",
+        "ordered_row_sha256": "3b9b093bb015f80895344f31047832c4f1cfb9b1fcc256701ec0f1a047a03c96",
+        "id_set_sha256": "639b72c2e2190fe5511ab63114edaa770b7dd217639399721b1d0a16048264b3",
+        "id_set_md5": "192b5337c21085731c978de1c7858be1"
+      },
+      "supabase_checksum": {
+        "row_count": 11,
+        "ordered_row_md5": "b116315926f099af4080bbda9c6d7313",
+        "ordered_row_sha256": "3b9b093bb015f80895344f31047832c4f1cfb9b1fcc256701ec0f1a047a03c96",
+        "id_set_sha256": "639b72c2e2190fe5511ab63114edaa770b7dd217639399721b1d0a16048264b3",
+        "id_set_md5": "192b5337c21085731c978de1c7858be1"
+      }
+    },
+    "PushSubscription": {
+      "neon_rows": 1,
+      "supabase_rows": 1,
+      "neon_checksum": {
+        "row_count": 1,
+        "ordered_row_md5": "dc9221d85f3bacbaf80c9dd1726460a1",
+        "ordered_row_sha256": "fc7b2b53c4c8043f320cdda23b5ea0c7b7180b3fdf5f70cace954af4f58c6007",
+        "id_set_sha256": "723079c2f4892cfe293da994ed902b9c5daa5c40e3e478b8d4c504ed5aa51daa",
+        "id_set_md5": "b0691b6f1fe1bda8cfe1ce51fdc9b8d3"
+      },
+      "supabase_checksum": {
+        "row_count": 1,
+        "ordered_row_md5": "dc9221d85f3bacbaf80c9dd1726460a1",
+        "ordered_row_sha256": "fc7b2b53c4c8043f320cdda23b5ea0c7b7180b3fdf5f70cace954af4f58c6007",
+        "id_set_sha256": "723079c2f4892cfe293da994ed902b9c5daa5c40e3e478b8d4c504ed5aa51daa",
+        "id_set_md5": "b0691b6f1fe1bda8cfe1ce51fdc9b8d3"
+      }
+    }
+  }
+}

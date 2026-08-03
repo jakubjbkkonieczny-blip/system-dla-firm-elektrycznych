@@ -1,0 +1,82 @@
+{
+  "stage": "4E",
+  "mode": "auth-validation",
+  "created_at": "2026-08-03T15:19:14.361Z",
+  "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+  "created": [
+    {
+      "kind": "auth.users",
+      "id": "9a2e52dd-c051-450f-9398-2a1e16dd78a3",
+      "email": "vw.stage4e.probe.msddk910@mailinator.com"
+    },
+    {
+      "kind": "User",
+      "id": "cmsddk9vd0000108h8xz84hby",
+      "email": "vw.stage4e.probe.msddk910@mailinator.com"
+    }
+  ],
+  "deleted": [
+    {
+      "kind": "User",
+      "id": "cmsddk9vd0000108h8xz84hby"
+    },
+    {
+      "kind": "auth.users",
+      "id": "9a2e52dd-c051-450f-9398-2a1e16dd78a3",
+      "ok": true
+    }
+  ],
+  "runtime": {
+    "db_host": "aws-1-eu-west-2.pooler.supabase.com",
+    "is_neon": false,
+    "is_supabase": true,
+    "auth_enabled": true,
+    "auth_url_host": "yzezdhwffgamtmozmfse.supabase.co"
+  },
+  "counts": {
+    "users": 3605,
+    "linked": 0,
+    "auth_users": 1
+  },
+  "existing_auth_users": [
+    {
+      "id": "3c9f52fe-643b-4841-ab44-0b57afa58811",
+      "email": "vw.diag.admin.1785427957015@mailinator.com",
+      "created_at": "2026-07-30T16:12:37.265Z"
+    }
+  ],
+  "existing_auth_link_checks": [
+    {
+      "authUserId": "3c9f52fe-643b-4841-ab44-0b57afa58811",
+      "authEmail": "vw.diag.admin.1785427957015@mailinator.com",
+      "linked_via_supabaseAuthUserId": null,
+      "business_user_same_email": null,
+      "session_resolve_would_succeed": false
+    }
+  ],
+  "existing_migrated_users_login_possible": "NO — 0/3605 User.supabaseAuthUserId populated; resolveLinkedUser fails closed (AUTH_USER_UNLINKED)",
+  "expected_at_this_stage": {
+    "null_links": true,
+    "reason": "Stage 4C copied business data only; Auth identity import/linking is a separate prerequisite. Repository has linkUserToSupabaseAuthUser / ensureLinkedUser helpers but no bulk import runner for production users."
+  },
+  "synthetic_auth_test": {
+    "ok": true,
+    "mapping": {
+      "auth_users_id": "9a2e52dd-c051-450f-9398-2a1e16dd78a3",
+      "User_supabaseAuthUserId": "9a2e52dd-c051-450f-9398-2a1e16dd78a3",
+      "User_id": "cmsddk9vd0000108h8xz84hby"
+    },
+    "password_signin_session": true,
+    "note": "Synthetic new user only — does not prove migrated-user login."
+  },
+  "cleanup_ok": true,
+  "authorization_sample": {
+    "companyMember_uses_userId": true,
+    "sample": {
+      "role": "owner",
+      "userId_prefix": "cmpa3mac",
+      "companyId_prefix": "cmpa3meu"
+    }
+  },
+  "inactive_users": 1281
+}

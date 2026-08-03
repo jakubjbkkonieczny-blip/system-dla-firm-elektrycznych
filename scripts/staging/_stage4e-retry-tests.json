@@ -1,0 +1,19 @@
+{
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "connection_limit": 1,
+  "results": [
+    {
+      "file": "lib/server/deactivation/__tests__/email-verification-flow.test.ts",
+      "exit": 0
+    },
+    {
+      "file": "lib/server/notifications/__tests__/stage-notifications.test.ts",
+      "exit": 0
+    },
+    {
+      "file": "lib/server/notifications/__tests__/vacation-notifications.test.ts",
+      "exit": 0
+    }
+  ],
+  "at": "2026-08-03T15:25:01.568Z"
+}

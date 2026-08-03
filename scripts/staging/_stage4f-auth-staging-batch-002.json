@@ -1,0 +1,147 @@
+{
+  "batch": 2,
+  "capturedAt": "2026-08-03T17:56:26.742Z",
+  "report": {
+    "stage": "4F-auth",
+    "mode": "execute",
+    "at": "2026-08-03T17:54:07.343Z",
+    "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+    "writesEnabled": true,
+    "args": {
+      "mode": "execute",
+      "userId": null,
+      "limit": 5,
+      "batchSize": 50,
+      "confirmBulkMigrate": false
+    },
+    "categoryCounts": {
+      "A_BCRYPT_ACTIVE": 1412,
+      "B_BCRYPT_INACTIVE": 842,
+      "C_PLACEHOLDER_ACTIVE": 905,
+      "D_PLACEHOLDER_INACTIVE": 435,
+      "E_INVALID_EMAIL": 1,
+      "F_DUPLICATE_EMAIL": 0,
+      "G_ALREADY_LINKED": 10,
+      "H_AUTH_EMAIL_CONFLICT": 0,
+      "I_EXCEPTIONAL": 0
+    },
+    "outcomeCounts": {
+      "RESET_REQUIRED": 1,
+      "READY": 3,
+      "INACTIVE": 1
+    },
+    "totalConsidered": 5,
+    "rows": [
+      {
+        "timestamp": "2026-08-03T17:54:06.265Z",
+        "userId": "009ce8d3-a6c6-494d-93e9-b8e8687dac84",
+        "emailMasked": "f***4@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "62a17090-2862-4ca4-97d3-32f6bab69895",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T17:54:06.531Z",
+        "userId": "009e4fc0-b0c7-470f-afcf-bed4dabb8494",
+        "emailMasked": "a***4@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "afbd2abe-c4fa-4597-a79f-f737e54467c6",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T17:54:06.762Z",
+        "userId": "00b50d4b-2a2f-42c9-9830-844d65e41b6a",
+        "emailMasked": "s***a@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "51a92a01-c751-4ed3-9407-d308ec07be9c",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T17:54:07.078Z",
+        "userId": "00b84907-07fb-4928-94db-1afd3c1438e2",
+        "emailMasked": "p***2@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "e8334fc0-ed26-4c45-97b5-566c26fc82c8",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T17:54:07.343Z",
+        "userId": "00c6e258-0f9f-4783-a7f7-8916bd789057",
+        "emailMasked": "v***7@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "425bfa59-f370-4184-b898-c907fdb54fe0",
+        "failureReason": null,
+        "compensated": false
+      }
+    ],
+    "rollbackManifest": {
+      "batchId": "4f-auth-2026-08-03T17-54-04-480Z-a23845f9",
+      "createdAuthUserIds": [
+        "62a17090-2862-4ca4-97d3-32f6bab69895",
+        "afbd2abe-c4fa-4597-a79f-f737e54467c6",
+        "51a92a01-c751-4ed3-9407-d308ec07be9c",
+        "e8334fc0-ed26-4c45-97b5-566c26fc82c8",
+        "425bfa59-f370-4184-b898-c907fdb54fe0"
+      ],
+      "linkedUserIds": [
+        {
+          "userId": "009ce8d3-a6c6-494d-93e9-b8e8687dac84",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "62a17090-2862-4ca4-97d3-32f6bab69895"
+        },
+        {
+          "userId": "009e4fc0-b0c7-470f-afcf-bed4dabb8494",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "afbd2abe-c4fa-4597-a79f-f737e54467c6"
+        },
+        {
+          "userId": "00b50d4b-2a2f-42c9-9830-844d65e41b6a",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "51a92a01-c751-4ed3-9407-d308ec07be9c"
+        },
+        {
+          "userId": "00b84907-07fb-4928-94db-1afd3c1438e2",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "e8334fc0-ed26-4c45-97b5-566c26fc82c8"
+        },
+        {
+          "userId": "00c6e258-0f9f-4783-a7f7-8916bd789057",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "425bfa59-f370-4184-b898-c907fdb54fe0"
+        }
+      ],
+      "guidance": [
+        "Never delete business User rows as part of Auth rollback.",
+        "Safe rollback for this batch: unlink User.supabaseAuthUserId for linkedUserIds where previous was null, then Admin deleteUser for createdAuthUserIds.",
+        "Do not delete Auth identities that existed before the batch (not listed in createdAuthUserIds).",
+        "Partial batches: resume with the same tool (idempotent); already-linked rows become ALREADY_MIGRATED."
+      ]
+    },
+    "notes": [
+      "Architecture: auth.users.id → User.supabaseAuthUserId → User.id (User.id immutable).",
+      "Default mode is dry-run; this invocation writesEnabled=true",
+      "Inactive users: Auth created (not banned); business isActive remains authoritative.",
+      "Placeholder hashes: Auth created without password; RESET_REQUIRED before login.",
+      "Bulk customer migration is NOT performed unless --execute --confirm-bulk-migrate.",
+      "Single-user execute test: SKIPPED — no disposable synthetic business User present.",
+      "runtime_host=aws-1-eu-west-2.pooler.supabase.com",
+      "database={\"host\":\"aws-1-eu-west-2.pooler.supabase.com\",\"port\":\"5432\",\"user\":\"postgres.yzezdhwffgamtmozmfse\",\"db\":\"postgres\",\"sslmode\":\"require\",\"connection_limit\":\"1\",\"pool_timeout\":\"30\",\"isNeon\":false,\"isSupabasePooler\":true,\"isSupabaseDirect\":false}",
+      "detail_rows=5"
+    ]
+  },
+  "note": "manual limit-5 after spawn fix"
+}

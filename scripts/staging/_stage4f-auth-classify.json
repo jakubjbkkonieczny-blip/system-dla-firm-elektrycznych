@@ -1,0 +1,55 @@
+{
+  "stage": "4F-auth",
+  "mode": "classify-readonly",
+  "at": "2026-08-03T18:17:42.058Z",
+  "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+  "totals": {
+    "businessUsers": 3605,
+    "authUsers": 3605,
+    "linked": 3604
+  },
+  "categoryCounts": {
+    "A_BCRYPT_ACTIVE": 0,
+    "B_BCRYPT_INACTIVE": 0,
+    "C_PLACEHOLDER_ACTIVE": 0,
+    "D_PLACEHOLDER_INACTIVE": 0,
+    "E_INVALID_EMAIL": 1,
+    "F_DUPLICATE_EMAIL": 0,
+    "G_ALREADY_LINKED": 3604,
+    "H_AUTH_EMAIL_CONFLICT": 0,
+    "I_EXCEPTIONAL": 0
+  },
+  "samplesByCategory": {
+    "G_ALREADY_LINKED": [
+      {
+        "userId": "0009f75f-32d5-4add-baba-c58aa311fd5e",
+        "emailMasked": "r***e@example.com",
+        "outcome": "ALREADY_MIGRATED"
+      },
+      {
+        "userId": "0035640c-6d2e-416b-911b-fb63eb68d0de",
+        "emailMasked": "o***e@example.com",
+        "outcome": "ALREADY_MIGRATED"
+      },
+      {
+        "userId": "0039caf2-480d-4062-8eb0-05c034c1e3cf",
+        "emailMasked": "c***f@example.com",
+        "outcome": "ALREADY_MIGRATED"
+      }
+    ],
+    "E_INVALID_EMAIL": [
+      {
+        "userId": "4a806296-9dcb-48d0-a745-6af43a3591f1",
+        "emailMasked": "(invalid-or-missing)",
+        "outcome": "BUSINESS_CONFLICT"
+      }
+    ]
+  },
+  "notes": [
+    "Architecture: auth.users.id → User.supabaseAuthUserId → User.id (User.id immutable).",
+    "Default mode is dry-run; this invocation writesEnabled=true",
+    "Inactive users: Auth created (not banned); business isActive remains authoritative.",
+    "Placeholder hashes: Auth created without password; RESET_REQUIRED before login.",
+    "Bulk customer migration is NOT performed unless --execute --confirm-bulk-migrate."
+  ]
+}

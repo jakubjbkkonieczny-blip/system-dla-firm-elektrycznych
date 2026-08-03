@@ -1,0 +1,30 @@
+{
+  "stage": "4F-auth",
+  "status": "PARTIAL EXECUTE — see execute report",
+  "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+  "do_not_execute_without_human_review": true,
+  "current_state": {
+    "business_users": 3605,
+    "linked": 3604,
+    "auth_users_staging": 3605,
+    "categoryCounts": {
+      "A_BCRYPT_ACTIVE": 0,
+      "B_BCRYPT_INACTIVE": 0,
+      "C_PLACEHOLDER_ACTIVE": 0,
+      "D_PLACEHOLDER_INACTIVE": 0,
+      "E_INVALID_EMAIL": 1,
+      "F_DUPLICATE_EMAIL": 0,
+      "G_ALREADY_LINKED": 3604,
+      "H_AUTH_EMAIL_CONFLICT": 0,
+      "I_EXCEPTIONAL": 0
+    }
+  },
+  "bcrypt_import": "Admin createUser({ email, password_hash, email_confirm: true }) — CONFIRMED via auth-js AdminUserAttributes",
+  "placeholder_strategy": "createUser({ email, email_confirm: true }) without password → RESET_REQUIRED",
+  "inactive_strategy": "Create Auth (not banned); link; business isActive remains false; login denied by resolveLinkedUser",
+  "tooling": "scripts/staging/_stage4f-auth-migrate.ts",
+  "reports": {
+    "classify": "scripts/staging/_stage4f-auth-classify.json",
+    "dryRun": "scripts/staging/_stage4f-auth-migrate-dry-run.json"
+  }
+}

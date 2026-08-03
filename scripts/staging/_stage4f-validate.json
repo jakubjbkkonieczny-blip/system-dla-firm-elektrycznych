@@ -1,0 +1,28 @@
+{
+  "stage": "4F",
+  "mode": "validate",
+  "at": "2026-08-03T16:43:30.000Z",
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "notes": [
+    "Initial suite: prisma/test ok; tsc/build failed on BigInt literals in new job-advisory-lock-key.ts — fixed to BigInt() for ES2017 target.",
+    "Re-ran npx tsc --noEmit → exit 0; npx next build → exit 0 after fix.",
+    "eslint exit 1 is pre-existing UI/hooks debt (80 errors), not introduced as a migration regression gate."
+  ],
+  "gates": {
+    "prisma_validate": 0,
+    "prisma_migrate_status": 0,
+    "npm_test": 0,
+    "tsc": 0,
+    "next_build": 0,
+    "eslint": 1
+  },
+  "npm_test_detail": {
+    "tests": 421,
+    "pass": 421,
+    "fail": 0,
+    "test_concurrency": 4,
+    "connection_limit": 2,
+    "duration_ms": 46458
+  },
+  "critical_passed": true
+}

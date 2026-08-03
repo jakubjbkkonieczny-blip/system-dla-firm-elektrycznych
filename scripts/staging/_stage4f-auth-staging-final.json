@@ -1,0 +1,99 @@
+{
+  "stage": "4F-auth-staging",
+  "at": "2026-08-03T18:16:27.112Z",
+  "projectRef": "yzezdhwffgamtmozmfse",
+  "batchLogSummary": {
+    "batches": 74,
+    "cumulative": {
+      "attempted": 3604,
+      "created": 3604,
+      "linked": 3604,
+      "skipped": 0,
+      "failed": 0,
+      "rolled_back": 0,
+      "auth_conflict": 0,
+      "business_conflict": 0
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "finalCounts": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58,
+    "linked": 3604,
+    "auth_users": 3605
+  },
+  "categoryCounts": {
+    "A_BCRYPT_ACTIVE": 0,
+    "B_BCRYPT_INACTIVE": 0,
+    "C_PLACEHOLDER_ACTIVE": 0,
+    "D_PLACEHOLDER_INACTIVE": 0,
+    "E_INVALID_EMAIL": 1,
+    "F_DUPLICATE_EMAIL": 0,
+    "G_ALREADY_LINKED": 3604,
+    "H_AUTH_EMAIL_CONFLICT": 0,
+    "I_EXCEPTIONAL": 0
+  },
+  "integrity": {
+    "duplicateAuthLinks": [],
+    "emailMismatches": 0,
+    "missingAuth": 0,
+    "metadataUserIdMismatch": 0,
+    "orphanMigrationAuth": 0,
+    "linkedCount": 3604,
+    "unlinkedCount": 1,
+    "invalidEmailUnlinkedCount": 1,
+    "invalidEmailUnlinkedUserIds": [
+      "4a806296-9dcb-48d0-a745-6af43a3591f1"
+    ],
+    "migrationMarkedAuthCount": 3604
+  },
+  "samples": {
+    "active_bcrypt": {
+      "ok": true,
+      "userId": "0039cc2b-e83b-42a5-9cf2-5c2c32bc2b3c",
+      "authUserId": "2495653e-457f-40e2-b5b2-d16606a7f122",
+      "isActive": true,
+      "mapping": "auth.users.id → User.supabaseAuthUserId → User.id",
+      "password_reset_required_meta": false,
+      "businessAccess": "LINKED_ACTIVE_STRUCTURAL",
+      "note": "No login impersonation; structural mapping + isActive semantics only"
+    },
+    "active_placeholder": {
+      "ok": true,
+      "userId": "f039d97e-cce1-47a7-99f9-46e4372b4de1",
+      "authUserId": "c2c5bd86-02bf-4aff-9355-1d611f1a5072",
+      "isActive": true,
+      "mapping": "auth.users.id → User.supabaseAuthUserId → User.id",
+      "password_reset_required_meta": true,
+      "businessAccess": "LINKED_RESET_REQUIRED_STRUCTURAL",
+      "note": "No login impersonation; structural mapping + isActive semantics only"
+    },
+    "inactive_bcrypt": {
+      "ok": true,
+      "userId": "003b86b5-4a81-483b-a731-e745871e72a5",
+      "authUserId": "8ec9337e-d6db-488b-a250-e4bbb8369927",
+      "isActive": false,
+      "mapping": "auth.users.id → User.supabaseAuthUserId → User.id",
+      "password_reset_required_meta": false,
+      "businessAccess": "DENIED_INACTIVE",
+      "note": "No login impersonation; structural mapping + isActive semantics only"
+    },
+    "inactive_placeholder": {
+      "ok": true,
+      "userId": "009a637b-bb21-4b95-9779-9732db3c9d64",
+      "authUserId": "e67b43e4-9f8e-44af-ae7c-e67b3dc41063",
+      "isActive": false,
+      "mapping": "auth.users.id → User.supabaseAuthUserId → User.id",
+      "password_reset_required_meta": true,
+      "businessAccess": "DENIED_INACTIVE",
+      "note": "No login impersonation; structural mapping + isActive semantics only"
+    },
+    "adminListUsersProbe": {
+      "ok": true,
+      "error": null
+    }
+  },
+  "businessBaselineIntact": true
+}

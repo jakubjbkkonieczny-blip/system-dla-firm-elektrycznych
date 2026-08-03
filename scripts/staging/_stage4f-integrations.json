@@ -1,0 +1,70 @@
+{
+  "stage": "4F",
+  "mode": "integrations-db-path",
+  "at": "2026-08-03T16:37:19.638Z",
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "runtime": {
+    "host": "aws-1-eu-west-2.pooler.supabase.com",
+    "port": "5432",
+    "user": "postgres.yzezdhwffgamtmozmfse",
+    "db": "postgres",
+    "sslmode": "require",
+    "connection_limit": "1",
+    "pool_timeout": "30",
+    "isNeon": false,
+    "isSupabasePooler": true,
+    "isSupabaseDirect": false
+  },
+  "marker": "stage4f-int-1785775039638",
+  "stripe": {
+    "users_with_customer": 289,
+    "users_with_subscription": 290,
+    "webhook_events": 0,
+    "sample_user": {
+      "userId_prefix": "00c90156-026",
+      "subscriptionStatus": "active",
+      "hasCustomer": true,
+      "hasSubscription": true,
+      "cancelAtPeriodEnd": false
+    },
+    "note": "DB columns readable on Supabase. No Stripe API calls performed.",
+    "webhook_write_cleanup": {
+      "attempted": true,
+      "ok": true,
+      "cleaned": true
+    }
+  },
+  "google": {
+    "users_with_access_token": 0,
+    "users_with_refresh_token": 0,
+    "note": "Token columns readable. No Google API calls performed."
+  },
+  "push": {
+    "push_subscription_rows": 1,
+    "users_with_legacy_push_json": 0,
+    "sample": {
+      "id": "cmrxtnrzy000110w0zmiv5wx0",
+      "userId": "cmouj03p400008dh0v4ma8cfz",
+      "endpoint_host": "web.push.apple.com"
+    },
+    "note": "PushSubscription table readable. No web-push sends performed."
+  },
+  "authorization": {
+    "membership_keyed_by_userId": true,
+    "inactive_users": 1281,
+    "companies": 2543,
+    "memberships": 2477,
+    "sample_member": {
+      "role": "owner",
+      "userId_prefix": "cmpa3mac5000",
+      "companyId_prefix": "cmpa3meul000",
+      "sample_user_linked": false,
+      "sample_user_active": true
+    }
+  },
+  "neon_dependency_scan": {
+    "runtime_database_is_neon": false,
+    "note": "Staging DATABASE_URL host is Supabase Session pooler after Stage 4E."
+  },
+  "passed": true
+}

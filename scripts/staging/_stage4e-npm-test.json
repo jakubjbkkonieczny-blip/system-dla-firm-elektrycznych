@@ -1,0 +1,6 @@
+{
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "exit": 1,
+  "at": "2026-08-03T15:22:48.089Z",
+  "note": "npm test with .env.local Supabase staging DATABASE_URL/DIRECT_URL"
+}

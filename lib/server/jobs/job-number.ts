@@ -1,6 +1,8 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 
+import { companyAdvisoryLockKey } from "@/lib/server/jobs/job-advisory-lock-key";
+
 type JobNumberDb = {
   $executeRaw: (query: ReturnType<typeof Prisma.sql>) => Promise<unknown>;
   job: {
@@ -10,18 +12,6 @@ type JobNumberDb = {
     }) => Promise<{ _max: { jobNumber: number | null } }>;
   };
 };
-
-/** Stable per-company lock key for pg_advisory_xact_lock(bigint). */
-function companyAdvisoryLockKey(companyId: string): bigint {
-  let k1 = 0;
-  let k2 = 0;
-  for (let i = 0; i < companyId.length; i++) {
-    const c = companyId.charCodeAt(i);
-    k1 = (Math.imul(k1, 31) + c) | 0;
-    k2 = (Math.imul(k2, 37) + c) | 0;
-  }
-  return (BigInt(k1 >>> 0) << BigInt(32)) | BigInt(k2 >>> 0);
-}
 
 /**
  * Next sequential job number for a company (1-based, never reused).
@@ -41,3 +31,5 @@ export async function allocateNextJobNumber(
 
   return (agg._max.jobNumber ?? 0) + 1;
 }
+
+export { companyAdvisoryLockKey } from "@/lib/server/jobs/job-advisory-lock-key";

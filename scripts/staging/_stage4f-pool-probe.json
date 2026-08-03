@@ -1,0 +1,86 @@
+{
+  "stage": "4F",
+  "mode": "pool-probe",
+  "at": "2026-08-03T15:34:56.439Z",
+  "runtime": {
+    "host": "aws-1-eu-west-2.pooler.supabase.com",
+    "port": "5432",
+    "user": "postgres.yzezdhwffgamtmozmfse",
+    "db": "postgres",
+    "sslmode": "require",
+    "connection_limit": "5",
+    "pool_timeout": "20",
+    "isNeon": false,
+    "isSupabasePooler": true,
+    "isSupabaseDirect": false
+  },
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "single": {
+    "label": "single_connection_limit_1",
+    "ok": true,
+    "ms": 539
+  },
+  "probes": [
+    {
+      "concurrency": 4,
+      "held_for_ms": 2477,
+      "ok": 4,
+      "failed": 0,
+      "emax_failures": 0,
+      "sample_error": null
+    },
+    {
+      "concurrency": 8,
+      "held_for_ms": 2517,
+      "ok": 8,
+      "failed": 0,
+      "emax_failures": 0,
+      "sample_error": null
+    },
+    {
+      "concurrency": 12,
+      "held_for_ms": 2545,
+      "ok": 12,
+      "failed": 0,
+      "emax_failures": 0,
+      "sample_error": null
+    },
+    {
+      "concurrency": 16,
+      "held_for_ms": 2662,
+      "ok": 15,
+      "failed": 1,
+      "emax_failures": 1,
+      "sample_error": "\nInvalid `prisma.$queryRaw()` invocation:\n\n\nError querying the database: FATAL: (EMAXCONNSESSION) max clients reached in session mode - max clients are limited to pool_size: 15"
+    }
+  ],
+  "theoretical": {
+    "cpus": 12,
+    "availableParallelism": 12,
+    "prismaDefaultConnectionLimit": 25,
+    "testFiles": 46,
+    "nodeTestDefaultWorkers": 12,
+    "worstCaseWithoutLimits": 300,
+    "withCurrentEnvConnectionLimit": {
+      "perProcess": 5,
+      "parallelWorkers": 12,
+      "total": 60
+    },
+    "safeExample": {
+      "connection_limit": 2,
+      "test_concurrency": 4,
+      "total": 8,
+      "note": "Stay under observed Session pool (~15)"
+    }
+  },
+  "conclusion": {
+    "cause": "Parallel Node test workers each instantiate PrismaClient; Session pooler rejects when concurrent sessions exceed plan capacity (~15). Not an application singleton bug in Next.js runtime (lib/db/prisma.ts already caches on globalThis).",
+    "evidence": {
+      "singleton_present": true,
+      "singleton_file": "lib/db/prisma.ts",
+      "stage4e_parallel_npm_test_exit": 1,
+      "stage4e_serial_retry_connection_limit_1_exit": 0,
+      "probe_emax_seen": true
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "stage": "4F-auth-staging-validate",
+  "at": "2026-08-03T18:17:38.167Z",
+  "baseline": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58
+  },
+  "counts": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58,
+    "linked": 3604,
+    "unlinked": 1,
+    "auth_users": 3605,
+    "unique_linked_auth_ids": 3604
+  },
+  "cohorts": {
+    "active_bcrypt": {
+      "expectedBusiness": 1414,
+      "linked": 1414,
+      "authExists": 1414,
+      "hasEncPassword": 1414,
+      "resetMeta": 0
+    },
+    "inactive_bcrypt": {
+      "expectedBusiness": 845,
+      "linked": 845,
+      "authExists": 845,
+      "hasEncPassword": 845,
+      "resetMeta": 0
+    },
+    "active_placeholder": {
+      "expectedBusiness": 909,
+      "linked": 909,
+      "authExists": 909,
+      "hasEncPassword": 909,
+      "resetMeta": 909
+    },
+    "inactive_placeholder": {
+      "expectedBusiness": 436,
+      "linked": 436,
+      "authExists": 436,
+      "hasEncPassword": 436,
+      "resetMeta": 436
+    },
+    "invalid_email": {
+      "expectedBusiness": 1,
+      "linked": 0,
+      "authExists": 0
+    }
+  },
+  "integrity": {
+    "duplicate_business_links_to_same_auth": 0,
+    "emailMismatches": 0,
+    "missingAuth": 0,
+    "metaUserMismatch": 0,
+    "migrationOrphans": 0,
+    "invalidEmailUnlinked": true,
+    "invalidEmailUserIds": [
+      "4a806296-9dcb-48d0-a745-6af43a3591f1"
+    ],
+    "preExistingAuthCount": 1
+  },
+  "expectations": {
+    "linked": 3604,
+    "unlinked": 1,
+    "auth_users_min": 3604,
+    "bcrypt_has_encrypted_password": true,
+    "placeholder_reset_meta": true
+  },
+  "ok": true
+}

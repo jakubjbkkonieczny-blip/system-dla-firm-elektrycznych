@@ -1,0 +1,314 @@
+{
+  "stage": "4F-auth-rehearsal",
+  "at": "2026-08-03T17:45:21.852Z",
+  "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+  "safety": {
+    "bulk": false,
+    "confirm_bulk_migrate": false,
+    "production_derived_users": false,
+    "synthetic_email_domain": "mailinator.com",
+    "password_or_hash_logged": false
+  },
+  "baseline": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58,
+    "linked": 0,
+    "auth_users": 1
+  },
+  "baseline_matches_expected": true,
+  "synthetic_test_cohort": [
+    {
+      "kind": "active_bcrypt",
+      "userId": "cmsdis5od000012gbl32zg64v",
+      "email": "vw.stage4f.rehearsal.active-bcrypt.msdis530@mailinator.com",
+      "isActive": true,
+      "hashKind": "bcrypt",
+      "companyMemberCreated": false
+    },
+    {
+      "kind": "active_placeholder",
+      "userId": "cmsdis5rl000112gbh8zn8y0k",
+      "email": "vw.stage4f.rehearsal.active-placeholder.msdis530@mailinator.com",
+      "isActive": true,
+      "hashKind": "placeholder",
+      "companyMemberCreated": false
+    },
+    {
+      "kind": "inactive_bcrypt",
+      "userId": "cmsdis5t0000212gbjy63ilmq",
+      "email": "vw.stage4f.rehearsal.inactive-bcrypt.msdis530@mailinator.com",
+      "isActive": false,
+      "hashKind": "bcrypt",
+      "companyMemberCreated": false
+    },
+    {
+      "kind": "inactive_placeholder",
+      "userId": "cmsdis5uf000312gbfr8lnmk9",
+      "email": "vw.stage4f.rehearsal.inactive-placeholder.msdis530@mailinator.com",
+      "isActive": false,
+      "hashKind": "placeholder",
+      "companyMemberCreated": false
+    }
+  ],
+  "counts_after_synthetic_create": {
+    "users": 3609,
+    "companies": 2543,
+    "jobs": 58,
+    "linked": 0,
+    "auth_users": 1
+  },
+  "migrate_execute": {
+    "active_bcrypt": {
+      "exitCode": 0,
+      "linked": true,
+      "authUserId": "cb8612b8-601e-48c9-b88f-759d01525cdd",
+      "userIdUnchanged": true,
+      "isActive": true
+    },
+    "active_placeholder": {
+      "exitCode": 0,
+      "linked": true,
+      "authUserId": "382e5178-1722-47f9-8a70-5153217a45c5",
+      "userIdUnchanged": true,
+      "isActive": true
+    },
+    "inactive_bcrypt": {
+      "exitCode": 0,
+      "linked": true,
+      "authUserId": "d8628aaf-3023-41fe-80c5-c95fa9bc11f2",
+      "userIdUnchanged": true,
+      "isActive": false
+    },
+    "inactive_placeholder": {
+      "exitCode": 0,
+      "linked": true,
+      "authUserId": "c4836378-c6ea-4e37-88a2-1c50c4b97916",
+      "userIdUnchanged": true,
+      "isActive": false
+    }
+  },
+  "active_bcrypt_migration_test": {
+    "migrate_linked": true,
+    "mapping": {
+      "ok": true,
+      "userId": "cmsdis5od000012gbl32zg64v",
+      "supabaseAuthUserId": "cb8612b8-601e-48c9-b88f-759d01525cdd",
+      "authExists": true,
+      "detail": "auth.users.id → User.supabaseAuthUserId → User.id intact"
+    },
+    "password_signin_ok": true,
+    "session_auth_id_matches": true,
+    "session_resolution": {
+      "ok": true,
+      "resolvedUserId": "cmsdis5od000012gbl32zg64v",
+      "expectedUserId": "cmsdis5od000012gbl32zg64v",
+      "category": null
+    },
+    "user_id_unchanged": true,
+    "ok": true
+  },
+  "active_placeholder_migration_test": {
+    "migrate_linked": true,
+    "mapping": {
+      "ok": true,
+      "userId": "cmsdis5rl000112gbh8zn8y0k",
+      "supabaseAuthUserId": "382e5178-1722-47f9-8a70-5153217a45c5",
+      "authExists": true,
+      "detail": "auth.users.id → User.supabaseAuthUserId → User.id intact"
+    },
+    "guessed_password_login_fails": true,
+    "admin_password_set_simulates_reset": true,
+    "login_after_reset_ok": true,
+    "session_resolution_after_reset": {
+      "ok": true,
+      "resolvedUserId": "cmsdis5rl000112gbh8zn8y0k"
+    },
+    "recovery_path": "Passwordless Auth create → resetPasswordForEmail / Admin password set required before login",
+    "ok": true
+  },
+  "inactive_bcrypt_migration_test": {
+    "migrate_linked": true,
+    "mapping": {
+      "ok": true,
+      "userId": "cmsdis5t0000212gbjy63ilmq",
+      "supabaseAuthUserId": "d8628aaf-3023-41fe-80c5-c95fa9bc11f2",
+      "authExists": true,
+      "detail": "auth.users.id → User.supabaseAuthUserId → User.id intact"
+    },
+    "isActive_remains_false": true,
+    "auth_password_signin_works": true,
+    "business_session_denied": true,
+    "resolve_category": "AUTH_USER_INACTIVE",
+    "ok": true
+  },
+  "inactive_placeholder_migration_test": {
+    "migrate_linked": true,
+    "mapping": {
+      "ok": true,
+      "userId": "cmsdis5uf000312gbfr8lnmk9",
+      "supabaseAuthUserId": "c4836378-c6ea-4e37-88a2-1c50c4b97916",
+      "authExists": true,
+      "detail": "auth.users.id → User.supabaseAuthUserId → User.id intact"
+    },
+    "isActive_remains_false": true,
+    "guessed_password_login_fails": true,
+    "business_session_denied": true,
+    "resolve_category": "AUTH_USER_INACTIVE",
+    "ok": true
+  },
+  "session_resolution_verification": {
+    "active_bcrypt": true,
+    "active_placeholder_after_reset": true,
+    "inactive_bcrypt_denied": true,
+    "inactive_placeholder_denied": true
+  },
+  "idempotency_test": {
+    "exitCode": 0,
+    "authUserId_unchanged": true,
+    "auth_users_count_unchanged": true,
+    "already_migrated_indicated": true,
+    "ok": true
+  },
+  "conflict_handling_test": {
+    "exitCode": 0,
+    "business_remained_unlinked": true,
+    "no_email_alone_claim": true,
+    "auth_conflict_indicated": true,
+    "precreated_auth_deleted": true,
+    "ok": true
+  },
+  "rollback_test": {
+    "unlinked": true,
+    "auth_identity_deleted": true,
+    "business_user_intact": true,
+    "diagnostic_auth_untouched": true,
+    "remigrate_exitCode": 0,
+    "remigrate_linked": true,
+    "remigrate_new_auth_id": "9b632b11-6161-4808-ab42-7c60778c5fcd",
+    "remigrate_user_id_unchanged": true,
+    "isActive_still_false": true,
+    "auth_count_delta_note": {
+      "before_rollback_delete": 5,
+      "after_remigrate": 5
+    },
+    "ok": true
+  },
+  "identity_mapping_verification": {
+    "ok": true,
+    "mappings": [
+      {
+        "kind": "active_bcrypt",
+        "userId": "cmsdis5od000012gbl32zg64v",
+        "authUserId": "cb8612b8-601e-48c9-b88f-759d01525cdd",
+        "mapping_ok": true,
+        "companyMember_count": 0
+      },
+      {
+        "kind": "active_placeholder",
+        "userId": "cmsdis5rl000112gbh8zn8y0k",
+        "authUserId": "382e5178-1722-47f9-8a70-5153217a45c5",
+        "mapping_ok": true,
+        "companyMember_count": 0
+      },
+      {
+        "kind": "inactive_bcrypt",
+        "userId": "cmsdis5t0000212gbjy63ilmq",
+        "authUserId": "d8628aaf-3023-41fe-80c5-c95fa9bc11f2",
+        "mapping_ok": true,
+        "companyMember_count": 0
+      },
+      {
+        "kind": "inactive_placeholder",
+        "userId": "cmsdis5uf000312gbfr8lnmk9",
+        "authUserId": "9b632b11-6161-4808-ab42-7c60778c5fcd",
+        "mapping_ok": true,
+        "companyMember_count": 0
+      }
+    ]
+  },
+  "deleted": [
+    {
+      "kind": "User",
+      "id": "cmsdisgox000412gbe6hfiinn",
+      "email": "vw.stage4f.rehearsal.conflict.msdis530@mailinator.com",
+      "phase": "conflict_cleanup",
+      "ok": true
+    },
+    {
+      "kind": "auth.users",
+      "id": "587876b6-0ea1-41ee-8a1e-1499bfc4dde1",
+      "email": "vw.stage4f.rehearsal.conflict.msdis530@mailinator.com",
+      "phase": "conflict_cleanup",
+      "ok": true
+    },
+    {
+      "kind": "auth.users",
+      "id": "cb8612b8-601e-48c9-b88f-759d01525cdd",
+      "email": "vw.stage4f.rehearsal.active-bcrypt.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    },
+    {
+      "kind": "User",
+      "id": "cmsdis5od000012gbl32zg64v",
+      "email": "vw.stage4f.rehearsal.active-bcrypt.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    },
+    {
+      "kind": "auth.users",
+      "id": "382e5178-1722-47f9-8a70-5153217a45c5",
+      "email": "vw.stage4f.rehearsal.active-placeholder.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    },
+    {
+      "kind": "User",
+      "id": "cmsdis5rl000112gbh8zn8y0k",
+      "email": "vw.stage4f.rehearsal.active-placeholder.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    },
+    {
+      "kind": "auth.users",
+      "id": "d8628aaf-3023-41fe-80c5-c95fa9bc11f2",
+      "email": "vw.stage4f.rehearsal.inactive-bcrypt.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    },
+    {
+      "kind": "User",
+      "id": "cmsdis5t0000212gbjy63ilmq",
+      "email": "vw.stage4f.rehearsal.inactive-bcrypt.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    },
+    {
+      "kind": "auth.users",
+      "id": "9b632b11-6161-4808-ab42-7c60778c5fcd",
+      "email": "vw.stage4f.rehearsal.inactive-placeholder.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    },
+    {
+      "kind": "User",
+      "id": "cmsdis5uf000312gbfr8lnmk9",
+      "email": "vw.stage4f.rehearsal.inactive-placeholder.msdis530@mailinator.com",
+      "phase": "final",
+      "ok": true
+    }
+  ],
+  "cleanup_verification": {
+    "final": {
+      "users": 3605,
+      "companies": 2543,
+      "jobs": 58,
+      "linked": 0,
+      "auth_users": 1
+    },
+    "matches_baseline": true,
+    "matches_expected_business": true
+  },
+  "verdict": "AUTH MIGRATION REHEARSAL PASSED"
+}

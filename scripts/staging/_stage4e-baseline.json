@@ -1,0 +1,207 @@
+{
+  "stage": "4E",
+  "mode": "pre-cutover-baseline",
+  "created_at": "2026-08-03T15:16:31.138Z",
+  "runtime_mechanism": {
+    "description": "Local Next.js staging rehearsal via dotenv: .env then .env.local override. No .vercel / remote staging deploy config in repo.",
+    "env_files": {
+      ".env": {
+        "DATABASE_URL": {
+          "host": "ep-green-wave-aljyrgvl-pooler.c-3.eu-central-1.aws.neon.tech",
+          "port": "(default)",
+          "user": "neondb_owner",
+          "db": "neondb",
+          "sslmode": "require",
+          "isNeon": true,
+          "isSupabase": false
+        },
+        "DIRECT_URL": {
+          "host": "ep-green-wave-aljyrgvl.c-3.eu-central-1.aws.neon.tech",
+          "port": "(default)",
+          "user": "neondb_owner",
+          "db": "neondb",
+          "sslmode": "require",
+          "isNeon": true,
+          "isSupabase": false
+        }
+      },
+      ".env.local": {
+        "DATABASE_URL": {
+          "host": "ep-green-wave-aljyrgvl-pooler.c-3.eu-central-1.aws.neon.tech",
+          "port": "(default)",
+          "user": "neondb_owner",
+          "db": "neondb",
+          "sslmode": "require",
+          "isNeon": true,
+          "isSupabase": false
+        },
+        "DIRECT_URL": {
+          "host": "ep-green-wave-aljyrgvl.c-3.eu-central-1.aws.neon.tech",
+          "port": "(default)",
+          "user": "neondb_owner",
+          "db": "neondb",
+          "sslmode": "require",
+          "isNeon": true,
+          "isSupabase": false
+        },
+        "SUPABASE_AUTH_ENABLED": "true",
+        "VECTORWORK_STAGING_AUTH_INTEGRATION": "true",
+        "NEXT_PUBLIC_SUPABASE_URL": "yzezdhwffgamtmozmfse.supabase.co"
+      },
+      ".env.supabase-staging": {
+        "DATABASE_URL": {
+          "host": "aws-1-eu-west-2.pooler.supabase.com",
+          "port": "5432",
+          "user": "postgres.yzezdhwffgamtmozmfse",
+          "db": "postgres",
+          "sslmode": "unset",
+          "isNeon": false,
+          "isSupabase": true
+        },
+        "DIRECT_URL": {
+          "host": "db.yzezdhwffgamtmozmfse.supabase.co",
+          "port": "5432",
+          "user": "postgres",
+          "db": "postgres",
+          "sslmode": "unset",
+          "isNeon": false,
+          "isSupabase": true
+        }
+      }
+    }
+  },
+  "network": {
+    "aws-1-eu-west-2.pooler.supabase.com": {
+      "dns": {
+        "host": "aws-1-eu-west-2.pooler.supabase.com",
+        "A": [
+          "13.43.174.140",
+          "13.41.42.138"
+        ],
+        "AAAA": []
+      },
+      "tcp": {
+        "port": 5432,
+        "ok": true
+      }
+    },
+    "db.yzezdhwffgamtmozmfse.supabase.co": {
+      "dns": {
+        "host": "db.yzezdhwffgamtmozmfse.supabase.co",
+        "A": [],
+        "AAAA": [
+          "2a05:d01c:874:6b00:de36:e9b7:db7a:e07"
+        ],
+        "A_error": "ENODATA"
+      },
+      "tcp": {
+        "port": 5432,
+        "ok": false,
+        "error": "ENOTFOUND"
+      }
+    }
+  },
+  "neon_smoke": {
+    "label": "neon_current",
+    "database": {
+      "host": "ep-green-wave-aljyrgvl-pooler.c-3.eu-central-1.aws.neon.tech",
+      "port": "(default)",
+      "user": "neondb_owner",
+      "db": "neondb",
+      "sslmode": "require",
+      "isNeon": true,
+      "isSupabase": false
+    },
+    "direct": {
+      "host": "ep-green-wave-aljyrgvl.c-3.eu-central-1.aws.neon.tech",
+      "port": "(default)",
+      "user": "neondb_owner",
+      "db": "neondb",
+      "sslmode": "require",
+      "isNeon": true,
+      "isSupabase": false
+    },
+    "connect": {
+      "ok": true,
+      "db": "neondb",
+      "addr": "::1/128",
+      "version": "17.10 (4f20678)"
+    },
+    "counts": {
+      "users": 3605,
+      "linked": 0,
+      "companies": 2543,
+      "jobs": 58
+    },
+    "tx_commit": {
+      "ok": true
+    },
+    "tx_rollback": {
+      "ok": true,
+      "detail": "intentional throw"
+    },
+    "advisory_lock": {
+      "ok": true
+    },
+    "auth_schema": false,
+    "prisma_migrations_rows": 23
+  },
+  "supabase_pooler_smoke": {
+    "label": "supabase_pooler",
+    "database": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "unset",
+      "isNeon": false,
+      "isSupabase": true
+    },
+    "direct": {
+      "host": "aws-1-eu-west-2.pooler.supabase.com",
+      "port": "5432",
+      "user": "postgres.yzezdhwffgamtmozmfse",
+      "db": "postgres",
+      "sslmode": "unset",
+      "isNeon": false,
+      "isSupabase": true
+    },
+    "connect": {
+      "ok": true,
+      "db": "postgres",
+      "addr": "2a05:d01c:874:6b00:de36:e9b7:db7a:e07/128",
+      "version": "17.6"
+    },
+    "counts": {
+      "users": 3605,
+      "linked": 0,
+      "companies": 2543,
+      "jobs": 58
+    },
+    "tx_commit": {
+      "ok": true
+    },
+    "tx_rollback": {
+      "ok": true,
+      "detail": "intentional throw"
+    },
+    "advisory_lock": {
+      "ok": true
+    },
+    "auth_schema": true,
+    "auth_users_count": 1,
+    "prisma_migrations_rows": 23
+  },
+  "supabase_direct_smoke": {
+    "skipped": true,
+    "reason": "direct host TCP unreachable from this machine",
+    "host": "db.yzezdhwffgamtmozmfse.supabase.co"
+  },
+  "recommended_staging_runtime": {
+    "DATABASE_URL": "Supabase Session pooler (aws-*-pooler.supabase.com:5432, user postgres.<ref>)",
+    "DIRECT_URL": "Same Session pooler URL as DATABASE_URL (IPv6 direct ENETUNREACH workaround; Prisma migrate deploy may need pooler)",
+    "pooling_mode": "Session (port 5432) — required for pg_advisory_xact_lock / Prisma",
+    "ssl": "require (append ?sslmode=require if unset)",
+    "prisma": "url=DATABASE_URL (pooled), directUrl=DIRECT_URL"
+  }
+}

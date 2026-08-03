@@ -1,0 +1,111 @@
+{
+  "stage": "4F",
+  "mode": "auth-identity-audit",
+  "at": "2026-08-03T15:33:52.444Z",
+  "runtime": {
+    "host": "aws-1-eu-west-2.pooler.supabase.com",
+    "port": "5432",
+    "user": "postgres.yzezdhwffgamtmozmfse",
+    "db": "postgres",
+    "sslmode": "require",
+    "connection_limit": "1",
+    "pool_timeout": "30",
+    "isNeon": false,
+    "isSupabasePooler": true,
+    "isSupabaseDirect": false
+  },
+  "host": "aws-1-eu-west-2.pooler.supabase.com",
+  "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+  "baseline_expected": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58
+  },
+  "counts": {
+    "users": 3605,
+    "companies": 2543,
+    "jobs": 58,
+    "linked": 0,
+    "unlinked": 3605,
+    "with_password_hash": 3605,
+    "without_password_hash": 0,
+    "active_users": 2324,
+    "inactive_users": 1281,
+    "hash_2a": 0,
+    "hash_2b": 2259,
+    "hash_other": 1346,
+    "auth_users": 1
+  },
+  "duplicate_emails": {
+    "count": 0,
+    "samples": [],
+    "note": "User.email is UNIQUE — duplicates should be empty by schema."
+  },
+  "password_hash_prefixes": [
+    {
+      "prefix": "$2b$10$",
+      "n": 2259
+    },
+    {
+      "prefix": "testhas",
+      "n": 861
+    },
+    {
+      "prefix": "hash",
+      "n": 485
+    }
+  ],
+  "auth_users_sample": [
+    {
+      "id": "3c9f52fe-643b-4841-ab44-0b57afa58811",
+      "email": "vw.diag.admin.1785427957015@mailinator.com",
+      "created_at": "2026-07-30T16:12:37.265Z"
+    }
+  ],
+  "existing_auth_link_checks": [
+    {
+      "authUserId": "3c9f52fe-643b-4841-ab44-0b57afa58811",
+      "authEmail": "vw.diag.admin.1785427957015@mailinator.com",
+      "linked_via_supabaseAuthUserId": null,
+      "business_user_same_email": null,
+      "session_resolve_would_succeed": false
+    }
+  ],
+  "migrated_user_login_possible": "NO — 0 linked User.supabaseAuthUserId; resolveLinkedUser fails closed (AUTH_USER_UNLINKED)",
+  "cohorts": {
+    "active_unlinked_with_legacy_hash": 2324,
+    "active_unlinked_without_hash": 0,
+    "inactive_users": 1281
+  },
+  "repository_mechanisms": {
+    "linkExistingUserToAuth": "lib/supabase/provisioning.ts — explicit, fail-closed; does not auto-claim by email alone",
+    "linkUserToSupabaseAuthUser": "lib/supabase/auth-user-mapping.ts — low-level link helper",
+    "ensureProvisionedUserAfterAuth": "new signup path only; refuses existing unlinked email (USER_EXISTS)",
+    "first_login_auto_link": false,
+    "bulk_import_script": false,
+    "password_hash_admin_import_documented": "docs/supabase-migration-phase-0.md + lib/supabase/phase0-dependencies.ts (bcrypt import CONFIRMED, not executed)",
+    "staged_synthetic_test": "scripts/staging/_stage4e-auth.mjs (synthetic only)"
+  },
+  "proposed_stage_4f_auth_substep": {
+    "name": "Stage 4F-auth — deterministic Auth identity import + link (REQUIRES HUMAN REVIEW)",
+    "do_not_execute_in_4f": true,
+    "steps": [
+      "1. Freeze Neon writes or accept drift window; re-copy or delta-sync business users if needed before Auth import.",
+      "2. Dry-run report: for each active User with passwordHash, classify importability ($2a$/$2b$ cost), email validity, conflicts with existing auth.users.",
+      "3. Human review dry-run CSV (email, userId, hash_prefix_only, action=import|reset|skip_inactive|conflict).",
+      "4. Batch Admin API createUser({ email, password_hash, email_confirm: true }) for importable rows ONLY — retain returned auth.users.id.",
+      "5. Deterministic link: UPDATE User SET supabaseAuthUserId = :authId WHERE id = :userId AND supabaseAuthUserId IS NULL AND lower(email)=lower(:email); refuse overwrite.",
+      "6. For non-importable hashes / null hashes: create confirmed Auth user WITHOUT password OR force recovery; require password reset before login.",
+      "7. Inactive users: defer import OR import banned; do not grant app access (isActive remains false).",
+      "8. Validate: linked count == imported count; spot-check resolveLinkedUser; zero duplicate supabaseAuthUserId; authorization still keys off User.id.",
+      "9. Rollback plan: unlink supabaseAuthUserId for batch marker; delete corresponding auth.users via Admin API; do not delete business User rows."
+    ],
+    "email_matching_safety": "Email match alone is NOT safe for auto-link from client input. Safe only after Admin-created Auth identity for that exact normalized email under a reviewed batch, then link by trusted User.id + verified auth.users.id.",
+    "password_migration": "Preferred: Admin password_hash import for VectorWork bcrypt ($2a$/$2b$). Fallback: force password reset. Do not copy plaintext passwords (none exist).",
+    "why_blocked_now": "0/3605 linked; staging auth.users contains only staging diagnostic identities; no reviewed dry-run artifact exists yet."
+  },
+  "sample_authorization_key": {
+    "note": "CompanyMember.userId references User.id (cuid), never auth.users.id",
+    "sample_user_id_prefix": "cmpa3mac5000"
+  }
+}

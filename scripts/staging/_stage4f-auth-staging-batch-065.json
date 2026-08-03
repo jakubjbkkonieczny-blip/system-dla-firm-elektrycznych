@@ -1,0 +1,911 @@
+{
+  "batch": 65,
+  "capturedAt": "2026-08-03T18:14:03.612Z",
+  "report": {
+    "stage": "4F-auth",
+    "mode": "execute",
+    "at": "2026-08-03T18:14:03.443Z",
+    "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+    "writesEnabled": true,
+    "args": {
+      "mode": "execute",
+      "userId": null,
+      "limit": 50,
+      "batchSize": 50,
+      "confirmBulkMigrate": false
+    },
+    "categoryCounts": {
+      "A_BCRYPT_ACTIVE": 174,
+      "B_BCRYPT_INACTIVE": 114,
+      "C_PLACEHOLDER_ACTIVE": 143,
+      "D_PLACEHOLDER_INACTIVE": 58,
+      "E_INVALID_EMAIL": 1,
+      "F_DUPLICATE_EMAIL": 0,
+      "G_ALREADY_LINKED": 3115,
+      "H_AUTH_EMAIL_CONFLICT": 0,
+      "I_EXCEPTIONAL": 0
+    },
+    "outcomeCounts": {
+      "RESET_REQUIRED": 16,
+      "READY": 19,
+      "INACTIVE": 15
+    },
+    "totalConsidered": 50,
+    "rows": [
+      {
+        "timestamp": "2026-08-03T18:13:51.020Z",
+        "userId": "ddbf1e0f-3125-4e15-a24b-e75e31861f98",
+        "emailMasked": "n***8@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "f48233a4-fdb6-4ea7-80be-9e0bc61c90d9",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:51.253Z",
+        "userId": "ddcd468e-dcf6-4dcd-b33e-240af3bf5870",
+        "emailMasked": "a***0@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "84dbd1e9-300d-4d69-9a8c-188fd6e71280",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:51.566Z",
+        "userId": "de07b06d-b205-4ed1-989a-aeee39d7cdfe",
+        "emailMasked": "a***e@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "1edc4a41-530c-485b-8eb6-c92dd6228f02",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:51.816Z",
+        "userId": "de14ffd3-b521-4869-b95d-19b1715aebaf",
+        "emailMasked": "o***f@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "4a7aad56-f537-451a-b728-732f83c8c6ac",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:52.079Z",
+        "userId": "de186c11-f63f-4fc8-a7e7-e6836a123434",
+        "emailMasked": "d***4@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "a2ec84f1-672c-40c0-92a7-3143e9634acc",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:52.326Z",
+        "userId": "de500ffe-0411-4c80-b3e6-d2a9f433c372",
+        "emailMasked": "w***2@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "331f702b-b663-4ae4-8d11-a6a59efe67ce",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:52.660Z",
+        "userId": "de5d8181-bf03-4f13-924e-446655b12a8a",
+        "emailMasked": "a***a@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "82f05bc5-ee7a-4ad6-b3ac-923d3d4ce83c",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:52.922Z",
+        "userId": "de5fad24-c4e8-47d7-a7f0-9b1b926627c5",
+        "emailMasked": "a***5@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "8b81edee-77fc-4396-a56f-f27a77d071fb",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:53.147Z",
+        "userId": "de7ed395-fea6-49e2-aa58-d006625bf486",
+        "emailMasked": "l***6@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "084a9bf0-bad2-4db9-b4a5-bbe280cde567",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:53.494Z",
+        "userId": "de99c40a-11d0-49aa-9926-b1279144cf5d",
+        "emailMasked": "o***d@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "7bf24b68-80b4-41a8-a15c-68cff475d345",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:53.722Z",
+        "userId": "dea6a321-c4f6-4b2a-bf6f-7d2cb8e126a0",
+        "emailMasked": "r***0@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "d6d1e060-b5ea-435a-91e6-5659a3a60102",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:53.952Z",
+        "userId": "deace28c-c6e2-4262-be0a-1fb27b50a130",
+        "emailMasked": "a***0@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "a5cefa6b-4288-4ded-b39a-e2e873f82624",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:54.181Z",
+        "userId": "ded59dd0-cd0b-4466-af1d-bc82bf47bf5f",
+        "emailMasked": "r***f@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "823a151c-213b-492b-8352-054479472ad5",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:54.412Z",
+        "userId": "dede81db-4fac-4271-89a3-c91e945370dd",
+        "emailMasked": "d***d@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "b2ec0287-fdb0-48a4-8a35-a799ab1f0fcd",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:54.626Z",
+        "userId": "dee2b3b9-4144-41dd-84f7-c01f3538b566",
+        "emailMasked": "o***6@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "63cbc657-db33-460f-adef-57be2827cb60",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:54.843Z",
+        "userId": "dee52ef9-5b70-49d8-b0f5-c23e9c11f542",
+        "emailMasked": "l***2@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "d7415bc9-c138-46f0-a00c-add9c04ac258",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:55.057Z",
+        "userId": "df134197-c29b-42da-8eef-1d6bb367e9ad",
+        "emailMasked": "r***d@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "d2e75255-75a9-4f8e-b02e-689934584494",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:55.272Z",
+        "userId": "df17ef88-4054-4c4d-ba6c-e83f91bbae7f",
+        "emailMasked": "r***f@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "5141558e-976e-4e8b-992e-4d77a532333e",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:55.586Z",
+        "userId": "df354ea0-3e8e-4e9c-abec-fc93a2a3b031",
+        "emailMasked": "f***1@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "08018858-8675-4629-8324-b304e9e3bcdc",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:55.794Z",
+        "userId": "df47e111-f8d8-4c3b-8a53-fdbb7084c48f",
+        "emailMasked": "w***f@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "a6302d1e-8dec-4d0b-b3b8-e59a8bc0ae1c",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:56.105Z",
+        "userId": "df529aa2-fd03-4fab-adc6-304f08e9386e",
+        "emailMasked": "e***e@example.com",
+        "category": "D_PLACEHOLDER_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "9d3d7dc3-d686-4f05-9f3a-29357cd19732",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:56.319Z",
+        "userId": "df52a878-3c3d-488c-9a4e-0f1efbad6f79",
+        "emailMasked": "r***9@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "7bbb03bc-bcc4-4652-9fc7-f668b459c82d",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:56.524Z",
+        "userId": "df5e25b1-1b8a-49ef-820f-b64eb90eece4",
+        "emailMasked": "l***4@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "5a002dd9-fa3e-4cc0-a719-205c8c1f094c",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:56.827Z",
+        "userId": "df5e6a49-d98d-43db-92fc-1ccd32cf2e54",
+        "emailMasked": "e***4@example.com",
+        "category": "D_PLACEHOLDER_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "4af4eaca-5f89-4b9d-9af1-12272ae6d480",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:57.044Z",
+        "userId": "dfa08265-e8f4-44e1-a3b2-319cd1ad8f41",
+        "emailMasked": "d***1@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "fe449c6a-5dd7-483f-8d6f-c0bb7399e741",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:57.263Z",
+        "userId": "dfa60535-3bc9-4cb1-a3a8-30703a0fa401",
+        "emailMasked": "l***1@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "1783c5f9-f6b1-4b20-8700-c3f5301c9a5e",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:57.475Z",
+        "userId": "dfb817fa-ef13-4cc9-9b33-b4fef997f0bc",
+        "emailMasked": "o***c@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "d158b1fd-16c0-40a5-93c7-f8f31c267e19",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:57.718Z",
+        "userId": "dfd2490c-521c-4eea-91a0-b9df8dfbc09d",
+        "emailMasked": "a***d@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "6e3a2a7c-a336-42d5-82b2-af932516627b",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:57.938Z",
+        "userId": "dfdda8f4-5fac-4117-a449-2261963daeb5",
+        "emailMasked": "o***5@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "4c7db0bc-b88a-4283-962c-02a2c965da00",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:58.142Z",
+        "userId": "e00bebaf-c564-4770-a6dc-d77cd62fe425",
+        "emailMasked": "r***5@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "fb53ca84-c833-410a-990f-31bd7d176216",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:58.479Z",
+        "userId": "e0233137-b390-462f-b41e-1efb173cf45b",
+        "emailMasked": "f***b@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "7b7ecee4-c852-4dbe-a816-64eb35f50969",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:58.789Z",
+        "userId": "e0325757-ab5c-44f3-b493-fa60d8d0922b",
+        "emailMasked": "a***b@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "e5bac29f-3815-4e74-9484-25bc54ab32e3",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:58.994Z",
+        "userId": "e0423700-da0c-449d-8779-5e7931c813e2",
+        "emailMasked": "w***2@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "d997d471-03d4-4fac-a9e5-68edbfed2a2b",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:59.207Z",
+        "userId": "e062a543-2740-404a-b0bc-41510e46397a",
+        "emailMasked": "a***a@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "7a6f7611-15de-423f-8936-7fc2ea28a5ec",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:59.515Z",
+        "userId": "e070d60c-add6-4d12-9a92-451672f94ee0",
+        "emailMasked": "c***0@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "e041c3e0-141d-4e60-bd93-1dd80d961406",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:13:59.727Z",
+        "userId": "e073895a-fa65-445b-aeaa-6774e019897a",
+        "emailMasked": "r***a@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "a21b150f-8c49-4212-a0e4-dba2229bee53",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:00.030Z",
+        "userId": "e0a9f95b-515b-4bca-96f6-cf954a4df559",
+        "emailMasked": "e***9@example.com",
+        "category": "D_PLACEHOLDER_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "5442cb78-e4b2-43e8-a2ff-bf4210825c21",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:00.347Z",
+        "userId": "e0b59c8e-6d5d-45d0-83a6-bcc94308e7de",
+        "emailMasked": "a***e@example.com",
+        "category": "D_PLACEHOLDER_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "321a61dd-50b8-4f45-926c-068523a06439",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:00.560Z",
+        "userId": "e0c20b5c-9e6a-427b-b7e7-781bd7418303",
+        "emailMasked": "o***3@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "68c1fca8-8608-456c-8107-dd56f92ac438",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:00.768Z",
+        "userId": "e0c46ab0-52c5-4229-a512-4318fe44fcd8",
+        "emailMasked": "d***8@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "9996abd1-cf4a-4181-8f80-799eabba5e95",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:00.980Z",
+        "userId": "e0d53283-35e3-426b-87d7-f4a910242d39",
+        "emailMasked": "o***9@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "523a00ad-9526-4ec5-a33d-7ec2dec7e0fa",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:01.320Z",
+        "userId": "e0dcecae-dbfc-4ec3-817d-4408f887baab",
+        "emailMasked": "e***b@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "316286a1-a8ea-40f7-b9b9-c22b205d5814",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:01.661Z",
+        "userId": "e0e3a760-cf80-4cad-b898-25922c293d3a",
+        "emailMasked": "e***a@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "51696bff-b09e-45de-b8d8-7ccc6a5e215b",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:01.872Z",
+        "userId": "e0e8fff3-b58b-47e1-900f-86d9df5ce4c0",
+        "emailMasked": "l***0@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "8eec6be8-499a-4438-995f-3f1c3ccc94c5",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:02.087Z",
+        "userId": "e0faf9d2-68e6-4e3e-9e75-1ff3be004eaa",
+        "emailMasked": "p***a@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "adc445c2-62e7-40e4-8890-64cb5292ac5c",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:02.302Z",
+        "userId": "e105e535-b3ff-4237-92ab-e8366b26efb1",
+        "emailMasked": "o***1@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "07041698-5523-4b5a-90db-0d1b006b401c",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:02.519Z",
+        "userId": "e108ef6e-0aa6-4465-a5db-10a96bef4bdc",
+        "emailMasked": "r***c@example.com",
+        "category": "B_BCRYPT_INACTIVE",
+        "proposedAction": "IMPORT_INACTIVE_BCRYPT_AND_LINK",
+        "outcome": "INACTIVE",
+        "authUserId": "33a75494-ddb8-40e7-b5ea-171c6b84f0fb",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:02.759Z",
+        "userId": "e10b162a-e76c-4d11-90e1-6cbde6f47f00",
+        "emailMasked": "d***0@example.com",
+        "category": "A_BCRYPT_ACTIVE",
+        "proposedAction": "IMPORT_BCRYPT_AND_LINK",
+        "outcome": "READY",
+        "authUserId": "0e2282c9-850e-490e-a025-666c6c473b77",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:03.091Z",
+        "userId": "e120fccc-e9d3-4201-884a-396ef0628261",
+        "emailMasked": "o***1@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "393411ef-cd16-4f19-9b91-3abdba3e5b60",
+        "failureReason": null,
+        "compensated": false
+      },
+      {
+        "timestamp": "2026-08-03T18:14:03.443Z",
+        "userId": "e1339780-8b09-4129-a6e3-21762c50c5a8",
+        "emailMasked": "p***8@example.com",
+        "category": "C_PLACEHOLDER_ACTIVE",
+        "proposedAction": "IMPORT_RESET_REQUIRED_AND_LINK",
+        "outcome": "RESET_REQUIRED",
+        "authUserId": "8dbc7f57-628d-42b3-b284-fb142249b929",
+        "failureReason": null,
+        "compensated": false
+      }
+    ],
+    "rollbackManifest": {
+      "batchId": "4f-auth-2026-08-03T18-13-49-194Z-366faca8",
+      "createdAuthUserIds": [
+        "f48233a4-fdb6-4ea7-80be-9e0bc61c90d9",
+        "84dbd1e9-300d-4d69-9a8c-188fd6e71280",
+        "1edc4a41-530c-485b-8eb6-c92dd6228f02",
+        "4a7aad56-f537-451a-b728-732f83c8c6ac",
+        "a2ec84f1-672c-40c0-92a7-3143e9634acc",
+        "331f702b-b663-4ae4-8d11-a6a59efe67ce",
+        "82f05bc5-ee7a-4ad6-b3ac-923d3d4ce83c",
+        "8b81edee-77fc-4396-a56f-f27a77d071fb",
+        "084a9bf0-bad2-4db9-b4a5-bbe280cde567",
+        "7bf24b68-80b4-41a8-a15c-68cff475d345",
+        "d6d1e060-b5ea-435a-91e6-5659a3a60102",
+        "a5cefa6b-4288-4ded-b39a-e2e873f82624",
+        "823a151c-213b-492b-8352-054479472ad5",
+        "b2ec0287-fdb0-48a4-8a35-a799ab1f0fcd",
+        "63cbc657-db33-460f-adef-57be2827cb60",
+        "d7415bc9-c138-46f0-a00c-add9c04ac258",
+        "d2e75255-75a9-4f8e-b02e-689934584494",
+        "5141558e-976e-4e8b-992e-4d77a532333e",
+        "08018858-8675-4629-8324-b304e9e3bcdc",
+        "a6302d1e-8dec-4d0b-b3b8-e59a8bc0ae1c",
+        "9d3d7dc3-d686-4f05-9f3a-29357cd19732",
+        "7bbb03bc-bcc4-4652-9fc7-f668b459c82d",
+        "5a002dd9-fa3e-4cc0-a719-205c8c1f094c",
+        "4af4eaca-5f89-4b9d-9af1-12272ae6d480",
+        "fe449c6a-5dd7-483f-8d6f-c0bb7399e741",
+        "1783c5f9-f6b1-4b20-8700-c3f5301c9a5e",
+        "d158b1fd-16c0-40a5-93c7-f8f31c267e19",
+        "6e3a2a7c-a336-42d5-82b2-af932516627b",
+        "4c7db0bc-b88a-4283-962c-02a2c965da00",
+        "fb53ca84-c833-410a-990f-31bd7d176216",
+        "7b7ecee4-c852-4dbe-a816-64eb35f50969",
+        "e5bac29f-3815-4e74-9484-25bc54ab32e3",
+        "d997d471-03d4-4fac-a9e5-68edbfed2a2b",
+        "7a6f7611-15de-423f-8936-7fc2ea28a5ec",
+        "e041c3e0-141d-4e60-bd93-1dd80d961406",
+        "a21b150f-8c49-4212-a0e4-dba2229bee53",
+        "5442cb78-e4b2-43e8-a2ff-bf4210825c21",
+        "321a61dd-50b8-4f45-926c-068523a06439",
+        "68c1fca8-8608-456c-8107-dd56f92ac438",
+        "9996abd1-cf4a-4181-8f80-799eabba5e95",
+        "523a00ad-9526-4ec5-a33d-7ec2dec7e0fa",
+        "316286a1-a8ea-40f7-b9b9-c22b205d5814",
+        "51696bff-b09e-45de-b8d8-7ccc6a5e215b",
+        "8eec6be8-499a-4438-995f-3f1c3ccc94c5",
+        "adc445c2-62e7-40e4-8890-64cb5292ac5c",
+        "07041698-5523-4b5a-90db-0d1b006b401c",
+        "33a75494-ddb8-40e7-b5ea-171c6b84f0fb",
+        "0e2282c9-850e-490e-a025-666c6c473b77",
+        "393411ef-cd16-4f19-9b91-3abdba3e5b60",
+        "8dbc7f57-628d-42b3-b284-fb142249b929"
+      ],
+      "linkedUserIds": [
+        {
+          "userId": "ddbf1e0f-3125-4e15-a24b-e75e31861f98",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "f48233a4-fdb6-4ea7-80be-9e0bc61c90d9"
+        },
+        {
+          "userId": "ddcd468e-dcf6-4dcd-b33e-240af3bf5870",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "84dbd1e9-300d-4d69-9a8c-188fd6e71280"
+        },
+        {
+          "userId": "de07b06d-b205-4ed1-989a-aeee39d7cdfe",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "1edc4a41-530c-485b-8eb6-c92dd6228f02"
+        },
+        {
+          "userId": "de14ffd3-b521-4869-b95d-19b1715aebaf",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "4a7aad56-f537-451a-b728-732f83c8c6ac"
+        },
+        {
+          "userId": "de186c11-f63f-4fc8-a7e7-e6836a123434",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "a2ec84f1-672c-40c0-92a7-3143e9634acc"
+        },
+        {
+          "userId": "de500ffe-0411-4c80-b3e6-d2a9f433c372",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "331f702b-b663-4ae4-8d11-a6a59efe67ce"
+        },
+        {
+          "userId": "de5d8181-bf03-4f13-924e-446655b12a8a",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "82f05bc5-ee7a-4ad6-b3ac-923d3d4ce83c"
+        },
+        {
+          "userId": "de5fad24-c4e8-47d7-a7f0-9b1b926627c5",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "8b81edee-77fc-4396-a56f-f27a77d071fb"
+        },
+        {
+          "userId": "de7ed395-fea6-49e2-aa58-d006625bf486",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "084a9bf0-bad2-4db9-b4a5-bbe280cde567"
+        },
+        {
+          "userId": "de99c40a-11d0-49aa-9926-b1279144cf5d",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "7bf24b68-80b4-41a8-a15c-68cff475d345"
+        },
+        {
+          "userId": "dea6a321-c4f6-4b2a-bf6f-7d2cb8e126a0",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "d6d1e060-b5ea-435a-91e6-5659a3a60102"
+        },
+        {
+          "userId": "deace28c-c6e2-4262-be0a-1fb27b50a130",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "a5cefa6b-4288-4ded-b39a-e2e873f82624"
+        },
+        {
+          "userId": "ded59dd0-cd0b-4466-af1d-bc82bf47bf5f",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "823a151c-213b-492b-8352-054479472ad5"
+        },
+        {
+          "userId": "dede81db-4fac-4271-89a3-c91e945370dd",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "b2ec0287-fdb0-48a4-8a35-a799ab1f0fcd"
+        },
+        {
+          "userId": "dee2b3b9-4144-41dd-84f7-c01f3538b566",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "63cbc657-db33-460f-adef-57be2827cb60"
+        },
+        {
+          "userId": "dee52ef9-5b70-49d8-b0f5-c23e9c11f542",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "d7415bc9-c138-46f0-a00c-add9c04ac258"
+        },
+        {
+          "userId": "df134197-c29b-42da-8eef-1d6bb367e9ad",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "d2e75255-75a9-4f8e-b02e-689934584494"
+        },
+        {
+          "userId": "df17ef88-4054-4c4d-ba6c-e83f91bbae7f",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "5141558e-976e-4e8b-992e-4d77a532333e"
+        },
+        {
+          "userId": "df354ea0-3e8e-4e9c-abec-fc93a2a3b031",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "08018858-8675-4629-8324-b304e9e3bcdc"
+        },
+        {
+          "userId": "df47e111-f8d8-4c3b-8a53-fdbb7084c48f",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "a6302d1e-8dec-4d0b-b3b8-e59a8bc0ae1c"
+        },
+        {
+          "userId": "df529aa2-fd03-4fab-adc6-304f08e9386e",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "9d3d7dc3-d686-4f05-9f3a-29357cd19732"
+        },
+        {
+          "userId": "df52a878-3c3d-488c-9a4e-0f1efbad6f79",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "7bbb03bc-bcc4-4652-9fc7-f668b459c82d"
+        },
+        {
+          "userId": "df5e25b1-1b8a-49ef-820f-b64eb90eece4",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "5a002dd9-fa3e-4cc0-a719-205c8c1f094c"
+        },
+        {
+          "userId": "df5e6a49-d98d-43db-92fc-1ccd32cf2e54",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "4af4eaca-5f89-4b9d-9af1-12272ae6d480"
+        },
+        {
+          "userId": "dfa08265-e8f4-44e1-a3b2-319cd1ad8f41",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "fe449c6a-5dd7-483f-8d6f-c0bb7399e741"
+        },
+        {
+          "userId": "dfa60535-3bc9-4cb1-a3a8-30703a0fa401",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "1783c5f9-f6b1-4b20-8700-c3f5301c9a5e"
+        },
+        {
+          "userId": "dfb817fa-ef13-4cc9-9b33-b4fef997f0bc",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "d158b1fd-16c0-40a5-93c7-f8f31c267e19"
+        },
+        {
+          "userId": "dfd2490c-521c-4eea-91a0-b9df8dfbc09d",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "6e3a2a7c-a336-42d5-82b2-af932516627b"
+        },
+        {
+          "userId": "dfdda8f4-5fac-4117-a449-2261963daeb5",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "4c7db0bc-b88a-4283-962c-02a2c965da00"
+        },
+        {
+          "userId": "e00bebaf-c564-4770-a6dc-d77cd62fe425",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "fb53ca84-c833-410a-990f-31bd7d176216"
+        },
+        {
+          "userId": "e0233137-b390-462f-b41e-1efb173cf45b",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "7b7ecee4-c852-4dbe-a816-64eb35f50969"
+        },
+        {
+          "userId": "e0325757-ab5c-44f3-b493-fa60d8d0922b",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "e5bac29f-3815-4e74-9484-25bc54ab32e3"
+        },
+        {
+          "userId": "e0423700-da0c-449d-8779-5e7931c813e2",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "d997d471-03d4-4fac-a9e5-68edbfed2a2b"
+        },
+        {
+          "userId": "e062a543-2740-404a-b0bc-41510e46397a",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "7a6f7611-15de-423f-8936-7fc2ea28a5ec"
+        },
+        {
+          "userId": "e070d60c-add6-4d12-9a92-451672f94ee0",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "e041c3e0-141d-4e60-bd93-1dd80d961406"
+        },
+        {
+          "userId": "e073895a-fa65-445b-aeaa-6774e019897a",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "a21b150f-8c49-4212-a0e4-dba2229bee53"
+        },
+        {
+          "userId": "e0a9f95b-515b-4bca-96f6-cf954a4df559",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "5442cb78-e4b2-43e8-a2ff-bf4210825c21"
+        },
+        {
+          "userId": "e0b59c8e-6d5d-45d0-83a6-bcc94308e7de",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "321a61dd-50b8-4f45-926c-068523a06439"
+        },
+        {
+          "userId": "e0c20b5c-9e6a-427b-b7e7-781bd7418303",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "68c1fca8-8608-456c-8107-dd56f92ac438"
+        },
+        {
+          "userId": "e0c46ab0-52c5-4229-a512-4318fe44fcd8",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "9996abd1-cf4a-4181-8f80-799eabba5e95"
+        },
+        {
+          "userId": "e0d53283-35e3-426b-87d7-f4a910242d39",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "523a00ad-9526-4ec5-a33d-7ec2dec7e0fa"
+        },
+        {
+          "userId": "e0dcecae-dbfc-4ec3-817d-4408f887baab",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "316286a1-a8ea-40f7-b9b9-c22b205d5814"
+        },
+        {
+          "userId": "e0e3a760-cf80-4cad-b898-25922c293d3a",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "51696bff-b09e-45de-b8d8-7ccc6a5e215b"
+        },
+        {
+          "userId": "e0e8fff3-b58b-47e1-900f-86d9df5ce4c0",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "8eec6be8-499a-4438-995f-3f1c3ccc94c5"
+        },
+        {
+          "userId": "e0faf9d2-68e6-4e3e-9e75-1ff3be004eaa",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "adc445c2-62e7-40e4-8890-64cb5292ac5c"
+        },
+        {
+          "userId": "e105e535-b3ff-4237-92ab-e8366b26efb1",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "07041698-5523-4b5a-90db-0d1b006b401c"
+        },
+        {
+          "userId": "e108ef6e-0aa6-4465-a5db-10a96bef4bdc",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "33a75494-ddb8-40e7-b5ea-171c6b84f0fb"
+        },
+        {
+          "userId": "e10b162a-e76c-4d11-90e1-6cbde6f47f00",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "0e2282c9-850e-490e-a025-666c6c473b77"
+        },
+        {
+          "userId": "e120fccc-e9d3-4201-884a-396ef0628261",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "393411ef-cd16-4f19-9b91-3abdba3e5b60"
+        },
+        {
+          "userId": "e1339780-8b09-4129-a6e3-21762c50c5a8",
+          "previousSupabaseAuthUserId": null,
+          "newSupabaseAuthUserId": "8dbc7f57-628d-42b3-b284-fb142249b929"
+        }
+      ],
+      "guidance": [
+        "Never delete business User rows as part of Auth rollback.",
+        "Safe rollback for this batch: unlink User.supabaseAuthUserId for linkedUserIds where previous was null, then Admin deleteUser for createdAuthUserIds.",
+        "Do not delete Auth identities that existed before the batch (not listed in createdAuthUserIds).",
+        "Partial batches: resume with the same tool (idempotent); already-linked rows become ALREADY_MIGRATED."
+      ]
+    },
+    "notes": [
+      "Architecture: auth.users.id → User.supabaseAuthUserId → User.id (User.id immutable).",
+      "Default mode is dry-run; this invocation writesEnabled=true",
+      "Inactive users: Auth created (not banned); business isActive remains authoritative.",
+      "Placeholder hashes: Auth created without password; RESET_REQUIRED before login.",
+      "Bulk customer migration is NOT performed unless --execute --confirm-bulk-migrate.",
+      "Single-user execute test: SKIPPED — no disposable synthetic business User present.",
+      "runtime_host=aws-1-eu-west-2.pooler.supabase.com",
+      "database={\"host\":\"aws-1-eu-west-2.pooler.supabase.com\",\"port\":\"5432\",\"user\":\"postgres.yzezdhwffgamtmozmfse\",\"db\":\"postgres\",\"sslmode\":\"require\",\"connection_limit\":\"1\",\"pool_timeout\":\"30\",\"isNeon\":false,\"isSupabasePooler\":true,\"isSupabaseDirect\":false}",
+      "detail_rows=50"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "stage": "4F-auth",
+  "mode": "execute",
+  "at": "2026-08-03T18:17:42.086Z",
+  "architecture": "auth.users.id → User.supabaseAuthUserId → User.id",
+  "writesEnabled": true,
+  "args": {
+    "mode": "execute",
+    "userId": "0039cc2b-e83b-42a5-9cf2-5c2c32bc2b3c",
+    "limit": null,
+    "batchSize": 50,
+    "confirmBulkMigrate": false
+  },
+  "categoryCounts": {
+    "A_BCRYPT_ACTIVE": 0,
+    "B_BCRYPT_INACTIVE": 0,
+    "C_PLACEHOLDER_ACTIVE": 0,
+    "D_PLACEHOLDER_INACTIVE": 0,
+    "E_INVALID_EMAIL": 1,
+    "F_DUPLICATE_EMAIL": 0,
+    "G_ALREADY_LINKED": 3604,
+    "H_AUTH_EMAIL_CONFLICT": 0,
+    "I_EXCEPTIONAL": 0
+  },
+  "outcomeCounts": {
+    "ALREADY_MIGRATED": 1
+  },
+  "totalConsidered": 1,
+  "rows": [
+    {
+      "timestamp": "2026-08-03T18:17:42.086Z",
+      "userId": "0039cc2b-e83b-42a5-9cf2-5c2c32bc2b3c",
+      "emailMasked": "l***c@example.com",
+      "category": "G_ALREADY_LINKED",
+      "proposedAction": "SKIP_ALREADY_LINKED",
+      "outcome": "ALREADY_MIGRATED",
+      "authUserId": "2495653e-457f-40e2-b5b2-d16606a7f122",
+      "failureReason": "User.supabaseAuthUserId already set",
+      "compensated": false
+    }
+  ],
+  "rollbackManifest": {
+    "batchId": "4f-auth-2026-08-03T18-17-41-005Z-c1ea610a",
+    "createdAuthUserIds": [],
+    "linkedUserIds": [],
+    "guidance": [
+      "Never delete business User rows as part of Auth rollback.",
+      "Safe rollback for this batch: unlink User.supabaseAuthUserId for linkedUserIds where previous was null, then Admin deleteUser for createdAuthUserIds.",
+      "Do not delete Auth identities that existed before the batch (not listed in createdAuthUserIds).",
+      "Partial batches: resume with the same tool (idempotent); already-linked rows become ALREADY_MIGRATED."
+    ]
+  },
+  "notes": [
+    "Architecture: auth.users.id → User.supabaseAuthUserId → User.id (User.id immutable).",
+    "Default mode is dry-run; this invocation writesEnabled=true",
+    "Inactive users: Auth created (not banned); business isActive remains authoritative.",
+    "Placeholder hashes: Auth created without password; RESET_REQUIRED before login.",
+    "Bulk customer migration is NOT performed unless --execute --confirm-bulk-migrate.",
+    "Single-user execute test: SKIPPED — no disposable synthetic business User present.",
+    "runtime_host=aws-1-eu-west-2.pooler.supabase.com",
+    "database={\"host\":\"aws-1-eu-west-2.pooler.supabase.com\",\"port\":\"5432\",\"user\":\"postgres.yzezdhwffgamtmozmfse\",\"db\":\"postgres\",\"sslmode\":\"require\",\"connection_limit\":\"1\",\"pool_timeout\":\"30\",\"isNeon\":false,\"isSupabasePooler\":true,\"isSupabaseDirect\":false}",
+    "detail_rows=1"
+  ]
+}
