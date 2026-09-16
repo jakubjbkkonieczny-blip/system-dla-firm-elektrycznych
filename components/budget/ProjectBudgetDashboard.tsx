@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { apiFetch } from "@/lib/api";
 import type { CompanyMemberOption } from "@/lib/company/member-options";
 import { BudgetHealthCard } from "@/components/budget/BudgetHealthCard";
@@ -32,6 +32,72 @@ const TABS: { id: BudgetTabId; label: string }[] = [
   { id: "notes", label: "Notatki" },
 ];
 
+/** Group integer digits from the right in threes (display/edit only). */
+function groupIntegerDigits(digits: string): string {
+  if (!digits) return "";
+  const parts: string[] = [];
+  for (let i = digits.length; i > 0; i -= 3) {
+    parts.unshift(digits.slice(Math.max(0, i - 3), i));
+  }
+  return parts.join(" ");
+}
+
+/**
+ * Format project total budget edit string: space-grouped integer + Polish comma decimals.
+ * Does not use floating-point money math — string transform only.
+ */
+function formatBudgetPlnEdit(raw: string): string {
+  let s = raw.replace(/\s/g, "");
+  if (s.includes(",")) {
+    s = s.replace(/\./g, "");
+  } else if (s.includes(".")) {
+    const idx = s.indexOf(".");
+    s = `${s.slice(0, idx)},${s.slice(idx + 1).replace(/\./g, "")}`;
+  }
+
+  let intPart = "";
+  let decPart: string | null = null;
+  let seenComma = false;
+  for (const ch of s) {
+    if (ch >= "0" && ch <= "9") {
+      if (seenComma) {
+        if (decPart === null) decPart = "";
+        if (decPart.length < 2) decPart += ch;
+      } else {
+        intPart += ch;
+      }
+    } else if (ch === "," && !seenComma) {
+      seenComma = true;
+      decPart = "";
+    }
+  }
+
+  const grouped = groupIntegerDigits(intPart);
+  return seenComma ? `${grouped},${decPart ?? ""}` : grouped;
+}
+
+function countSignificantChars(value: string, caret: number): number {
+  let count = 0;
+  for (let i = 0; i < caret && i < value.length; i++) {
+    const ch = value[i];
+    if ((ch >= "0" && ch <= "9") || ch === ",") count++;
+  }
+  return count;
+}
+
+function caretFromSignificant(value: string, significant: number): number {
+  if (significant <= 0) return 0;
+  let count = 0;
+  for (let i = 0; i < value.length; i++) {
+    const ch = value[i];
+    if ((ch >= "0" && ch <= "9") || ch === ",") {
+      count++;
+      if (count >= significant) return i + 1;
+    }
+  }
+  return value.length;
+}
+
 type Props = {
   companyId: string;
   jobId: string;
@@ -51,6 +117,8 @@ export function ProjectBudgetDashboard({
   const [budgetOpen, setBudgetOpen] = useState(false);
   const [budgetPln, setBudgetPln] = useState("");
   const [budgetNote, setBudgetNote] = useState("");
+  const budgetInputRef = useRef<HTMLInputElement>(null);
+  const budgetCaretRef = useRef<number | null>(null);
 
   const {
     header,
@@ -75,11 +143,31 @@ export function ProjectBudgetDashboard({
     return { companyId, jobId, jobNumber };
   }, [companyId, jobId, jobNumber, header]);
 
+  useLayoutEffect(() => {
+    if (budgetCaretRef.current === null) return;
+    const el = budgetInputRef.current;
+    if (el) {
+      el.setSelectionRange(budgetCaretRef.current, budgetCaretRef.current);
+    }
+    budgetCaretRef.current = null;
+  }, [budgetPln]);
+
   function openBudgetEdit() {
     if (!header) return;
-    setBudgetPln((header.budget.totalBudgetCents / 100).toFixed(2).replace(".", ","));
+    setBudgetPln(
+      formatBudgetPlnEdit((header.budget.totalBudgetCents / 100).toFixed(2).replace(".", ",")),
+    );
     setBudgetNote(header.budget.note ?? "");
     setBudgetOpen(true);
+  }
+
+  function handleBudgetPlnChange(e: ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value;
+    const caret = e.target.selectionStart ?? raw.length;
+    const significant = countSignificantChars(raw, caret);
+    const formatted = formatBudgetPlnEdit(raw);
+    budgetCaretRef.current = caretFromSignificant(formatted, significant);
+    setBudgetPln(formatted);
   }
 
   async function saveBudget() {
@@ -133,7 +221,14 @@ export function ProjectBudgetDashboard({
           <h3 className="font-medium">Budżet projektu</h3>
           <label className="block space-y-1">
             <span className="text-sm text-text">Kwota (PLN)</span>
-            <input className={BUDGET_INPUT_CLASS} inputMode="decimal" value={budgetPln} onChange={(e) => setBudgetPln(e.target.value)} />
+            <input
+              ref={budgetInputRef}
+              className={BUDGET_INPUT_CLASS}
+              type="text"
+              inputMode="decimal"
+              value={budgetPln}
+              onChange={handleBudgetPlnChange}
+            />
           </label>
           <div className="flex flex-wrap gap-2">
             <button type="button" className={BUDGET_BTN_PRIMARY} onClick={saveBudget} disabled={busy}>Zapisz</button>
