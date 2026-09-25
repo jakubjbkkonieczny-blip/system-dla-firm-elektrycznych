@@ -70,6 +70,7 @@ model User {
   budgetLaborCreated  JobBudgetLaborItem[]    @relation("BudgetLaborCreatedBy")
   notifications       Notification[]
   pushSubscriptions   PushSubscription[]
+  jobPhotos           JobPhoto[]
 }
 
 model Company {
@@ -94,6 +95,7 @@ model Company {
   jobStageNoteHistory  JobStageNoteHistory[]
   jobStageHistory      JobStageHistory[]
   jobStagePhotos       JobStagePhoto[]
+  jobPhotos            JobPhoto[]
   jobStatusHistory     JobStatusHistory[]
   auditLogs            AuditLog[]
   idempotencyKeys      IdempotencyKey[]
@@ -159,6 +161,7 @@ model Job {
   budget            JobBudget?
   budgetItems       JobBudgetItem[]
   budgetLaborItems  JobBudgetLaborItem[]
+  jobPhotos         JobPhoto[]
 
   @@unique([companyId, jobNumber])
   @@index([companyId])
@@ -300,6 +303,26 @@ model JobStagePhoto {
   @@index([jobStageId])
   @@index([companyId, jobStageId])
   @@unique([bucket, objectKey])
+}
+
+model JobPhoto {
+  id               String   @id @default(cuid())
+  companyId        String
+  jobId            String
+  uploadedByUserId String
+  blobPathname     String   @unique
+  originalFilename String?
+  contentType      String
+  sizeBytes        Int
+  createdAt        DateTime @default(now())
+
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job              Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  uploadedBy       User     @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([companyId, createdAt(sort: Desc)])
+  @@index([companyId, jobId, createdAt(sort: Desc)])
+  @@index([companyId, uploadedByUserId, createdAt(sort: Desc)])
 }
 
 model JobStatusHistory {

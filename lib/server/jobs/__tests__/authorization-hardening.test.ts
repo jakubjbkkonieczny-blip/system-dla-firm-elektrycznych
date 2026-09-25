@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { describe, it } from "node:test";
+import { createRequire } from "node:module";
+import Module from "node:module";
+import { before, describe, it } from "node:test";
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
 
@@ -12,6 +14,27 @@ import {
 import { canMemberSeeJob } from "@/lib/server/jobs/job-visibility";
 import { assertCanManageTargetMembership } from "@/lib/server/company/member-management-guards";
 import { companyRouteErrorStatus } from "@/lib/server/auth/handle-session-route-error";
+
+// tsx does not apply Next's server-only alias. Point that marker at Next's empty
+// module so these tests can execute the real membership helper.
+const nodeRequire = createRequire(import.meta.url);
+const moduleResolver = Module as unknown as {
+  _resolveFilename: (
+    request: string,
+    parent: NodeJS.Module | null | undefined,
+    isMain: boolean,
+    options?: object
+  ) => string;
+};
+const resolveFilename = moduleResolver._resolveFilename;
+moduleResolver._resolveFilename = function (request, parent, isMain, options) {
+  if (request === "server-only") {
+    return nodeRequire.resolve("next/dist/compiled/server-only/empty.js");
+  }
+  return resolveFilename.call(this, request, parent, isMain, options);
+};
+
+let requireJobPhotoAccessForUser: typeof import("@/lib/server/jobs/job-photo-access").requireJobPhotoAccessForUser;
 
 process.env.SESSION_SECRET = process.env.SESSION_SECRET ?? "test-session-secret-0123456789abcdef";
 
@@ -383,5 +406,179 @@ describe("owner membership mutation protection (DB)", () => {
       userIds: [owner.id, admin.id, staff.id],
       companyIds: [company.id],
     });
+  });
+});
+
+describe("requireJobPhotoAccessForUser", () => {
+  before(async () => {
+    ({ requireJobPhotoAccessForUser } = await import("@/lib/server/jobs/job-photo-access"));
+  });
+
+  async function activateBilling(companyId: string) {
+    await prisma.company.update({
+      where: { id: companyId },
+      data: { billingStatus: "active" },
+    });
+  }
+
+  it("denies a Company A member a job that belongs to Company B", async () => {
+    const ownerA = await createTestUser("photo-owner-a", "employer");
+    const ownerB = await createTestUser("photo-owner-b", "employer");
+    const companyA = await createTestCompany("Firma Photo A");
+    const companyB = await createTestCompany("Firma Photo B");
+    const ids = {
+      userIds: [ownerA.id, ownerB.id],
+      companyIds: [companyA.id, companyB.id],
+      jobIds: [] as string[],
+    };
+
+    try {
+      await createMembership({ companyId: companyA.id, userId: ownerA.id, role: "owner" });
+      await createMembership({ companyId: companyB.id, userId: ownerB.id, role: "owner" });
+      await activateBilling(companyA.id);
+      await activateBilling(companyB.id);
+      const jobB = await createTestJob({ companyId: companyB.id, createdByUserId: ownerB.id });
+      ids.jobIds.push(jobB.id);
+
+      await assert.rejects(
+        requireJobPhotoAccessForUser(companyA.id, jobB.id, ownerA.id),
+        /JOB_NOT_FOUND/
+      );
+      await assert.rejects(
+        requireJobPhotoAccessForUser(companyB.id, jobB.id, ownerA.id),
+        /NOT_MEMBER/
+      );
+    } finally {
+      await cleanup(ids);
+    }
+  });
+
+  it("denies assigned_only staff an unassigned job and allows an assigned job", async () => {
+    const owner = await createTestUser("photo-scope-owner", "employer");
+    const staff = await createTestUser("photo-scope-staff");
+    const company = await createTestCompany("Firma Photo Scope");
+    const ids = {
+      userIds: [owner.id, staff.id],
+      companyIds: [company.id],
+      jobIds: [] as string[],
+    };
+
+    try {
+      await createMembership({ companyId: company.id, userId: owner.id, role: "owner" });
+      await createMembership({
+        companyId: company.id,
+        userId: staff.id,
+        role: "staff",
+        scope: "assigned_only",
+      });
+      await activateBilling(company.id);
+      const job = await createTestJob({ companyId: company.id, createdByUserId: owner.id });
+      ids.jobIds.push(job.id);
+
+      await assert.rejects(
+        requireJobPhotoAccessForUser(company.id, job.id, staff.id),
+        /FORBIDDEN/
+      );
+
+      await prisma.jobAssignment.create({
+        data: {
+          companyId: company.id,
+          jobId: job.id,
+          userId: staff.id,
+          assignedByUserId: owner.id,
+        },
+      });
+
+      const allowed = await requireJobPhotoAccessForUser(company.id, job.id, staff.id);
+      assert.equal(allowed.userId, staff.id);
+      assert.equal(allowed.member.role, "staff");
+    } finally {
+      await cleanup(ids);
+    }
+  });
+
+  it("allows owner and admin to access a job in their own company", async () => {
+    const owner = await createTestUser("photo-role-owner", "employer");
+    const admin = await createTestUser("photo-role-admin", "employer");
+    const company = await createTestCompany("Firma Photo Roles");
+    const ids = {
+      userIds: [owner.id, admin.id],
+      companyIds: [company.id],
+      jobIds: [] as string[],
+    };
+
+    try {
+      await createMembership({ companyId: company.id, userId: owner.id, role: "owner" });
+      await createMembership({ companyId: company.id, userId: admin.id, role: "admin" });
+      await activateBilling(company.id);
+      const job = await createTestJob({ companyId: company.id, createdByUserId: owner.id });
+      ids.jobIds.push(job.id);
+
+      const ownerAccess = await requireJobPhotoAccessForUser(company.id, job.id, owner.id);
+      const adminAccess = await requireJobPhotoAccessForUser(company.id, job.id, admin.id);
+      assert.equal(ownerAccess.member.role, "owner");
+      assert.equal(adminAccess.member.role, "admin");
+    } finally {
+      await cleanup(ids);
+    }
+  });
+
+  it("rejects a non-member and an inactive member", async () => {
+    const owner = await createTestUser("photo-member-owner", "employer");
+    const inactive = await createTestUser("photo-member-inactive");
+    const outsider = await createTestUser("photo-member-outsider");
+    const company = await createTestCompany("Firma Photo Members");
+    const ids = {
+      userIds: [owner.id, inactive.id, outsider.id],
+      companyIds: [company.id],
+      jobIds: [] as string[],
+    };
+
+    try {
+      await createMembership({ companyId: company.id, userId: owner.id, role: "owner" });
+      await createMembership({
+        companyId: company.id,
+        userId: inactive.id,
+        role: "staff",
+        scope: "all",
+      });
+      await prisma.companyMember.update({
+        where: { companyId_userId: { companyId: company.id, userId: inactive.id } },
+        data: { isActive: false },
+      });
+      await activateBilling(company.id);
+      const job = await createTestJob({ companyId: company.id, createdByUserId: owner.id });
+      ids.jobIds.push(job.id);
+
+      await assert.rejects(
+        requireJobPhotoAccessForUser(company.id, job.id, inactive.id),
+        /NOT_MEMBER/
+      );
+      await assert.rejects(
+        requireJobPhotoAccessForUser(company.id, job.id, outsider.id),
+        /NOT_MEMBER/
+      );
+    } finally {
+      await cleanup(ids);
+    }
+  });
+
+  it("wires session resolution through the existing membership and job helpers", async () => {
+    const source = await readFile("lib/server/jobs/job-photo-access.ts", "utf8");
+    const proxy = await readFile("proxy.ts", "utf8");
+    const shell = await readFile("components/AppShell.tsx", "utf8");
+
+    assert.match(source, /requireSessionUser/);
+    assert.match(source, /requireActiveMember/);
+    assert.match(source, /assertMemberCanAccessJob/);
+    assert.doesNotMatch(source, /blobPathname/);
+    assert.match(proxy, /\/gallery\/:path\*/);
+
+    const galleryAt = shell.indexOf('href="/gallery"');
+    const membersAt = shell.indexOf('href="/members"');
+    assert.ok(galleryAt > 0);
+    assert.ok(membersAt > 0);
+    assert.doesNotMatch(shell.slice(galleryAt - 120, galleryAt), /isOwnerOrAdmin/);
+    assert.match(shell.slice(membersAt - 80, membersAt), /isOwnerOrAdmin/);
   });
 });

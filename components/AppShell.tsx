@@ -114,9 +114,7 @@ function SidebarContent({
           <SidebarItem href="/calendar" label="Kalendarz" icon="📅" onNavigate={onNavigate} />
         )}
 
-        {isOwnerOrAdmin && (
-          <SidebarItem href="/gallery" label="Galeria zdjęć" icon="🖼️" onNavigate={onNavigate} />
-        )}
+        <SidebarItem href="/gallery" label="Galeria zdjęć" icon="🖼️" onNavigate={onNavigate} />
 
         <SidebarItem href="/notifications" label="Powiadomienia" icon="🔔" onNavigate={onNavigate} />
         <SidebarItem href="/settings" label="Ustawienia" icon="⚙️" onNavigate={onNavigate} />
