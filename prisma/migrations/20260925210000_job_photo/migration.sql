@@ -4,7 +4,7 @@ CREATE TABLE "JobPhoto" (
     "companyId" TEXT NOT NULL,
     "jobId" TEXT NOT NULL,
     "uploadedByUserId" TEXT NOT NULL,
-    "blobPathname" TEXT NOT NULL,
+    "objectKey" TEXT NOT NULL,
     "originalFilename" TEXT,
     "contentType" TEXT NOT NULL,
     "sizeBytes" INTEGER NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE "JobPhoto" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "JobPhoto_blobPathname_key" ON "JobPhoto"("blobPathname");
+CREATE UNIQUE INDEX "JobPhoto_objectKey_key" ON "JobPhoto"("objectKey");
 
 -- CreateIndex
 CREATE INDEX "JobPhoto_companyId_createdAt_idx" ON "JobPhoto"("companyId", "createdAt" DESC);

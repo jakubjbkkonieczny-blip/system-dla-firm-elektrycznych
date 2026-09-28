@@ -310,7 +310,7 @@ model JobPhoto {
   companyId        String
   jobId            String
   uploadedByUserId String
-  blobPathname     String   @unique
+  objectKey        String   @unique
   originalFilename String?
   contentType      String
   sizeBytes        Int
