@@ -1,5 +1,6 @@
 "use client";
 
+import { JobPhotoThumbs, type JobPhotoThumb } from "@/components/jobs/JobPhotoThumbs";
 import { STAGE_STATUS_LABELS, type StagePlStatus } from "@/lib/jobs/stage-status";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -14,6 +15,7 @@ export type JobStageCardData = {
   zakonczone_przez?: { displayName: string; email: string | null } | null;
   notatka_pracownika?: string;
   lista_zdjec?: string[];
+  zdjecia?: JobPhotoThumb[];
   kierownik_etapu?: { uid: string; displayName: string; email: string | null } | null;
   kierownik_moze_tworzyc_etapy?: boolean;
   odrzucenie_komentarz?: string;
@@ -79,7 +81,10 @@ export function JobStageCard({
   const [actionsOpen, setActionsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const photos = Array.isArray(stage.lista_zdjec) ? stage.lista_zdjec : [];
+  const photos = Array.isArray(stage.zdjecia) ? stage.zdjecia.filter((photo) => photo?.id && photo.readUrl) : [];
+  const legacyPhotoUrls = (Array.isArray(stage.lista_zdjec) ? stage.lista_zdjec : []).filter(
+    (value) => typeof value === "string" && /^https?:\/\//i.test(value.trim())
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -286,27 +291,34 @@ export function JobStageCard({
         </button>
       </div>
 
-      {photos.length > 0 ? (
+      {photos.length > 0 || legacyPhotoUrls.length > 0 ? (
         <div>
           <div className="text-xs text-text-muted mb-2">Zdjęcia</div>
-          <div className="flex gap-2 flex-wrap">
-            {photos.map((url, idx) => (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                className="block"
-                title="Otwórz zdjęcie"
-              >
-                <img
-                  src={url}
-                  alt={`Zdjęcie ${idx + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg border border-border bg-card"
-                />
-              </a>
-            ))}
-          </div>
+          <JobPhotoThumbs photos={photos} />
+          {legacyPhotoUrls.length > 0 ? (
+            <div className="flex gap-2 flex-wrap mt-2">
+              {legacyPhotoUrls.map((url) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
+                  title="Otwórz zdjęcie"
+                >
+                  <img
+                    src={url}
+                    alt="Zdjęcie"
+                    width={160}
+                    height={160}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-20 h-20 object-cover rounded-lg border border-border bg-card"
+                  />
+                </a>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </article>
