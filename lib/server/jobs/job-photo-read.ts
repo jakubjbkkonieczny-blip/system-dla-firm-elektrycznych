@@ -18,6 +18,7 @@ import {
   type JobPhotoReadView,
 } from "@/lib/server/jobs/job-photo-query";
 import { prisma } from "@/lib/db/prisma";
+import { memberCanDeleteCompanyPhotos } from "@/lib/server/jobs/job-photo-delete";
 import { getPhotoStorage } from "@/lib/server/storage/get-photo-storage";
 import { PhotoStorageError } from "@/lib/server/storage/photo-storage";
 
@@ -37,6 +38,7 @@ const gallerySelect = {
 export type GalleryListResult = {
   photos: GalleryPhotoDto[];
   nextCursor: string | null;
+  canDeletePhotos: boolean;
   filters?: {
     jobs: { id: string; jobNumber: number; customerName: string }[];
     uploaders: { id: string; displayName: string }[];
@@ -174,7 +176,12 @@ export async function listCompanyGalleryPhotos(input: {
 
   const filters = input.cursor ? undefined : await loadGalleryFilters(input);
 
-  return { photos, nextCursor, filters };
+  return {
+    photos,
+    nextCursor,
+    canDeletePhotos: memberCanDeleteCompanyPhotos(input.member),
+    filters,
+  };
 }
 
 type JobDisplayRow = {

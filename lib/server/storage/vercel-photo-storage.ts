@@ -77,9 +77,19 @@ async function store(input: StorePhotoObjectInput): Promise<StoredPhotoObject> {
   };
 }
 
+/**
+ * A missing object is already in the desired storage state.
+ * That lets an owner retry after the blob was removed but the JobPhoto row
+ * delete did not finish. Other provider failures stay generic.
+ */
 async function deleteObject(objectKey: string): Promise<void> {
   assertPhotoObjectKey(objectKey);
-  await del(objectKey);
+  try {
+    await del(objectKey);
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) return;
+    throw new PhotoStorageError("photo object could not be deleted");
+  }
 }
 
 async function createUploadUrl(input: CreatePhotoUploadUrlInput): Promise<PhotoUploadUrl> {
