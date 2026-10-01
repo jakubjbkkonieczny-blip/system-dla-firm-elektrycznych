@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireSessionUser } from "@/lib/server/auth/getUserFromSession";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { jobStageListInclude, jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
+import { jobStageListInclude } from "@/lib/server/jobs/job-stage-dto";
+import { serializeStagesWithJobPhotos } from "@/lib/server/jobs/job-photo-read";
 import {
   companyRouteErrorStatus,
   handleSessionRouteErrorOr,
@@ -37,10 +38,16 @@ export async function GET(
       include: jobStageListInclude,
     });
 
-    const stages = rows.map((r) => jobStageToPl(r));
-    return NextResponse.json({ stages }, { status: 200 });
+    const payload = await serializeStagesWithJobPhotos({ companyId, jobId, rows });
+    return NextResponse.json(payload, {
+      status: 200,
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (e: unknown) {
-    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
+    return handleSessionRouteErrorOr(e, (message) => {
+      if (message === "PHOTO_STORAGE_UNAVAILABLE") return 503;
+      return companyRouteErrorStatus(message);
+    });
   }
 }
 

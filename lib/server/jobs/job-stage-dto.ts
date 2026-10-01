@@ -1,6 +1,10 @@
 import "server-only";
 import type { Prisma } from "@prisma/client";
 import { stageDbToPl } from "@/lib/jobs/stage-status";
+import {
+  legacyStagePhotoUrls,
+  type JobPhotoReadView,
+} from "@/lib/server/jobs/job-photo-query";
 
 const userBriefSelect = {
   select: { id: true, displayName: true, email: true },
@@ -55,7 +59,7 @@ function yyyyMmDd(d: Date | null) {
   return d.toISOString().slice(0, 10);
 }
 
-export function jobStageToPl(s: StageWithPhotos) {
+export function jobStageToPl(s: StageWithPhotos, zdjecia: JobPhotoReadView[] = []) {
   const status = stageDbToPl(s.status);
   return {
     id: s.id,
@@ -66,7 +70,8 @@ export function jobStageToPl(s: StageWithPhotos) {
     data_zakonczenia: s.completedAt ? yyyyMmDd(s.completedAt) : null,
     zakonczone_przez: serializeStageUser(s.completedByUserId, s.completedBy),
     notatka_pracownika: s.workerNote ?? "",
-    lista_zdjec: s.photos.map((p) => p.objectKey),
+    lista_zdjec: legacyStagePhotoUrls(s.photos.map((p) => p.objectKey)),
+    zdjecia,
     kierownik_etapu: serializeStageUser(s.supervisorUserId, s.supervisor),
     kierownik_moze_tworzyc_etapy: s.supervisorCanCreateStages,
     kierownik_przypisany_przez: serializeStageUser(

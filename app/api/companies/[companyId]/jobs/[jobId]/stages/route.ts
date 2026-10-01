@@ -6,7 +6,8 @@ import {
   handleSessionRouteErrorOr,
 } from "@/lib/server/auth/handle-session-route-error";
 import { requireActiveMember } from "@/app/api/_lib/membership";
-import { jobStageListInclude, jobStageToPl } from "@/lib/server/jobs/job-stage-dto";
+import { jobStageListInclude } from "@/lib/server/jobs/job-stage-dto";
+import { serializeStagesWithJobPhotos } from "@/lib/server/jobs/job-photo-read";
 import { assertMemberCanAccessJob } from "@/lib/server/jobs/job-stage-ownership";
 
 type Ctx = { params: Promise<{ companyId: string; jobId: string }> };
@@ -30,10 +31,16 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
       include: jobStageListInclude,
     });
 
-    const stages = rows.map((r) => jobStageToPl(r));
-    return NextResponse.json({ stages }, { status: 200 });
+    const payload = await serializeStagesWithJobPhotos({ companyId, jobId, rows });
+    return NextResponse.json(payload, {
+      status: 200,
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (e: unknown) {
-    return handleSessionRouteErrorOr(e, companyRouteErrorStatus);
+    return handleSessionRouteErrorOr(e, (message) => {
+      if (message === "PHOTO_STORAGE_UNAVAILABLE") return 503;
+      return companyRouteErrorStatus(message);
+    });
   }
 }
 

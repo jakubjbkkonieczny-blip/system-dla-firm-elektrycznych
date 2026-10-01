@@ -27,6 +27,7 @@ import { JobPriorityBadge, JobPrioritySelect } from "@/lib/jobs/job-priority";
 import { JobStageNoteHistoryModal } from "@/components/jobs/JobStageNoteHistoryModal";
 import { JobStageEventHistoryModal } from "@/components/jobs/JobStageEventHistoryModal";
 import { JobStageCard, type JobStageCardData } from "@/components/jobs/JobStageCard";
+import { JobPhotoThumbs, type JobPhotoThumb } from "@/components/jobs/JobPhotoThumbs";
 import { type StagePlStatus } from "@/lib/jobs/stage-status";
 import {
   canCreateJobStageClient,
@@ -86,6 +87,8 @@ notatka_pracownika?: string;
 
 lista_zdjec?: string[];
 
+zdjecia?: JobPhotoThumb[];
+
 kierownik_etapu?: { uid: string; displayName: string; email: string | null } | null;
 
 kierownik_moze_tworzyc_etapy?: boolean;
@@ -131,6 +134,8 @@ const [err, setErr] = useState<string | null>(null);
 const [role, setRole] = useState<Role>("staff");
 
 const [stages, setStages] = useState<Stage[]>([]);
+
+const [jobLevelPhotos, setJobLevelPhotos] = useState<JobPhotoThumb[]>([]);
 
 const [stagesErr, setStagesErr] = useState<string | null>(null);
 
@@ -556,9 +561,15 @@ const data = await apiFetch(`/api/companies/${companyId}/jobs/${jobId}/etapy_rea
 
 setStages((data.stages || []) as Stage[]);
 
+setJobLevelPhotos(Array.isArray(data.zdjecia_zlecenia) ? data.zdjecia_zlecenia : []);
+
 } catch (e: any) {
 
-setStagesErr(e?.message ?? "LOAD_STAGES_ERROR");
+setStagesErr(
+  e?.message === "PHOTO_STORAGE_UNAVAILABLE"
+    ? "Nie udało się wczytać etapów. Spróbuj ponownie."
+    : (e?.message ?? "LOAD_STAGES_ERROR")
+);
 
 }
 
@@ -1709,6 +1720,22 @@ Jako pracownik możesz edytować notatki / kończyć etapy tylko, gdy zlecenie j
 </div>
 
 </div>
+
+
+
+{jobLevelPhotos.length > 0 ? (
+
+<div className="theme-glass border border-border rounded-xl p-4 bg-card space-y-3">
+
+<h2 className="text-lg font-semibold">Zdjęcia zlecenia</h2>
+
+<p className="text-sm text-text-muted">Zdjęcia bez przypisanego etapu.</p>
+
+<JobPhotoThumbs photos={jobLevelPhotos} />
+
+</div>
+
+) : null}
 
 
 
