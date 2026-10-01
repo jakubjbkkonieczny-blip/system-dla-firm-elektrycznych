@@ -230,6 +230,7 @@ model JobStage {
   rejectedBy         User?    @relation("StageRejectedBy", fields: [rejectedByUserId], references: [id], onDelete: SetNull)
   supervisorAssignedBy User?  @relation("StageSupervisorAssignedBy", fields: [supervisorAssignedByUserId], references: [id], onDelete: SetNull)
   photos             JobStagePhoto[]
+  jobPhotos          JobPhoto[]
   noteHistory        JobStageNoteHistory[]
   history            JobStageHistory[]
 
@@ -309,6 +310,7 @@ model JobPhoto {
   id               String   @id @default(cuid())
   companyId        String
   jobId            String
+  jobStageId       String?
   uploadedByUserId String
   objectKey        String   @unique
   originalFilename String?
@@ -318,10 +320,12 @@ model JobPhoto {
 
   company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   job              Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobStage         JobStage? @relation(fields: [jobStageId], references: [id], onDelete: SetNull)
   uploadedBy       User     @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
 
   @@index([companyId, createdAt(sort: Desc)])
   @@index([companyId, jobId, createdAt(sort: Desc)])
+  @@index([companyId, jobStageId, createdAt(sort: Desc)])
   @@index([companyId, uploadedByUserId, createdAt(sort: Desc)])
 }
 
