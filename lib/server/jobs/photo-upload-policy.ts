@@ -1,5 +1,7 @@
 import "server-only";
 
+import { PHOTO_JPEG_CONTENT_TYPE, PHOTO_MAX_SIZE_BYTES } from "@/lib/jobs/photo-limits";
+
 /**
  * Upload policy for private job photos.
  *
@@ -8,10 +10,7 @@ import "server-only";
  * There is no manager role. A stage supervisor is JobStage.supervisorUserId.
  */
 
-export const PHOTO_JPEG_CONTENT_TYPE = "image/jpeg";
-
-/** 2 MiB. The persisted object must not exceed this. */
-export const PHOTO_MAX_SIZE_BYTES = 2 * 1024 * 1024;
+export { PHOTO_JPEG_CONTENT_TYPE, PHOTO_MAX_SIZE_BYTES };
 
 /** Short-lived signed PUT. Not the storage adapter's 7-day ceiling. */
 export const PHOTO_UPLOAD_URL_TTL_SECONDS = 10 * 60;

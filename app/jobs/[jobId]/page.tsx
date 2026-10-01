@@ -8,7 +8,7 @@ import { apiFetch } from "@/lib/api";
 
 import { useActiveCompanyId } from "@/lib/useActiveCompany";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useRouter, useParams } from "next/navigation";
 
@@ -32,6 +32,19 @@ import {
   canCreateJobStageClient,
   computeStagePermissions,
 } from "@/lib/jobs/stage-permissions-client";
+import {
+  originalPhotoInputError,
+  stagePhotoBatchError,
+} from "@/lib/client/images/prepare-job-photo";
+import {
+  partialUploadHint,
+  stageFinishErrorMessage,
+  uploadingPhotoLabel,
+} from "@/lib/client/images/job-photo-messages";
+import {
+  uploadOneStagePhoto,
+  uploadStagePhotoSequence,
+} from "@/lib/client/jobs/upload-stage-photo";
 
 
 
@@ -86,104 +99,6 @@ odrzucenie_komentarz?: string;
 function isYyyyMmDd(s: string) {
 
 return /^\d{4}-\d{2}-\d{2}$/.test(s);
-
-}
-
-
-
-// prosta kompresja zdjęć w przeglądarce (MVP)
-
-// - zmniejsza max bok do 1600px
-
-// - JPEG quality 0.8
-
-async function compressImage(file: File): Promise<Blob> {
-
-// jak to nie obrazek, zwróć oryginał
-
-if (!file.type.startsWith("image/")) return file;
-
-
-
-const imgUrl = URL.createObjectURL(file);
-
-try {
-
-const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-
-const i = new Image();
-
-i.onload = () => resolve(i);
-
-i.onerror = reject;
-
-i.src = imgUrl;
-
-});
-
-
-
-const maxSide = 1600;
-
-const w = img.width;
-
-const h = img.height;
-
-
-
-let newW = w;
-
-let newH = h;
-
-
-
-if (w > h && w > maxSide) {
-
-newW = maxSide;
-
-newH = Math.round((h * maxSide) / w);
-
-} else if (h >= w && h > maxSide) {
-
-newH = maxSide;
-
-newW = Math.round((w * maxSide) / h);
-
-}
-
-
-
-const canvas = document.createElement("canvas");
-
-canvas.width = newW;
-
-canvas.height = newH;
-
-const ctx = canvas.getContext("2d");
-
-if (!ctx) return file;
-
-
-
-ctx.drawImage(img, 0, 0, newW, newH);
-
-
-
-const blob = await new Promise<Blob>((resolve) => {
-
-canvas.toBlob((b) => resolve(b || file), "image/jpeg", 0.8);
-
-});
-
-
-
-return blob;
-
-} finally {
-
-URL.revokeObjectURL(imgUrl);
-
-}
 
 }
 
@@ -254,6 +169,12 @@ const [finishNote, setFinishNote] = useState("");
 const [finishFiles, setFinishFiles] = useState<File[]>([]);
 
 const [uploadPct, setUploadPct] = useState<number>(0);
+
+const [uploadLabel, setUploadLabel] = useState<string | null>(null);
+
+const finalizedPhotosRef = useRef<Set<File>>(new Set());
+
+const finishSubmitLockRef = useRef(false);
 
 
 
@@ -1003,126 +924,120 @@ setBusy(false);
 
 // ---------- ZAKOŃCZ / COFNIJ ----------
 
-function openFinish(stageId: string) {
-
-setFinishId(stageId);
-
-setFinishNote("");
-
-setFinishFiles([]);
-
-setUploadPct(0);
-
-setStagesErr(null);
-
+function resetFinishPhotoProgress() {
+  finalizedPhotosRef.current = new Set();
+  setUploadPct(0);
+  setUploadLabel(null);
 }
 
-
+function openFinish(stageId: string) {
+  setFinishId(stageId);
+  setFinishNote("");
+  setFinishFiles([]);
+  resetFinishPhotoProgress();
+  setStagesErr(null);
+}
 
 function closeFinish() {
-
-setFinishId(null);
-
-setFinishNote("");
-
-setFinishFiles([]);
-
-setUploadPct(0);
-
+  setFinishId(null);
+  setFinishNote("");
+  setFinishFiles([]);
+  resetFinishPhotoProgress();
 }
 
+function onFinishFilesSelected(list: FileList | null) {
+  const selected = Array.from(list ?? []);
+  if (selected.length === 0) return;
 
+  const countError = stagePhotoBatchError(selected.length);
+  if (countError) {
+    setStagesErr(countError);
+    return;
+  }
 
-async function uploadOne(stageId: string, file: File): Promise<string> {
+  for (const file of selected) {
+    const inputError = originalPhotoInputError(file);
+    if (inputError) {
+      setStagesErr(inputError);
+      return;
+    }
+  }
 
-if (!companyId || !user) throw new Error("NOT_LOGGED_IN");
-
-
-
-// kompresja (dużo przyspiesza)
-
-const blob = await compressImage(file);
-
-
-
-const safeName = `${Date.now()}_${file.name}.replace(/[^\w.\-]+/g, "_")`;
-
-const path = `companies/${companyId}/jobs/${jobId}/etapy_realizacji/${stageId}/${safeName}`;
-console.log("TODO AUTH");
-console.log("UPLOAD TODO", { path, size: blob.size });
-setUploadPct(100);
-return `todo://upload/${stageId}/${safeName}`;
-
+  finalizedPhotosRef.current = new Set();
+  setFinishFiles(selected);
+  setUploadPct(0);
+  setUploadLabel(null);
+  setStagesErr(null);
 }
-
-
 
 async function finishStage() {
+  if (!companyId || !finishId || finishSubmitLockRef.current) return;
 
-if (!companyId || !finishId) return;
+  const countError = stagePhotoBatchError(finishFiles.length);
+  if (countError) {
+    setStagesErr(countError);
+    return;
+  }
+  for (const file of finishFiles) {
+    if (finalizedPhotosRef.current.has(file)) continue;
+    const inputError = originalPhotoInputError(file);
+    if (inputError) {
+      setStagesErr(inputError);
+      return;
+    }
+  }
 
+  const stageId = finishId;
+  finishSubmitLockRef.current = true;
+  setBusy(true);
+  setStagesErr(null);
 
+  try {
+    if (finishFiles.length > 0) {
+      await uploadStagePhotoSequence({
+        files: finishFiles,
+        finalized: finalizedPhotosRef.current,
+        uploadOne: (file) =>
+          uploadOneStagePhoto({
+            companyId,
+            jobId,
+            jobStageId: stageId,
+            file,
+          }),
+        onFinalized: (file) => {
+          finalizedPhotosRef.current.add(file);
+        },
+        onProgress: ({ completed, total, current }) => {
+          setUploadPct(total === 0 ? 0 : Math.round((completed / total) * 100));
+          if (current !== null) setUploadLabel(uploadingPhotoLabel(current, total));
+        },
+      });
+      setUploadLabel("Zapisywanie etapu...");
+      setUploadPct(100);
+    }
 
-setBusy(true);
+    await apiFetch(`/api/companies/${companyId}/jobs/${jobId}/etapy_realizacji/${stageId}/zakoncz`, {
+      method: "POST",
+      body: JSON.stringify({
+        notatka_pracownika: finishNote,
+      }),
+    });
 
-setStagesErr(null);
-
-setUploadPct(0);
-
-
-
-try {
-
-const urls: string[] = [];
-
-
-
-for (let i = 0; i < finishFiles.length; i++) {
-
-setUploadPct(0);
-
-const url = await uploadOne(finishId, finishFiles[i]);
-
-urls.push(url);
-
-}
-
-
-
-await apiFetch(`/api/companies/${companyId}/jobs/${jobId}/etapy_realizacji/${finishId}/zakoncz`, {
-
-method: "POST",
-
-body: JSON.stringify({
-
-notatka_pracownika: finishNote,
-
-lista_zdjec: urls,
-
-}),
-
-});
-
-
-
-closeFinish();
-
-await loadStages();
-
-} catch (e: any) {
-
-// tu zobaczysz prawdziwy błąd uploadu (np. 403 z Storage)
-
-setStagesErr(e?.message ?? "FINISH_STAGE_ERROR");
-
-} finally {
-
-setBusy(false);
-
-setUploadPct(0);
-
-}
-
+    closeFinish();
+    await loadStages();
+  } catch (error: unknown) {
+    const done = finishFiles.filter((file) => finalizedPhotosRef.current.has(file)).length;
+    if (finishFiles.length > 0 && done === finishFiles.length) {
+      setUploadLabel("Zdjęcia zostały zapisane. Ponowienie pominie je i spróbuje zapisać etap.");
+    } else if (done > 0 && done < finishFiles.length) {
+      setUploadLabel(partialUploadHint(done, finishFiles.length));
+      setUploadPct(Math.round((done / finishFiles.length) * 100));
+    }
+    setStagesErr(stageFinishErrorMessage(error));
+  } finally {
+    finishSubmitLockRef.current = false;
+    setBusy(false);
+  }
 }
 
 
@@ -2248,7 +2163,7 @@ Zapisz notatkę
 
 <h3 className="font-semibold text-lg">Oznacz etap jako wykonany</h3>
 
-<button className="text-sm px-2 py-1" onClick={closeFinish}>
+<button className="text-sm px-2 py-1 disabled:opacity-40" onClick={closeFinish} disabled={busy}>
 
 ✕
 
@@ -2280,7 +2195,7 @@ onChange={(e) => setFinishNote(e.target.value)}
 
 
 
-<label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover cursor-pointer text-sm min-h-[44px] w-fit">
+<label className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card hover:bg-card-hover cursor-pointer text-sm min-h-[44px] w-fit${busy ? " pointer-events-none opacity-60" : ""}`}>
 
 📎 Załącz zdjęcia
 
@@ -2294,7 +2209,13 @@ accept="image/*"
 
 className="hidden"
 
-onChange={(e) => setFinishFiles(Array.from(e.target.files || []))}
+disabled={busy}
+
+onChange={(e) => {
+  const input = e.currentTarget;
+  onFinishFilesSelected(input.files);
+  input.value = "";
+}}
 
 />
 
@@ -2312,17 +2233,17 @@ Wybrano: <b>{finishFiles.length}</b> plik(ów)
 
 ) : (
 
-<div className="text-xs text-text-muted">Możesz dodać jedno lub wiele zdjęć.</div>
+<div className="text-xs text-text-muted">Możesz dodać do 10 zdjęć.</div>
 
 )}
 
 
 
-{uploadPct > 0 ? (
+{uploadLabel ? (
 
 <div className="text-xs text-text">
 
-Wysyłanie zdjęcia: <b>{uploadPct}%</b>
+{uploadLabel}
 
 <div className="w-full h-2 bg-border rounded mt-1 overflow-hidden">
 
@@ -2331,6 +2252,12 @@ Wysyłanie zdjęcia: <b>{uploadPct}%</b>
 </div>
 
 </div>
+
+) : null}
+
+{stagesErr ? (
+
+<div className="text-sm text-danger border border-danger-border bg-danger-bg p-3 rounded-lg">{stagesErr}</div>
 
 ) : null}
 
