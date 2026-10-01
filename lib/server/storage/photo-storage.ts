@@ -63,9 +63,21 @@ export type PhotoReadUrl = {
   expiresAt: Date;
 };
 
+/** Trusted private-object metadata. Provider URLs are not part of this result. */
+export type PhotoObjectHead = {
+  objectKey: string;
+  contentType: string;
+  sizeBytes: number;
+};
+
 export type PhotoStorage = {
   store(input: StorePhotoObjectInput): Promise<StoredPhotoObject>;
   delete(objectKey: string): Promise<void>;
   createUploadUrl(input: CreatePhotoUploadUrlInput): Promise<PhotoUploadUrl>;
   createReadUrl(input: CreatePhotoReadUrlInput): Promise<PhotoReadUrl>;
+  /**
+   * Server-side metadata for one private object.
+   * Returns null when the provider reports that the object is absent.
+   */
+  head(objectKey: string): Promise<PhotoObjectHead | null>;
 };

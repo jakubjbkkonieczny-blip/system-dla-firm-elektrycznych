@@ -1,5 +1,13 @@
 import "server-only";
-import { del, issueSignedToken, presignUrl, put } from "@vercel/blob";
+import {
+  BlobNotFoundError,
+  del,
+  head,
+  issueSignedToken,
+  presignUrl,
+  put,
+  type HeadBlobResult,
+} from "@vercel/blob";
 
 import { assertPhotoObjectKey } from "@/lib/server/storage/photo-object-key";
 import {
@@ -7,6 +15,7 @@ import {
   PhotoStorageError,
   type CreatePhotoReadUrlInput,
   type CreatePhotoUploadUrlInput,
+  type PhotoObjectHead,
   type PhotoReadUrl,
   type PhotoStorage,
   type PhotoUploadUrl,
@@ -106,6 +115,39 @@ async function createUploadUrl(input: CreatePhotoUploadUrlInput): Promise<PhotoU
   };
 }
 
+/**
+ * Control-plane metadata read using the SDK's server credentials.
+ * `head` does not accept an access option in this SDK; privacy is enforced
+ * because the call is authenticated as the store, not as a public URL.
+ * A missing object is reported as null. Other provider failures stay generic.
+ */
+async function headObject(objectKey: string): Promise<PhotoObjectHead | null> {
+  assertPhotoObjectKey(objectKey);
+
+  let result: HeadBlobResult;
+  try {
+    result = await head(objectKey);
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) return null;
+    throw new PhotoStorageError("photo object metadata could not be read");
+  }
+
+  if (
+    result.pathname !== objectKey ||
+    typeof result.contentType !== "string" ||
+    typeof result.size !== "number" ||
+    !Number.isFinite(result.size)
+  ) {
+    throw new PhotoStorageError("photo object metadata could not be read");
+  }
+
+  return {
+    objectKey,
+    contentType: result.contentType,
+    sizeBytes: result.size,
+  };
+}
+
 async function createReadUrl(input: CreatePhotoReadUrlInput): Promise<PhotoReadUrl> {
   assertPhotoObjectKey(input.objectKey);
   const expiresAt = expiresAtFromTtl(input.ttlSeconds);
@@ -136,4 +178,5 @@ export const vercelPhotoStorage: PhotoStorage = {
   delete: deleteObject,
   createUploadUrl,
   createReadUrl,
+  head: headObject,
 };
